@@ -1,29 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:household_manager/app_root.dart';
 
 void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hello world!',
-      home: Scaffold(
-        appBar: AppBar(
-            title: const Center(
-              child: Text(
-                        'Hello world!',
-                      ),
-            )),
-        body: const Center(
-          child: Text('Hello world!'),
-        ),
-      ),
-    );
-  }
+  runApp(AppRoot());
 }
 
