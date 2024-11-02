@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:household_manager/mocks/profile_info_mock.dart';
 import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/pages/home_page.dart';
 import 'package:household_manager/pages/registration_page.dart';
-
-import 'home_page.dart';
 
 const _appMargin = 40.0;
 const _spaceAfterPassword = 15.0;
@@ -63,10 +63,20 @@ class _LoginPageState extends State<LoginPage> {
         Text('or'),
         SizedBox(width: _spaceBetweenButtons),
         _buildStadiumButton('Log In', () {
-          if (checkLoginInfo(
-              _usernameController.text, _passwordController.text)) {
-            Navigator.pushAndRemoveUntil(context,
-                MaterialPageRoute(builder: (_) => HomePage()), (_) => false);
+          final username = _usernameController.text;
+          final password = _passwordController.text;
+
+          if (username.isNotEmpty &&
+              password.isNotEmpty &&
+              ProfileInfoMock().checkLoginInfo(username, password)) {
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => HomePage(
+                    profileInfo: ProfileInfoMock().getProfileInfo(),
+                  ),
+                ),
+                (_) => false);
           } else {
             setState(() => _isError = true);
           }
@@ -94,14 +104,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
       child: Text(text),
     );
-  }
-
-  bool checkLoginInfo(String username, String password) {
-    if (username.isEmpty || password.isEmpty) {
-      return false;
-    }
-    // TODO
-    return true;
   }
 
   @override
