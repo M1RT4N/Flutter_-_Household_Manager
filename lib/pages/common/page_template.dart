@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
 class PageTemplate extends StatelessWidget {
+  final String _title;
+  final Widget _child;
 
-  final String title;
-  final Widget child;
-
-  const PageTemplate({super.key, required this.title, required this.child});
+  const PageTemplate({super.key, required String title, required Widget child})
+      : _child = child,
+        _title = title;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(_title),
         centerTitle: true,
       ),
-      body: child,
+      body: _child,
     );
   }
 }
