@@ -24,7 +24,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
-      title: 'HouseHold Manager - Login',
+      appBar: AppBar(
+        title: Text('HouseHold Manager - Login'),
+        centerTitle: true,
+      ),
       child: Container(
         margin: EdgeInsets.all(_appMargin),
         child: Column(

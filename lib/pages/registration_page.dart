@@ -7,6 +7,11 @@ class RegistrationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
-        title: 'HouseHold Manager - Register', child: Text('TODO'));
+      appBar: AppBar(
+        title: Text('HouseHold Manager - Register'),
+        centerTitle: true,
+      ),
+      child: Text('HouseHold Manager - Register'),
+    );
   }
 }
