@@ -1,3 +1,4 @@
+import 'package:household_manager/models/home_page_data.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/models/todo_data.dart';
 
@@ -16,5 +17,11 @@ class HomePageMock {
     }
     await Future.delayed(Duration(seconds: 2));
     return topFiveBeforeDeadline;
+  }
+
+  Future<HomePageData> getHomePageData() async {
+    final res = await Future.wait(
+        [getLatestFiveBeforeDeadline(), getLatestFiveBeforeDeadline()]);
+    return HomePageData(top5ClosestToDeadline: res[0], pastDeadline: res[1]);
   }
 }

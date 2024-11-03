@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:household_manager/mocks/home_page_mock.dart';
+import 'package:household_manager/models/home_page_data.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/models/todo_data.dart';
 import 'package:household_manager/pages/house_hold_page.dart';
@@ -13,6 +14,9 @@ const _CLOSEST_TO_DEADLINE_FONT_SIZE = 20.0;
 const _TODO_PADDING = 10.0;
 const _DEADLINE_FONT_SIZE = 20.0;
 const _SPACE_BEFORE_DESCRIPTION = 20.0;
+const _HEADER_PADDING = 20.0;
+const _BORDER_WIDTH = 2.0;
+const _SMILEY_SPACE = 8.0;
 
 class HomePage extends StatefulWidget {
   final ProfileInfo profileInfo;
@@ -27,19 +31,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: _buildAppBar(),
-        body: Column(
-          children: [
-            _buildMainSection(),
-          ],
-        ));
+      appBar: _buildAppBar(),
+      body: _buildMainSection(),
+    );
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       leading: _buildIconButton(_buildProfileIcon(), ProfilePage()),
       title: Text(
-        'Closest to deadline:',
+        'Home',
         style: TextStyle(
             fontSize: _CLOSEST_TO_DEADLINE_FONT_SIZE,
             fontWeight: FontWeight.bold),
@@ -83,7 +84,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMainSection() {
     return FutureBuilder(
-        future: HomePageMock().getLatestFiveBeforeDeadline(),
+        future: HomePageMock().getHomePageData(),
         builder: (_, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Could not fetch data'));
@@ -97,21 +98,73 @@ class _HomePageState extends State<HomePage> {
             );
           }
 
-          List<TodoData> top5BeforeDeadline = snapshot.data!;
+          HomePageData homePageData = snapshot.data!;
 
-          return Column(
+          if (homePageData.top5ClosestToDeadline.isEmpty &&
+              homePageData.pastDeadline.isEmpty) {
+            return SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Text(
+                      'Everything done, for now...',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: _SMILEY_SPACE),
+                    Icon(Icons.emoji_emotions),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return ListView(
             children: [
-              for (var i = 0; i < top5BeforeDeadline.length; i++)
-                _buildTodoRow(top5BeforeDeadline[i])
+              if (homePageData.top5ClosestToDeadline.isNotEmpty) ...[
+                _buildSection(Colors.orange, 'Close to deadline:',
+                    homePageData.top5ClosestToDeadline),
+              ],
+              if (homePageData.pastDeadline.isNotEmpty) ...[
+                _buildSection(Colors.redAccent, 'Past deadline:',
+                    homePageData.pastDeadline),
+              ],
             ],
           );
         });
   }
 
+  Widget _buildSection(Color color, String headerText, List<TodoData> todos) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(color, headerText),
+        for (var todo in todos) _buildTodoRow(todo),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(Color bgColor, String text) {
+    return Container(
+      padding: EdgeInsets.all(_HEADER_PADDING),
+      color: bgColor,
+      width: double.infinity,
+      child: Text(
+        text,
+        style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: _CLOSEST_TO_DEADLINE_FONT_SIZE),
+      ),
+    );
+  }
+
   Widget _buildTodoRow(TodoData todo) {
     return Container(
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.black, width: 2)),
+        border:
+            Border(top: BorderSide(color: Colors.black, width: _BORDER_WIDTH)),
         color: Colors.blue,
       ),
       padding: EdgeInsets.all(_TODO_PADDING),
