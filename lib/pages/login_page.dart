@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:household_manager/mocks/profile_info_mock.dart';
-import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/pages/home_page.dart';
 import 'package:household_manager/pages/registration_page.dart';
 
@@ -23,12 +22,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
+    return Scaffold(
       appBar: AppBar(
         title: Text('HouseHold Manager - Login'),
         centerTitle: true,
       ),
-      child: Container(
+      body: Container(
         margin: EdgeInsets.all(_appMargin),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -5,7 +5,8 @@ class HomePageMock {
   final TodoData todoSectionData = TodoData(
       assigner: ProfileInfo(firstName: "Zadavatel", lastName: 'Zadavac'),
       assignTime: DateTime(2024, 2, 12, 12, 12, 12),
-      taskDescription: "Zadana uloha",
+      taskDescription:
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
       deadline: DateTime(2024, 3, 12));
 
   Future<List<TodoData>> getLatestFiveBeforeDeadline() async {

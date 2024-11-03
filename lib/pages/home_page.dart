@@ -2,9 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:household_manager/mocks/home_page_mock.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/models/todo_data.dart';
+import 'package:household_manager/pages/house_hold_page.dart';
+import 'package:household_manager/pages/manage_todos_page.dart';
+import 'package:household_manager/pages/notifications_page.dart';
+import 'package:household_manager/pages/profile_page.dart';
+import 'package:intl/intl.dart';
 
-const _AVATAR_SIZE = 50.0;
-const _SECTION_BUTTON_PADDING = 5.0;
+const _AVATAR_SIZE = 30.0;
+const _CLOSEST_TO_DEADLINE_FONT_SIZE = 20.0;
+const _TODO_PADDING = 10.0;
+const _DEADLINE_FONT_SIZE = 20.0;
+const _SPACE_BEFORE_DESCRIPTION = 20.0;
 
 class HomePage extends StatefulWidget {
   final ProfileInfo profileInfo;
@@ -22,78 +30,50 @@ class _HomePageState extends State<HomePage> {
         appBar: _buildAppBar(),
         body: Column(
           children: [
-            Container(
-              color: Colors.black,
-              padding:
-                  EdgeInsets.symmetric(horizontal: _SECTION_BUTTON_PADDING),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildSectionButton("TODO's", () {}),
-                      SizedBox(
-                        width: _SECTION_BUTTON_PADDING,
-                      ),
-                      _buildSectionButton("HouseHold", () {}),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            _buildMainSection()
+            _buildMainSection(),
           ],
         ));
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      leading: IconButton(
-        onPressed: () {},
-        icon: _buildProfileIcon(),
+      leading: _buildIconButton(_buildProfileIcon(), ProfilePage()),
+      title: Text(
+        'Closest to deadline:',
+        style: TextStyle(
+            fontSize: _CLOSEST_TO_DEADLINE_FONT_SIZE,
+            fontWeight: FontWeight.bold),
       ),
-      title: Text('Home'),
       actions: <Widget>[
-        IconButton(onPressed: () {}, icon: Icon(Icons.notifications))
+        _buildIconButton(Icon(Icons.list_alt), ManageTodosPage()),
+        _buildIconButton(Icon(Icons.home), HouseHoldPage()),
+        _buildIconButton(Icon(Icons.notifications), NotificationsPage()),
       ],
-      centerTitle: true,
+      // centerTitle: true,
     );
   }
 
-  Widget _buildSectionButton(String buttonText, VoidCallback onPressed) {
-    return Expanded(
-      child: TextButton(
-        onPressed: onPressed,
-        child: Text(
-          buttonText,
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        style: ButtonStyle(
-            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                    side: BorderSide(color: Colors.red))),
-            backgroundColor: WidgetStatePropertyAll(Colors.red)),
-      ),
+  Widget _buildIconButton(Widget icon, Widget nextPage) {
+    return IconButton(
+      icon: icon,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => nextPage),
+        );
+      },
     );
   }
 
   Widget _buildProfileIcon() {
-    return IconButton(
-      onPressed: () {},
-      icon: Container(
-        width: _AVATAR_SIZE,
-        height: _AVATAR_SIZE,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
-        child: Center(
-          child: Text(
-            '${_getInitialFromString(widget.profileInfo.firstName)}${_getInitialFromString(widget.profileInfo.lastName)}',
-            style: TextStyle(color: Colors.white),
-          ),
+    return Container(
+      width: _AVATAR_SIZE,
+      height: _AVATAR_SIZE,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+      child: Center(
+        child: Text(
+          '${_getInitialFromString(widget.profileInfo.firstName)}${_getInitialFromString(widget.profileInfo.lastName)}',
+          style: TextStyle(color: Colors.white),
         ),
       ),
     );
@@ -110,7 +90,11 @@ class _HomePageState extends State<HomePage> {
           }
 
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return Expanded(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           }
 
           List<TodoData> top5BeforeDeadline = snapshot.data!;
@@ -126,10 +110,25 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildTodoRow(TodoData todo) {
     return Container(
-      color: Colors.blue,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [Text(todo.deadline.toString()), Text(todo.taskDescription)],
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: Colors.black, width: 2)),
+        color: Colors.blue,
+      ),
+      padding: EdgeInsets.all(_TODO_PADDING),
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            "Deadline: ${DateFormat("dd.M. yyyy HH:MM").format(todo.deadline)}",
+            style: TextStyle(fontSize: _DEADLINE_FONT_SIZE),
+          ),
+          Text(
+            "Created by: ${todo.assigner.firstName} ${todo.assigner.lastName}",
+          ),
+          SizedBox(height: _SPACE_BEFORE_DESCRIPTION),
+          Text(todo.taskDescription)
+        ],
       ),
     );
   }
