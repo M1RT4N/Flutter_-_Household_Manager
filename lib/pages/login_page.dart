@@ -99,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
     return ElevatedButton(
       onPressed: () => onPressed(),
       style: ButtonStyle(
-        shape: WidgetStatePropertyAll(StadiumBorder()),
+        shape: MaterialStateProperty.all(StadiumBorder()),
       ),
       child: Text(text),
     );
