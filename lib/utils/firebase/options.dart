@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:household_manager/utils/firebase/secret_config.dart'; // Import the secret config
 
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
@@ -38,18 +39,18 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
+    apiKey: SecretConfig.webApiKey,
+    appId: SecretConfig.webAppId,
+    messagingSenderId: SecretConfig.webMessagingSenderId,
     projectId: 'household-manager-pv292',
     authDomain: 'household-manager-pv292.firebaseapp.com',
     storageBucket: 'household-manager-pv292.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
+    apiKey: SecretConfig.androidApiKey,
+    appId: SecretConfig.androidAppId,
+    messagingSenderId: SecretConfig.androidMessagingSenderId,
     projectId: 'household-manager-pv292',
     storageBucket: 'household-manager-pv292.firebasestorage.app',
   );

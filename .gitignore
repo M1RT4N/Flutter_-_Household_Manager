@@ -48,3 +48,4 @@ app.*.map.json
 /build
 pubspec.lock
 firebase.json
+secret_config.dart
