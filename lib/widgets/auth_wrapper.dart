@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/pages/auth/login_page.dart';
 import 'package:household_manager/pages/household_page.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -43,8 +42,13 @@ class AuthWrapper extends StatelessWidget {
               'An error occurred while fetching user data.', Colors.red);
           return LoginPage();
         }
-        ProfileInfo profileInfo = userService.getUserProfile();
-        return HomePage(profileInfo: profileInfo);
+
+        if (userService.userProfile == null) {
+          showTopSnackBar(context, 'User profile not found!', Colors.red);
+          return LoginPage();
+        }
+
+        return HomePage();
       },
     );
   }

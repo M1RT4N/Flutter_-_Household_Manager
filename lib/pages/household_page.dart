@@ -1,17 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/widgets/login_template.dart';
+import 'package:get_it/get_it.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/services/household_service.dart';
 
 class HomePage extends StatefulWidget {
-  final ProfileInfo profileInfo;
-
-  const HomePage({super.key, required this.profileInfo});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  String userName = '';
+  String householdName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    final userService = GetIt.instance<UserService>();
+    final householdService = GetIt.instance<HouseholdService>();
+
+    final user = await userService.getUserProfile();
+    final household = await householdService.getHousehold();
+
+    setState(() {
+      userName = user.name;
+      householdName = household?.name ?? 'Unknown Household';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return LoginTemplate(
@@ -19,7 +41,12 @@ class _HomePageState extends State<HomePage> {
         breadcrumbPath: const ['Home'],
         currentRoute: '/home', // Pass current route
         child: Scaffold(
-          body: Text('Home Page'),
+          body: Column(
+            children: [
+              Text('User: $userName'),
+              Text('Household: $householdName'),
+            ],
+          ),
         ));
   }
 }

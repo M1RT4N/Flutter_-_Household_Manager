@@ -11,6 +11,7 @@ class User {
   final String email;
   final String name;
   final String? householdId;
+  final String? requestedId;
 
   @TimestampConverter()
   final Timestamp createdAt;
@@ -21,6 +22,7 @@ class User {
     required this.email,
     required this.name,
     this.householdId,
+    this.requestedId,
     required this.createdAt,
   });
 

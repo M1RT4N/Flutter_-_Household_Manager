@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -35,7 +34,7 @@ class LoginTemplate extends StatelessWidget {
   final Widget child;
   final String currentRoute;
 
-  const LoginTemplate({
+  LoginTemplate({
     Key? key,
     required this.title,
     required this.breadcrumbPath,
@@ -43,10 +42,10 @@ class LoginTemplate extends StatelessWidget {
     required this.currentRoute,
   }) : super(key: key);
 
+  final userService = GetIt.instance<UserService>();
+
   @override
   Widget build(BuildContext context) {
-    final userService = GetIt.instance<UserService>();
-
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!userService.isLoggedIn) {
         return; // Not logged in
@@ -120,7 +119,6 @@ class LoginTemplate extends StatelessWidget {
   }
 
   String _getUserInitials() {
-    final userService = GetIt.instance<UserService>();
     final userProfile = userService.userProfile;
     if (userProfile != null && userProfile.name.isNotEmpty) {
       return userProfile.name.trim().split(' ').map((e) => e[0]).take(2).join();
@@ -131,8 +129,9 @@ class LoginTemplate extends StatelessWidget {
 
 class AppDrawer extends StatelessWidget {
   final String currentRoute;
+  final userService = GetIt.instance<UserService>();
 
-  const AppDrawer({
+  AppDrawer({
     Key? key,
     required this.currentRoute,
   }) : super(key: key);
@@ -161,7 +160,7 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
-            onTap: _logout,
+            onTap: () => _logout(context),
           ),
         ],
       ),
@@ -188,7 +187,7 @@ class AppDrawer extends StatelessWidget {
       selected: isSelected,
       onTap: () {
         if (item.route == '/logout') {
-          _logout();
+          _logout(context);
         } else if (!isSelected) {
           Navigator.pushNamed(context, item.route);
         } else {
@@ -199,7 +198,6 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _leaveHousehold(BuildContext context) async {
-    final userService = GetIt.instance<UserService>();
     if (userService.householdId != null) {
       await userService.leaveHousehold();
 
@@ -212,8 +210,12 @@ class AppDrawer extends StatelessWidget {
     }
   }
 
-  void _logout() async {
-    await FirebaseAuth.instance.signOut();
-    // NOTE: Navigation should handle AuthWrapper
+  void _logout(BuildContext context) async {
+    await userService.logout();
+    if (context.mounted) {
+      Future.microtask(() {
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      });
+    }
   }
 }

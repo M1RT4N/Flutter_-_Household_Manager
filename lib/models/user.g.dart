@@ -12,6 +12,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       email: json['email'] as String,
       name: json['name'] as String,
       householdId: json['householdId'] as String?,
+      requestedId: json['requestedId'] as String?,
       createdAt:
           const TimestampConverter().fromJson(json['createdAt'] as Object),
     );
@@ -31,6 +32,7 @@ Map<String, dynamic> _$UserToJson(User instance) {
   }
 
   writeNotNull('householdId', instance.householdId);
+  writeNotNull('requestedId', instance.requestedId);
   val['createdAt'] = const TimestampConverter().toJson(instance.createdAt);
   return val;
 }

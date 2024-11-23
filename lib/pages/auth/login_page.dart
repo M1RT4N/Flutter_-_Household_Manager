@@ -12,7 +12,7 @@ const _containerPadding = 16.0;
 const _maxContainerWidth = 400.0;
 const _buttonWidth = 120.0;
 const _buttonHeight = 40.0;
-const _spaceAfterPassword = 15.0;
+const _spaceAfterPassword = 35.0;
 const _spaceBetweenButtons = 10.0;
 
 class LoginPage extends StatefulWidget {

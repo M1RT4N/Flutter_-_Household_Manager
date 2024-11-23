@@ -7,6 +7,7 @@ class ProfileInfo {
   final String name;
   final String email;
   String? householdId;
+  String? requestedId;
 
   @TimestampConverter()
   final Timestamp createdAt;
@@ -17,6 +18,7 @@ class ProfileInfo {
     required this.name,
     required this.email,
     this.householdId,
+    this.requestedId,
     required this.createdAt,
   });
 
@@ -27,6 +29,7 @@ class ProfileInfo {
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       householdId: map['householdId'],
+      requestedId: map['requestedId'],
       createdAt:
           TimestampConverter().fromJson(map['createdAt'] ?? Timestamp.now()),
     );
@@ -38,6 +41,7 @@ class ProfileInfo {
       'name': name,
       'email': email,
       'householdId': householdId,
+      'requestedId': requestedId,
       'createdAt': TimestampConverter().toJson(createdAt),
     };
   }

@@ -123,7 +123,7 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
             MaterialPageRoute(
                 builder: (_) => userService.householdId != null &&
                         userService.householdId!.isNotEmpty
-                    ? HomePage(profileInfo: userService.userProfile!)
+                    ? HomePage()
                     : ChooseHouseholdPage()),
           );
         }

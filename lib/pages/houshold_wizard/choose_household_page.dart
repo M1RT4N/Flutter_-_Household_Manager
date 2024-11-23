@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:household_manager/pages/houshold_wizard/create_household_page.dart';
 import 'package:household_manager/pages/houshold_wizard/join_household_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get_it/get_it.dart';
+import 'package:household_manager/pages/houshold_wizard/request_household_page.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/models/profile_info.dart';
+import 'package:household_manager/models/household.dart';
 
 const _boxSize = 250.0;
 const _mainIconSize = 40.0;
@@ -49,6 +54,37 @@ class ChooseHouseholdPage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
+    final userService = GetIt.instance<UserService>();
+    return FutureBuilder<Map<String, dynamic>>(
+      future: userService.fetchUserProfileWithHousehold(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return Center(child: Text('Error loading user profile.'));
+        }
+
+        ProfileInfo profileInfo = snapshot.data!['profileInfo'];
+        Household? household = snapshot.data!['household'];
+
+        if (profileInfo.requestedId != null) {
+          return HouseholdRequestPage(hideAppBar: true);
+        }
+
+        if (household != null &&
+            household.requested
+                .contains(FirebaseAuth.instance.currentUser!.uid)) {
+          return HouseholdRequestPage(hideAppBar: true);
+        }
+
+        return _buildMainContent(context);
+      },
+    );
+  }
+
+  Widget _buildMainContent(BuildContext context) {
     return Stack(
       children: [
         Container(
