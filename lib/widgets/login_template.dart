@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
+import 'package:household_manager/pages/houshold_wizard/choose_household_page.dart';
 
 const _breadcrumbPadding = 8.0;
 const _initialsSize = 12.0;
@@ -44,6 +45,21 @@ class LoginTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userService = GetIt.instance<UserService>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!userService.isLoggedIn) {
+        return; // Not logged in
+      }
+      await userService.fetchUserProfile();
+      if (userService.householdId == null && context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => ChooseHouseholdPage()),
+        );
+      }
+    });
+
     return Scaffold(
       appBar: _buildAppBar(context),
       drawer: AppDrawer(currentRoute: currentRoute),
@@ -139,6 +155,11 @@ class AppDrawer extends StatelessWidget {
           ThemeFlipper(),
           ListTile(
             leading: Icon(Icons.logout),
+            title: Text('Leave Household'),
+            onTap: () => _leaveHousehold(context),
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
             title: Text('Logout'),
             onTap: _logout,
           ),
@@ -175,6 +196,20 @@ class AppDrawer extends StatelessWidget {
         }
       },
     );
+  }
+
+  void _leaveHousehold(BuildContext context) async {
+    final userService = GetIt.instance<UserService>();
+    if (userService.householdId != null) {
+      await userService.leaveHousehold();
+
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => ChooseHouseholdPage()),
+        );
+      }
+    }
   }
 
   void _logout() async {

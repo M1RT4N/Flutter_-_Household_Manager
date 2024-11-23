@@ -93,6 +93,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'username': _usernameController.text.trim(),
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
+        'created_at': Timestamp.now(),
       });
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -102,8 +103,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (userDoc.exists) {
         UserService userService = IocContainer.getIt<UserService>();
-        await userService
-            .setUserProfile(userDoc.data() as Map<String, dynamic>?);
+        await userService.setUserProfile(
+            userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
 
         setState(() {
           _isRegistering = false;

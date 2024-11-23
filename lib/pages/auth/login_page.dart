@@ -83,10 +83,14 @@ class _LoginPageState extends State<LoginPage> {
 
       if (userDoc.exists) {
         UserService userService = IocContainer.getIt<UserService>();
-        await userService
-            .setUserProfile(userDoc.data() as Map<String, dynamic>?);
+        await userService.setUserProfile(
+            userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
+
+        if (mounted) {
+          showTopSnackBar(context, 'Login successful.', Colors.green);
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
-      // NOTE: Navigation is handled by AuthWrapper
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'An error occurred.';
 
@@ -135,6 +139,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: Text('HouseHold Manager - Login'),
         centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: Center(
         child: Container(

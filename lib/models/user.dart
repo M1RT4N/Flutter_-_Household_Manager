@@ -1,4 +1,6 @@
+import 'package:household_manager/utils/utility.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 part 'user.g.dart';
 
@@ -8,12 +10,18 @@ class User {
   final String username;
   final String email;
   final String name;
+  final String? householdId;
+
+  @TimestampConverter()
+  final Timestamp createdAt;
 
   const User({
     required this.id,
     required this.username,
     required this.email,
     required this.name,
+    this.householdId,
+    required this.createdAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
