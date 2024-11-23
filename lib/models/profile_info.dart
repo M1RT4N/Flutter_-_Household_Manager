@@ -1,9 +1,19 @@
 class ProfileInfo {
-  final String firstName;
-  final String lastName;
+  final String username;
+  final String name;
+  final String email;
 
-  const ProfileInfo({
-    required this.firstName,
-    required this.lastName,
+  ProfileInfo({
+    required this.username,
+    required this.name,
+    required this.email,
   });
+
+  factory ProfileInfo.fromMap(Map<String, dynamic> map) {
+    return ProfileInfo(
+      username: map['username'] ?? '',
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
+    );
+  }
 }
