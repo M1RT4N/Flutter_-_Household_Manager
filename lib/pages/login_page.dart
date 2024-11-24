@@ -1,12 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/utils/ioc_container.dart';
-import 'package:household_manager/pages/auth/register_page.dart';
-import 'package:household_manager/utils/utility.dart';
-import 'package:household_manager/widgets/snackbar.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:household_manager/pages/household_wizard/register_page.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/ioc_container.dart';
+import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
+import 'package:household_manager/widgets/stadium_button.dart';
 
 const _containerPadding = 16.0;
 const _maxContainerWidth = 400.0;
@@ -33,6 +34,83 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('HouseHold Manager - Login'),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+      ),
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(_containerPadding),
+          constraints: BoxConstraints(maxWidth: _maxContainerWidth),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FormTextField(
+                labelText: 'Username',
+                controller: _usernameController,
+                icon: Icons.person,
+              ),
+              FormTextField(
+                labelText: 'Password',
+                controller: _passwordController,
+                obscureText: true,
+                icon: Icons.lock,
+              ),
+              SizedBox(height: _spaceAfterPassword),
+              _buildButtons(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (!_isLoggingIn) ...[
+          SizedBox(
+            width: _buttonWidth,
+            height: _buttonHeight,
+            child: StadiumButton(
+                text: 'Register',
+                width: _buttonWidth,
+                height: _buttonHeight,
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => RegisterPage()));
+                }),
+          ),
+          SizedBox(width: _spaceBetweenButtons),
+          Text('or'),
+          SizedBox(width: _spaceBetweenButtons),
+        ],
+        SizedBox(
+          width: _buttonWidth,
+          height: _buttonHeight,
+          child: _isLoggingIn
+              ? Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).primaryColor),
+                  ),
+                )
+              : StadiumButton(
+                  text: 'Log In',
+                  width: _buttonWidth,
+                  height: _buttonHeight,
+                  onPressed: _login),
+        )
+      ],
+    );
+  }
+
   bool _validateInputs(String usernameOrEmail, String password) {
     if (usernameOrEmail.isEmpty || password.isEmpty) {
       showTopSnackBar(
@@ -46,8 +124,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _login() async {
-    final usernameOrEmail = _usernameController.text.trim();
-    final password = _passwordController.text.trim();
+    final usernameOrEmail = _usernameController.text;
+    final password = _passwordController.text;
 
     if (!_validateInputs(usernameOrEmail, password)) {
       return;
@@ -131,90 +209,6 @@ class _LoginPageState extends State<LoginPage> {
       return query.docs.first.get('email');
     }
     return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('HouseHold Manager - Login'),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(_containerPadding),
-          constraints: BoxConstraints(maxWidth: _maxContainerWidth),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FormTextField(
-                labelText: 'Username',
-                controller: _usernameController,
-                icon: Icons.person,
-              ),
-              FormTextField(
-                labelText: 'Password',
-                controller: _passwordController,
-                obscureText: true,
-                icon: Icons.lock,
-              ),
-              SizedBox(height: _spaceAfterPassword),
-              _buildButtons(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (!_isLoggingIn) ...[
-          SizedBox(
-            width: _buttonWidth,
-            height: _buttonHeight,
-            child: _buildStadiumButton('Register', () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => RegisterPage()));
-            }),
-          ),
-          SizedBox(width: _spaceBetweenButtons),
-          Text('or'),
-          SizedBox(width: _spaceBetweenButtons),
-        ],
-        _isLoggingIn
-            ? SizedBox(
-                width: _buttonWidth,
-                height: _buttonHeight,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor),
-                  ),
-                ),
-              )
-            : SizedBox(
-                width: _buttonWidth,
-                height: _buttonHeight,
-                child: _buildStadiumButton('Log In', _login),
-              ),
-      ],
-    );
-  }
-
-  Widget _buildStadiumButton(String text, Function onPressed) {
-    return ElevatedButton(
-      onPressed: () => onPressed(),
-      style: ElevatedButton.styleFrom(
-        minimumSize: Size(_buttonWidth, _buttonHeight),
-        shape: StadiumBorder(),
-      ),
-      child: Text(text),
-    );
   }
 
   @override

@@ -1,11 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
 import 'package:household_manager/utils/utility.dart';
-import 'package:household_manager/widgets/snackbar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
 
 const _containerPadding = 16.0;
 const _maxContainerWidth = 400.0;
@@ -29,6 +29,72 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
 
   bool _isRegistering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Register'),
+      ),
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(_containerPadding),
+          constraints: BoxConstraints(maxWidth: _maxContainerWidth),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FormTextField(
+                labelText: 'Username',
+                controller: _usernameController,
+                icon: Icons.person,
+              ),
+              FormTextField(
+                labelText: 'Password',
+                controller: _passwordController,
+                obscureText: true,
+                icon: Icons.lock,
+              ),
+              FormTextField(
+                labelText: 'Confirm Password',
+                controller: _confirmPasswordController,
+                obscureText: true,
+                icon: Icons.lock,
+              ),
+              FormTextField(
+                labelText: 'Email',
+                controller: _emailController,
+                icon: Icons.email,
+              ),
+              FormTextField(
+                labelText: 'Name',
+                controller: _nameController,
+                icon: Icons.person_outline,
+              ),
+              SizedBox(height: _spacingHeight),
+              SizedBox(
+                width: _buttonWidth,
+                height: _buttonHeight,
+                child: _isRegistering
+                    ? Center(
+                        child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).primaryColor),
+                      ))
+                    : ElevatedButton(
+                        onPressed: _register,
+                        style: ElevatedButton.styleFrom(
+                          shape: StadiumBorder(),
+                        ),
+                        child: Text('Register'),
+                      ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   bool _validateInputs() {
     if (_emailController.text.isEmpty) {
@@ -111,6 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
         });
         if (mounted) {
           showTopSnackBar(context, 'Registration successful.', Colors.green);
+          Navigator.pushReplacementNamed(context, '/choose_household');
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -141,77 +208,6 @@ class _RegisterPageState extends State<RegisterPage> {
             context, 'An unexpected error occurred: $e', Colors.red);
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Register'),
-      ),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(_containerPadding),
-          constraints: BoxConstraints(maxWidth: _maxContainerWidth),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FormTextField(
-                labelText: 'Username',
-                controller: _usernameController,
-                icon: Icons.person,
-              ),
-              FormTextField(
-                labelText: 'Password',
-                controller: _passwordController,
-                obscureText: true,
-                icon: Icons.lock,
-              ),
-              FormTextField(
-                labelText: 'Confirm Password',
-                controller: _confirmPasswordController,
-                obscureText: true,
-                icon: Icons.lock,
-              ),
-              FormTextField(
-                labelText: 'Email',
-                controller: _emailController,
-                icon: Icons.email,
-              ),
-              FormTextField(
-                labelText: 'Name',
-                controller: _nameController,
-                icon: Icons.person_outline,
-              ),
-              SizedBox(height: _spacingHeight),
-              _isRegistering
-                  ? SizedBox(
-                      width: _buttonWidth,
-                      height: _buttonHeight,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context).primaryColor),
-                        ),
-                      ),
-                    )
-                  : SizedBox(
-                      width: _buttonWidth,
-                      height: _buttonHeight,
-                      child: ElevatedButton(
-                        onPressed: _register,
-                        style: ElevatedButton.styleFrom(
-                          shape: StadiumBorder(),
-                        ),
-                        child: Text('Register'),
-                      ),
-                    ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override

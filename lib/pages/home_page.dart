@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/widgets/login_template.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/user_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,6 +21,21 @@ class _HomePageState extends State<HomePage> {
     _fetchData();
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return PageTemplate(
+        title: 'Home',
+        currentRoute: '/home', // Pass current route
+        child: Scaffold(
+          body: Column(
+            children: [
+              Text('User: $userName'),
+              Text('Household: $householdName'),
+            ],
+          ),
+        ));
+  }
+
   Future<void> _fetchData() async {
     final userService = GetIt.instance<UserService>();
     final householdService = GetIt.instance<HouseholdService>();
@@ -32,21 +47,5 @@ class _HomePageState extends State<HomePage> {
       userName = user.name;
       householdName = household?.name ?? 'Unknown Household';
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return LoginTemplate(
-        title: 'Home',
-        breadcrumbPath: const ['Home'],
-        currentRoute: '/home', // Pass current route
-        child: Scaffold(
-          body: Column(
-            children: [
-              Text('User: $userName'),
-              Text('Household: $householdName'),
-            ],
-          ),
-        ));
   }
 }

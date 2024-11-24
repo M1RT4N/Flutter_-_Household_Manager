@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 const _cornerOffset = 20.0;
-const _snackbarSize = 10.0;
-const _snackbarInnerOffset = 2.0;
-const _snackbarBlurRadius = 4.0;
-const _snackbarPadding = 16.0;
-const _snackbarBorderRadius = 8.0;
-const _snackbarHideDuration = 3; // In seconds
+const _snackBarSize = 10.0;
+const _snackBarInnerOffset = 2.0;
+const _snackBarBlurRadius = 4.0;
+const _snackBarPadding = 16.0;
+const _snackBarBorderRadius = 8.0;
+const _snackBarHideDuration = 3; // In seconds
 
 class SnackBar extends StatelessWidget {
   final String message;
@@ -29,15 +29,15 @@ class SnackBar extends StatelessWidget {
   Widget _buildSnackBar() {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: _snackbarPadding, vertical: _snackbarPadding),
+          horizontal: _snackBarPadding, vertical: _snackBarPadding),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(_snackbarBorderRadius),
+        borderRadius: BorderRadius.circular(_snackBarBorderRadius),
         boxShadow: const [
           BoxShadow(
             color: Colors.black26,
-            blurRadius: _snackbarBlurRadius,
-            offset: Offset(_snackbarInnerOffset, _snackbarInnerOffset),
+            blurRadius: _snackBarBlurRadius,
+            offset: Offset(_snackBarInnerOffset, _snackBarInnerOffset),
           ),
         ],
       ),
@@ -45,7 +45,7 @@ class SnackBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildIcon(),
-          SizedBox(width: _snackbarSize),
+          SizedBox(width: _snackBarSize),
           _buildMessage(),
         ],
       ),
@@ -73,7 +73,7 @@ void showTopSnackBar(BuildContext context, String message, Color color) {
   );
 
   Overlay.of(context).insert(overlayEntry);
-  Future.delayed(Duration(seconds: _snackbarHideDuration)).then((_) {
+  Future.delayed(Duration(seconds: _snackBarHideDuration)).then((_) {
     overlayEntry.remove();
   });
 }

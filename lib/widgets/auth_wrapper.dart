@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/pages/auth/login_page.dart';
-import 'package:household_manager/pages/household_page.dart';
+import 'package:household_manager/pages/home_page.dart';
+import 'package:household_manager/pages/login_page.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
-import 'package:household_manager/widgets/snackbar.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
+
 import 'loading_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
@@ -24,6 +25,7 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.hasData) {
           return _buildUserProfile(context);
         }
+
         return LoginPage();
       },
     );

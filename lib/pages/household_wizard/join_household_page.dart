@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:household_manager/models/profile_info.dart';
-import 'package:household_manager/widgets/snackbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
 
 const _mainBoxSize = 600.0;
 const _mainBoxPadding = 16.0;

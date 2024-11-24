@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:household_manager/pages/household_page.dart';
-import 'package:household_manager/models/profile_info.dart';
-import 'package:household_manager/pages/houshold_wizard/choose_household_page.dart';
-import 'package:household_manager/widgets/snackbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:household_manager/models/profile_info.dart';
+import 'package:household_manager/pages/home_page.dart';
+import 'package:household_manager/pages/household_wizard/choose_household_page.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
 
 const _buttonWidth = 120.0;
 const _buttonHeight = 40.0;
-const _mauinBoxSize = 400.0;
+const _mainBoxSize = 400.0;
 const _mainBoxPadding = 16.0;
 const _spaceAfterField = 30.0;
 
@@ -34,7 +34,7 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
       body: Center(
         child: Container(
           padding: const EdgeInsets.all(_mainBoxPadding),
-          constraints: BoxConstraints(maxWidth: _mauinBoxSize),
+          constraints: BoxConstraints(maxWidth: _mainBoxSize),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

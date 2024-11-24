@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/household_service.dart';
-import 'package:household_manager/widgets/snackbar.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
 
 const _mainBoxPadding = 24.0;
 const _pendingSize = 100.0;
@@ -52,9 +52,7 @@ class HouseholdRequestPage extends StatelessWidget {
   void _logout(BuildContext context) async {
     await userService.logout();
     if (context.mounted) {
-      Future.microtask(() {
-        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-      });
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
 

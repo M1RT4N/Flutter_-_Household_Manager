@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:household_manager/pages/houshold_wizard/create_household_page.dart';
-import 'package:household_manager/pages/houshold_wizard/join_household_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/pages/houshold_wizard/request_household_page.dart';
-import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/profile_info.dart';
+import 'package:household_manager/pages/household_wizard/create_household_page.dart';
+import 'package:household_manager/pages/household_wizard/join_household_page.dart';
+import 'package:household_manager/pages/household_wizard/request_household_page.dart';
+import 'package:household_manager/services/user_service.dart';
 
 const _boxSize = 250.0;
 const _mainIconSize = 40.0;
@@ -41,10 +41,8 @@ class ChooseHouseholdPage extends StatelessWidget {
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               if (context.mounted) {
-                Future.microtask(() {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, '/login', (route) => false);
-                });
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/login', (_) => false);
               }
             },
           ),
@@ -98,24 +96,24 @@ class ChooseHouseholdPage extends StatelessWidget {
                   context,
                   icon: Icons.home,
                   label: 'Enter Existing Household',
-                  onPressed: () => Future.microtask(() {
+                  onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => AddToHouseholdPage()));
-                  }),
+                      context,
+                      MaterialPageRoute(builder: (_) => AddToHouseholdPage()),
+                    );
+                  },
                 ),
                 const SizedBox(width: _mainButtonGap),
                 _buildHouseholdButton(
                   context,
                   icon: Icons.add,
                   label: 'Create New Household',
-                  onPressed: () => Future.microtask(() {
+                  onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => CreateHouseholdPage()));
-                  }),
+                      context,
+                      MaterialPageRoute(builder: (_) => CreateHouseholdPage()),
+                    );
+                  },
                 ),
               ],
             ),
