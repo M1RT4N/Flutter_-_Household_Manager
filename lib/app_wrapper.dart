@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:household_manager/pages/home_page.dart';
 import 'package:household_manager/pages/household_wizard/choose_household_page.dart';
+import 'package:household_manager/pages/household_wizard/create_household_page.dart';
+import 'package:household_manager/pages/household_wizard/join_household_page.dart';
 import 'package:household_manager/pages/household_wizard/register_page.dart';
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/pages/login_page.dart';
@@ -25,11 +27,13 @@ class HouseholdManagerApp extends StatelessWidget {
           theme: snapshot.data,
           home: AuthWrapper(),
           routes: {
-            '/login': (context) => LoginPage(),
-            '/register': (context) => RegisterPage(),
-            '/choose_household': (context) => ChooseHouseholdPage(),
-            '/home': (context) => HomePage(),
-            '/household_request': (context) => HouseholdRequestPage(),
+            '/login': (_) => LoginPage(),
+            '/register': (_) => RegisterPage(),
+            '/choose_household': (_) => ChooseHouseholdPage(),
+            '/home': (_) => HomePage(),
+            '/household_request': (_) => HouseholdRequestPage(),
+            '/join_household': (_) => JoinHouseholdPage(),
+            '/create_household': (_) => CreateHouseholdPage(),
           },
           debugShowCheckedModeBanner: false,
         );

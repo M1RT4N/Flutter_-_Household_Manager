@@ -21,14 +21,14 @@ const _qrCodeTextPadding = 8.0;
 const _qrCodeTextSize = 16.0;
 const _qrCodePadding = 16.0;
 
-class AddToHouseholdPage extends StatefulWidget {
-  const AddToHouseholdPage({super.key});
+class JoinHouseholdPage extends StatefulWidget {
+  const JoinHouseholdPage({super.key});
 
   @override
-  State<AddToHouseholdPage> createState() => _AddToHouseholdPageState();
+  State<JoinHouseholdPage> createState() => _JoinHouseholdPageState();
 }
 
-class _AddToHouseholdPageState extends State<AddToHouseholdPage> {
+class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
   final _codeController = TextEditingController();
   final HouseholdService _householdService = HouseholdService();
   bool _isJoining = false;

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/profile_info.dart';
-import 'package:household_manager/pages/household_wizard/create_household_page.dart';
-import 'package:household_manager/pages/household_wizard/join_household_page.dart';
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/services/user_service.dart';
 
@@ -92,28 +90,18 @@ class ChooseHouseholdPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildHouseholdButton(
-                  context,
-                  icon: Icons.home,
-                  label: 'Enter Existing Household',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => AddToHouseholdPage()),
-                    );
-                  },
-                ),
+                _buildHouseholdButton(context,
+                    icon: Icons.home,
+                    label: 'Enter Existing Household',
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/join_household')),
                 const SizedBox(width: _mainButtonGap),
                 _buildHouseholdButton(
                   context,
                   icon: Icons.add,
                   label: 'Create New Household',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => CreateHouseholdPage()),
-                    );
-                  },
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/create_household'),
                 ),
               ],
             ),
