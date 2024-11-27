@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/user.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
 
 // const _breadcrumbPadding = 8.0;
@@ -12,27 +12,29 @@ class PageTemplate extends StatelessWidget {
   final String title;
   final Widget child;
   final String currentRoute;
+  final User user;
+  final Household household;
 
   PageTemplate({
     Key? key,
     required this.title,
     required this.child,
     required this.currentRoute,
+    required this.user,
+    required this.household,
   }) : super(key: key);
-
-  final userService = GetIt.instance<UserService>();
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!userService.isLoggedIn) {
-        return; // Not logged in
-      }
-      await userService.fetchUserProfile();
-      if (userService.householdId == null && context.mounted) {
-        Navigator.pushReplacementNamed(context, '/choose_household');
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   if (!userService.isLoggedIn) {
+    //     return; // Not logged in
+    //   }
+    //   await userService.fetchUserProfile();
+    //   if (userService.householdId == null && context.mounted) {
+    //     Navigator.pushReplacementNamed(context, '/choose_household');
+    //   }
+    // });
 
     return Scaffold(
       appBar: _buildAppBar(context),
@@ -94,10 +96,6 @@ class PageTemplate extends StatelessWidget {
   // }
 
   String _getUserInitials() {
-    final userProfile = userService.userProfile;
-    if (userProfile != null && userProfile.name.isNotEmpty) {
-      return userProfile.name.trim().split(' ').map((e) => e[0]).take(2).join();
-    }
-    return '';
+    return user.name.trim().split(' ').map((e) => e[0]).take(2).join();
   }
 }

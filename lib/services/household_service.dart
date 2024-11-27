@@ -1,14 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as fb;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:household_manager/models/household.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:rxdart/rxdart.dart';
 
 class HouseholdService {
+  final _householdStream = BehaviorSubject<Household?>.seeded(null);
+
+  Stream<Household?> get getHouseholdStream => _householdStream.stream;
+
   Future<String> createHousehold(String householdName) async {
     String code = _generateRandomCode();
-    DocumentReference docRef =
-        FirebaseFirestore.instance.collection('households').doc();
+    var docRef = fb.FirebaseFirestore.instance.collection('households').doc();
     String householdId = docRef.id;
 
     Household household = Household(
@@ -17,7 +20,7 @@ class HouseholdService {
       code: code,
       members: [FirebaseAuth.instance.currentUser!.uid],
       requested: [],
-      createdAt: Timestamp.now(),
+      createdAt: fb.Timestamp.now(),
     );
 
     await docRef.set(household.toJson());
@@ -25,7 +28,7 @@ class HouseholdService {
   }
 
   Future<bool> joinHouseholdByCode(String code) async {
-    QuerySnapshot query = await FirebaseFirestore.instance
+    fb.QuerySnapshot query = await fb.FirebaseFirestore.instance
         .collection('households')
         .where('code', isEqualTo: code)
         .get();
@@ -34,19 +37,19 @@ class HouseholdService {
       return false;
     }
 
-    DocumentSnapshot householdDoc = query.docs.first;
+    var householdDoc = query.docs.first;
     Household household =
         Household.fromJson(householdDoc.data() as Map<String, dynamic>);
 
-    await FirebaseFirestore.instance
+    await fb.FirebaseFirestore.instance
         .collection('households')
         .doc(household.id)
         .update({
       'requested':
-          FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          fb.FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
     });
 
-    await FirebaseFirestore.instance
+    await fb.FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({
@@ -57,7 +60,7 @@ class HouseholdService {
   }
 
   Future<bool> cancelHouseholdRequestByCode(String code) async {
-    QuerySnapshot query = await FirebaseFirestore.instance
+    var query = await fb.FirebaseFirestore.instance
         .collection('households')
         .where('code', isEqualTo: code)
         .get();
@@ -66,65 +69,61 @@ class HouseholdService {
       return false;
     }
 
-    DocumentSnapshot householdDoc = query.docs.first;
+    var householdDoc = query.docs.first;
     Household household =
         Household.fromJson(householdDoc.data() as Map<String, dynamic>);
 
-    await FirebaseFirestore.instance
+    await fb.FirebaseFirestore.instance
         .collection('households')
         .doc(household.id)
         .update({
       'requested':
-          FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+          fb.FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
     });
 
     return true;
   }
 
-  Future<Household?> getHousehold() async {
-    final userService = GetIt.instance<UserService>();
-    final userProfile = await userService.getUserProfile();
-    if (userProfile.householdId != null) {
-      try {
-        final householdDoc = await FirebaseFirestore.instance
-            .collection('households')
-            .doc(userProfile.householdId)
-            .get();
-        if (householdDoc.exists) {
-          return Household.fromJson(
-              householdDoc.data() as Map<String, dynamic>);
-        }
-        // ignore: empty_catches
-      } catch (e) {}
-    }
-    return null;
-  }
-
-  Future<void> leaveHousehold() async {
-    final userService = GetIt.instance<UserService>();
-    final userProfile = await userService.getUserProfile();
-    final userId = userProfile.id;
-    final householdId = userService.householdId;
-
-    if (householdId != null) {
-      await _removeUserFromHousehold(userId, householdId);
-      await userService.updateUserProfile({'householdId': null});
-      userService.setUserProfile({
-        ...userService.userProfile!.toMap(),
-        'householdId': null,
-      }, userId);
-    }
-  }
+  // Future<Household?> getHousehold(User user) async {
+  //   if (user.householdId != null) {
+  //     try {
+  //       final householdDoc = await fb.FirebaseFirestore.instance
+  //           .collection('households')
+  //           .doc(user.householdId)
+  //           .get();
+  //       if (householdDoc.exists) {
+  //         return Household.fromJson(householdDoc.data()!);
+  //       }
+  //       // ignore: empty_catches
+  //     } catch (e) {}
+  //   }
+  //   return null;
+  // }
+  //
+  // Future<void> leaveHousehold() async {
+  //   final userService = GetIt.instance<UserService>();
+  //   final userProfile = await userService.getUserProfile();
+  //   final userId = userProfile.id;
+  //   final householdId = userService.householdId;
+  //
+  //   if (householdId != null) {
+  //     await _removeUserFromHousehold(userId, householdId);
+  //     await userService.updateUserProfile({'householdId': null});
+  //     userService.setUser({
+  //       ...userService.userStream!,
+  //       'householdId': null,
+  //     }, userId);
+  //   }
+  // }
 
   Future<void> _removeUserFromHousehold(
       String userId, String householdId) async {
-    DocumentReference householdRef =
-        FirebaseFirestore.instance.collection('households').doc(householdId);
-    DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(userId);
+    var householdRef =
+        fb.FirebaseFirestore.instance.collection('households').doc(householdId);
+    var userRef = fb.FirebaseFirestore.instance.collection('users').doc(userId);
 
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      DocumentSnapshot householdSnapshot = await transaction.get(householdRef);
+    await fb.FirebaseFirestore.instance.runTransaction((transaction) async {
+      var householdSnapshot = await transaction.get(householdRef);
       if (householdSnapshot.exists) {
         List<dynamic> members = householdSnapshot.get('members');
         members.remove(userId);
@@ -135,6 +134,8 @@ class HouseholdService {
   }
 
   String _generateRandomCode() {
+    var ukey = UniqueKey();
+    var str = ukey.toString();
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return List.generate(
         8,

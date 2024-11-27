@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/drawer_item.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
@@ -7,6 +8,7 @@ import 'package:household_manager/widgets/theme_flipper.dart';
 class AppDrawer extends StatelessWidget {
   final String currentRoute;
   final userService = GetIt.instance<UserService>();
+  final HouseholdService householdService = GetIt.instance<HouseholdService>();
 
   AppDrawer({
     Key? key,
@@ -47,14 +49,20 @@ class AppDrawer extends StatelessWidget {
                 isSelected: currentRoute == '/settings',
                 nextPageRoute: '/settings',
               ),
+              DrawerItem(
+                title: 'My Household',
+                icon: Icons.settings,
+                isSelected: currentRoute == '/household',
+                nextPageRoute: '/household',
+              ),
             ]),
           ),
           ThemeFlipper(),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Leave Household'),
-            onTap: () => _leaveHousehold(context),
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.logout),
+          //   title: Text('Leave Household'),
+          //   onTap: () => _leaveHousehold(context),
+          // ),
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
@@ -65,15 +73,15 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  void _leaveHousehold(BuildContext context) async {
-    if (userService.householdId != null) {
-      await userService.leaveHousehold();
-
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/choose_household');
-      }
-    }
-  }
+  // void _leaveHousehold(BuildContext context) async {
+  //   if (userService.householdId != null) {
+  //     await userService.leaveHousehold();
+  //
+  //     if (context.mounted) {
+  //       Navigator.pushReplacementNamed(context, '/choose_household');
+  //     }
+  //   }
+  // }
 
   void _logout(BuildContext context) async {
     await userService.logout();

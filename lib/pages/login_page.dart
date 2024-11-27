@@ -1,10 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:easy_loading_button/easy_loading_button.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/pages/household_wizard/register_page.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
-import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:household_manager/widgets/stadium_button.dart';
@@ -17,7 +14,9 @@ const _spaceAfterPassword = 35.0;
 const _spaceBetweenButtons = 10.0;
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final UserService userService = IocContainer.getIt<UserService>();
+
+  LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -26,8 +25,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  bool _isLoggingIn = false;
 
   @override
   void initState() {
@@ -73,39 +70,31 @@ class _LoginPageState extends State<LoginPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (!_isLoggingIn) ...[
-          SizedBox(
-            width: _buttonWidth,
-            height: _buttonHeight,
-            child: StadiumButton(
-                text: 'Register',
-                width: _buttonWidth,
-                height: _buttonHeight,
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => RegisterPage()));
-                }),
-          ),
-          SizedBox(width: _spaceBetweenButtons),
-          Text('or'),
-          SizedBox(width: _spaceBetweenButtons),
-        ],
         SizedBox(
           width: _buttonWidth,
           height: _buttonHeight,
-          child: _isLoggingIn
-              ? Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor),
-                  ),
-                )
-              : StadiumButton(
-                  text: 'Log In',
-                  width: _buttonWidth,
-                  height: _buttonHeight,
-                  onPressed: _login),
+          child: StadiumButton(
+              text: 'Register',
+              width: _buttonWidth,
+              height: _buttonHeight,
+              onPressed: () {
+                // Navigator.push(
+                //     context, MaterialPageRoute(builder: (_) => RegisterPage()));
+              }),
+        ),
+        SizedBox(width: _spaceBetweenButtons),
+        Text('or'),
+        SizedBox(width: _spaceBetweenButtons),
+        EasyButton(
+          width: _buttonWidth,
+          height: _buttonHeight,
+          idleStateWidget: Text('Log In'),
+          loadingStateWidget: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor:
+                AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+          ),
+          onPressed: () => _login,
         )
       ],
     );
@@ -131,84 +120,19 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    setState(() {
-      _isLoggingIn = true;
-    });
-
-    try {
-      UserCredential userCredential;
-      if (Utility.isValidEmail(usernameOrEmail)) {
-        userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: usernameOrEmail,
-          password: password,
-        );
-      } else {
-        String? email = await _getEmailByUsername(usernameOrEmail);
-        if (email == null) {
-          throw FirebaseAuthException(
-              code: 'user-not-found', message: 'User not found');
-        }
-        userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      }
-
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .get();
-
-      if (userDoc.exists) {
-        UserService userService = IocContainer.getIt<UserService>();
-        await userService.setUserProfile(
-            userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
-
-        if (mounted) {
-          showTopSnackBar(context, 'Login successful.', Colors.green);
-          Navigator.pushReplacementNamed(context, '/home');
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'An error occurred.';
-
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found with this username or email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Incorrect password.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'The email address is badly formatted.';
-      } else {
-        errorMessage = e.message ?? errorMessage;
-      }
-
+    var res = await widget.userService.tryLogin(usernameOrEmail, password);
+    if (res == null) {
       if (mounted) {
-        showTopSnackBar(context, errorMessage, Colors.red);
+        showTopSnackBar(context,
+            'Login failed: ${widget.userService.getError!}', Colors.red);
+        return;
       }
-      setState(() {
-        _isLoggingIn = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
-      }
-      setState(() {
-        _isLoggingIn = false;
-      });
     }
-  }
 
-  Future<String?> _getEmailByUsername(String username) async {
-    QuerySnapshot query = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .limit(1)
-        .get();
-
-    if (query.docs.isNotEmpty) {
-      return query.docs.first.get('email');
+    if (mounted) {
+      showTopSnackBar(context, 'Login successful.', Colors.green);
+      Navigator.pushReplacementNamed(context, '/home');
     }
-    return null;
   }
 
   @override

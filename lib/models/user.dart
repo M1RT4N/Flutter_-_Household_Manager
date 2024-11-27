@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 part 'user.g.dart';
 
@@ -28,4 +28,24 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  User copyWith({
+    String? id,
+    String? username,
+    String? email,
+    String? name,
+    String? householdId,
+    String? requestedId,
+    Timestamp? createdAt,
+  }) {
+    return User(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      householdId: householdId ?? this.householdId,
+      requestedId: requestedId ?? this.requestedId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

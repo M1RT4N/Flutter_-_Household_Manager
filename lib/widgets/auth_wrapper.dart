@@ -15,25 +15,29 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (userService.isLoggedIn) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return LoadingScreen();
-        }
+        stream: userService.authChangeStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return LoadingScreen();
+          }
 
-        if (snapshot.hasData) {
-          return _buildUserProfile(context);
-        }
+          if (snapshot.hasData) {
+            return _buildUserProfile(context);
+          }
 
-        return LoginPage();
-      },
-    );
+          // Navigator.pushReplacementNamed(context, '/login');
+          return LoginPage();
+        });
   }
 
   Widget _buildUserProfile(BuildContext context) {
-    return FutureBuilder<void>(
-      future: userService.fetchUserProfile(),
+    return FutureBuilder<User?>(
+      future: userService.fetchUser(),
       builder: (context, userSnapshot) {
         if (userSnapshot.connectionState == ConnectionState.waiting) {
           return LoadingScreen();
