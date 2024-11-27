@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/common/page_template.dart';
+import 'package:household_manager/widgets/common/page_template.dart';
 
 class StatisticsPage extends StatelessWidget {
   const StatisticsPage({super.key});

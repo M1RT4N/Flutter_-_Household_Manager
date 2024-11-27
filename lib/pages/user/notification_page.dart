@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/common/page_template.dart';
+import 'package:household_manager/widgets/common/page_template.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notificatiion.dart';
 import 'package:household_manager/widgets/notifications/todo_notification.dart';

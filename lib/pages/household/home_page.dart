@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/page_template.dart';
+import 'package:household_manager/widgets/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/loading_screen.dart';
