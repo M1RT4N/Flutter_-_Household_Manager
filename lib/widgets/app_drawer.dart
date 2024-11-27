@@ -8,6 +8,21 @@ import 'package:household_manager/widgets/drawer_item.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
 
 class AppDrawer extends StatelessWidget {
+  final drawerItems = [
+    {'title': 'Home', 'icon': Icons.house_outlined, 'route': '/home'},
+    {'title': 'Statistics', 'icon': Icons.auto_graph, 'route': '/statistics'},
+    {
+      'title': 'Household Members',
+      'icon': Icons.person_2_outlined,
+      'route': '/members'
+    },
+    {},
+    {'title': 'Todo List', 'icon': Icons.list, 'route': '/todo_list'},
+    {'title': 'New Todo', 'icon': Icons.add, 'route': '/new_todo'},
+    {},
+    {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
+  ];
+
   final userService = GetIt.instance<UserService>();
 
   AppDrawer({
@@ -44,21 +59,6 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _buildDrawerList() {
-    final drawerItems = [
-      {'title': 'Home', 'icon': Icons.house_outlined, 'route': '/home'},
-      {'title': 'Statistics', 'icon': Icons.auto_graph, 'route': '/statistics'},
-      {
-        'title': 'Household Members',
-        'icon': Icons.person_2_outlined,
-        'route': '/members'
-      },
-      {},
-      {'title': 'Todo List', 'icon': Icons.list, 'route': '/todo_list'},
-      {'title': 'New Todo', 'icon': Icons.add, 'route': '/new_todo'},
-      {},
-      {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
-    ];
-
     return Expanded(
       child: ListView(
         children: drawerItems.map((item) {
@@ -82,14 +82,32 @@ class AppDrawer extends StatelessWidget {
           child: ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
-            onTap: () => logout(context, userService),
+            onTap: () async {
+              final confirm = await showConfirmationDialog(
+                context,
+                'Confirm Logout',
+                'Are you sure you want to logout?',
+              );
+              if (confirm == true && context.mounted) {
+                logout(context, userService);
+              }
+            },
           ),
         ),
         Expanded(
           child: ListTile(
             leading: Icon(Icons.cancel_outlined),
             title: Text('Leave Household'),
-            onTap: () => _leaveHousehold(context),
+            onTap: () async {
+              final confirm = await showConfirmationDialog(
+                context,
+                'Confirm Leave Household',
+                'Are you sure you want to leave the household?',
+              );
+              if (confirm == true && context.mounted) {
+                _leaveHousehold(context);
+              }
+            },
           ),
         ),
       ],

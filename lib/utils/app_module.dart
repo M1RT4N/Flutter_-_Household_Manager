@@ -6,6 +6,7 @@ import 'package:household_manager/pages/household_wizard/join_household_page.dar
 import 'package:household_manager/pages/household_wizard/register_page.dart';
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/pages/login_page.dart';
+import 'package:household_manager/pages/notification_page.dart';
 import 'package:household_manager/utils/guards/auth_guard.dart';
 import 'package:household_manager/pages/splash_screen.dart';
 import 'package:household_manager/utils/utility.dart';
@@ -33,5 +34,7 @@ class AppModule extends Module {
         child: (_, __) => JoinHouseholdPage(), guards: [AuthGuard()]),
     ChildRoute('/create_household',
         child: (_, __) => CreateHouseholdPage(), guards: [AuthGuard()]),
+    ChildRoute('/notifications',
+        child: (_, __) => NotificationsPage(), guards: [AuthGuard()]),
   ];
 }

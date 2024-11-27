@@ -43,3 +43,24 @@ void logout(BuildContext context, UserService userService) async {
     Modular.to.navigate('/login');
   }
 }
+
+Future<bool?> showConfirmationDialog(
+    BuildContext context, String title, String content) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text('No'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text('Yes'),
+        ),
+      ],
+    ),
+  );
+}

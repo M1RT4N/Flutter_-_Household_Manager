@@ -163,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
         await userService.setUserProfile(
             userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
 
-        if (mounted) {
+        if (context.mounted) {
           showTopSnackBar(context, 'Login successful.', Colors.green);
           Modular.to.navigate('/home');
         }
@@ -181,14 +181,14 @@ class _LoginPageState extends State<LoginPage> {
         errorMessage = e.message ?? errorMessage;
       }
 
-      if (mounted) {
+      if (context.mounted) {
         showTopSnackBar(context, errorMessage, Colors.red);
       }
       setState(() {
         _isLoggingIn = false;
       });
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
       }
       setState(() {

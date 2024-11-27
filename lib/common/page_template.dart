@@ -48,6 +48,41 @@ class PageTemplate extends StatelessWidget {
     return AppBar(
       title: Text(title),
       actions: [
+        Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: IconButton(
+                icon: Icon(Icons.notifications),
+                onPressed: () {
+                  Modular.to.pushNamed('/notifications');
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 12),
+              child: Container(
+                padding: EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                constraints: BoxConstraints(
+                  minWidth: 14,
+                  minHeight: 14,
+                ),
+                child: Text(
+                  '5', // TODO: This need to be dynamic, implement after service!!
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
         _buildUserAvatar(context),
         SizedBox(width: _initialsRightPadding),
       ],
