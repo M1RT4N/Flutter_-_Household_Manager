@@ -16,55 +16,104 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Drawer(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: Column(
+          children: [
+            _buildDrawerHeader(),
+            _buildDrawerList(),
+            _buildActionButtons(context),
+            const Divider(),
+            _buildThemeSwitcher(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerHeader() {
+    return DrawerHeader(
+      padding: EdgeInsets.only(left: 16.0),
+      child: SvgPicture.asset(
+        'assets/icons/logo.svg',
+        width: 512,
+        height: 256,
+      ),
+    );
+  }
+
+  Widget _buildDrawerList() {
     final drawerItems = [
-      {'title': 'Household', 'icon': Icons.house, 'route': '/home'},
-      {'title': 'Todo List', 'icon': Icons.list, 'route': '/todo_list'},
+      {'title': 'Home', 'icon': Icons.house_outlined, 'route': '/home'},
       {'title': 'Statistics', 'icon': Icons.auto_graph, 'route': '/statistics'},
+      {
+        'title': 'Household Members',
+        'icon': Icons.person_2_outlined,
+        'route': '/members'
+      },
+      {},
+      {'title': 'Todo List', 'icon': Icons.list, 'route': '/todo_list'},
+      {'title': 'New Todo', 'icon': Icons.add, 'route': '/new_todo'},
+      {},
       {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
     ];
 
-    return Drawer(
-      child: Column(
-        children: [
-          SvgPicture.asset(
-            'assets/icons/logo.svg',
-            width: 400,
-            height: 200,
-          ),
-          Expanded(
-            child: ListView(
-              children: drawerItems.map((item) {
-                return DrawerItem(
-                  title: item['title']! as String,
-                  icon: item['icon'] as IconData,
-                  nextPageRoute: item['route'] as String,
-                );
-              }).toList(),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('Current theme'),
-                  ThemeFlipper(),
-                ],
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Leave Household'),
-            onTap: () => _leaveHousehold(context),
-          ),
-          ListTile(
+    return Expanded(
+      child: ListView(
+        children: drawerItems.map((item) {
+          if (item.isEmpty) {
+            return Divider();
+          }
+          return DrawerItem(
+            title: item['title']! as String,
+            icon: item['icon'] as IconData,
+            nextPageRoute: item['route'] as String,
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
             onTap: () => logout(context, userService),
           ),
-        ],
+        ),
+        Expanded(
+          child: ListTile(
+            leading: Icon(Icons.cancel_outlined),
+            title: Text('Leave Household'),
+            onTap: () => _leaveHousehold(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThemeSwitcher() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: ListTile(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Row(
+              children: [
+                Padding(
+                    padding: EdgeInsets.only(right: 24.0),
+                    child: Icon(Icons.brush)),
+                Text('Current theme'),
+              ],
+            ),
+            ThemeFlipper(),
+          ],
+        ),
       ),
     );
   }
