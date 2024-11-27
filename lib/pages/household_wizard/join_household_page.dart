@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
 const _mainBoxSize = 600.0;
@@ -230,17 +232,15 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
       _isJoining = false;
     });
 
-    Navigator.pushReplacementNamed(
-      context,
-      '/household_request',
+    Modular.to.navigate(
+      AppRoute.householdRequest.path,
       arguments: {'hideAppBar': false},
     );
   }
 
   void _navigateToChooseHouseholdPage() {
-    Navigator.pushReplacementNamed(
-      context,
-      '/choose_household',
+    Modular.to.navigate(
+      AppRoute.chooseHousehold.path,
     );
   }
 

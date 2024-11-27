@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 
 const _boxSize = 250.0;
 const _mainIconSize = 40.0;
@@ -39,8 +41,7 @@ class ChooseHouseholdPage extends StatelessWidget {
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/login', (_) => false);
+                Modular.to.navigate(AppRoute.login.path);
               }
             },
           ),
@@ -94,14 +95,14 @@ class ChooseHouseholdPage extends StatelessWidget {
                     icon: Icons.home,
                     label: 'Enter Existing Household',
                     onPressed: () =>
-                        Navigator.pushNamed(context, '/join_household')),
+                        Modular.to.pushNamed(AppRoute.joinHousehold.path)),
                 const SizedBox(width: _mainButtonGap),
                 _buildHouseholdButton(
                   context,
                   icon: Icons.add,
                   label: 'Create New Household',
                   onPressed: () =>
-                      Navigator.pushNamed(context, '/create_household'),
+                      Modular.to.pushNamed(AppRoute.createHousehold.path),
                 ),
               ],
             ),

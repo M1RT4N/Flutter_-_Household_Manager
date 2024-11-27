@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/page_template.dart';
+import 'package:household_manager/widgets/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/widgets/loading_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,6 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String userName = '';
   String householdName = '';
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -25,14 +27,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return PageTemplate(
         title: 'Home',
-        currentRoute: '/home', // Pass current route
         child: Scaffold(
-          body: Column(
-            children: [
-              Text('User: $userName'),
-              Text('Household: $householdName'),
-            ],
-          ),
+          body: isLoading
+              ? LoadingScreen()
+              : Column(
+                  children: [
+                    Text('User: $userName'),
+                    Text('Household: $householdName'),
+                  ],
+                ),
         ));
   }
 
@@ -46,6 +49,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       userName = user.name;
       householdName = household?.name ?? 'Unknown Household';
+      isLoading = false;
     });
   }
 }

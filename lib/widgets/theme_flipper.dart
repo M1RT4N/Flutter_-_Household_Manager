@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/theme_controller.dart';
@@ -16,15 +15,11 @@ class ThemeFlipper extends StatelessWidget {
       builder: (context, snapshot) {
         bool isDarkMode = snapshot.data?.brightness == Brightness.dark;
 
-        return ListTile(
-          leading: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
-          title: Text('Dark Mode'),
-          trailing: Switch(
-            value: isDarkMode,
-            onChanged: (value) {
-              themeController.toggleTheme(value);
-            },
-          ),
+        return IconButton(
+          icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+          onPressed: () {
+            themeController.toggleTheme(!isDarkMode);
+          },
         );
       },
     );

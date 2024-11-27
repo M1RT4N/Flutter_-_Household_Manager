@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/pages/household_wizard/register_page.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -82,8 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: _buttonWidth,
                 height: _buttonHeight,
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => RegisterPage()));
+                  Modular.to.pushNamed(AppRoute.register.path);
                 }),
           ),
           SizedBox(width: _spaceBetweenButtons),
@@ -164,9 +164,9 @@ class _LoginPageState extends State<LoginPage> {
         await userService.setUserProfile(
             userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
 
-        if (mounted) {
+        if (context.mounted) {
           showTopSnackBar(context, 'Login successful.', Colors.green);
-          Navigator.pushReplacementNamed(context, '/home');
+          Modular.to.navigate(AppRoute.home.path);
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -182,14 +182,14 @@ class _LoginPageState extends State<LoginPage> {
         errorMessage = e.message ?? errorMessage;
       }
 
-      if (mounted) {
+      if (context.mounted) {
         showTopSnackBar(context, errorMessage, Colors.red);
       }
       setState(() {
         _isLoggingIn = false;
       });
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
       }
       setState(() {

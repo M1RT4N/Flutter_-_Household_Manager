@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/routing/routes.dart';
+import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
 const _mainBoxPadding = 24.0;
@@ -18,9 +21,8 @@ const _warningBoxRadius = 8.0;
 
 class HouseholdRequestPage extends StatelessWidget {
   final bool hideAppBar;
-  final userService = GetIt.instance<UserService>();
 
-  HouseholdRequestPage({super.key, this.hideAppBar = false});
+  const HouseholdRequestPage({super.key, this.hideAppBar = false});
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +44,11 @@ class HouseholdRequestPage extends StatelessWidget {
           child: TextButton.icon(
             icon: const Icon(Icons.logout, color: Colors.white),
             label: const Text('Logout', style: TextStyle(color: Colors.white)),
-            onPressed: () => _logout(context),
+            onPressed: () => logout(context, GetIt.instance<UserService>()),
           ),
         ),
       ],
     );
-  }
-
-  void _logout(BuildContext context) async {
-    await userService.logout();
-    if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    }
   }
 
   Widget _buildPendingContent(BuildContext context) {
@@ -133,7 +128,7 @@ class HouseholdRequestPage extends StatelessWidget {
         if (context.mounted) {
           showTopSnackBar(
               context, 'Request cancelled successfully.', Colors.green);
-          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          Modular.to.navigate(AppRoute.chooseHousehold.path);
         }
       } catch (e) {
         if (context.mounted) {

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -177,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
         });
         if (mounted) {
           showTopSnackBar(context, 'Registration successful.', Colors.green);
-          Navigator.pushReplacementNamed(context, '/choose_household');
+          Modular.to.navigate(AppRoute.chooseHousehold.path);
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -204,8 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       if (mounted) {
-        showTopSnackBar(
-            context, 'An unexpected error occurred: $e', Colors.red);
+        showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
       }
     }
   }
