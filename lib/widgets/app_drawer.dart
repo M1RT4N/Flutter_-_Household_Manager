@@ -17,8 +17,8 @@ class AppDrawer extends StatelessWidget {
       'route': '/members'
     },
     {},
-    {'title': 'Todo List', 'icon': Icons.list, 'route': '/todo_list'},
-    {'title': 'New Todo', 'icon': Icons.add, 'route': '/new_todo'},
+    {'title': 'Todo List', 'icon': Icons.list, 'route': '/todos'},
+    {'title': 'New Todo', 'icon': Icons.add, 'route': '/create-todo'},
     {},
     {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
   ];

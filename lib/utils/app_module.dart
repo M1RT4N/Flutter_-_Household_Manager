@@ -1,12 +1,18 @@
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:household_manager/pages/home_page.dart';
+import 'package:household_manager/pages/household/home_page.dart';
+import 'package:household_manager/pages/household/members_page.dart';
+import 'package:household_manager/pages/household/settings.dart';
+import 'package:household_manager/pages/household/statistics_page.dart';
 import 'package:household_manager/pages/household_wizard/choose_household_page.dart';
 import 'package:household_manager/pages/household_wizard/create_household_page.dart';
 import 'package:household_manager/pages/household_wizard/join_household_page.dart';
-import 'package:household_manager/pages/household_wizard/register_page.dart';
+import 'package:household_manager/pages/auth/register_page.dart';
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
-import 'package:household_manager/pages/login_page.dart';
-import 'package:household_manager/pages/notification_page.dart';
+import 'package:household_manager/pages/auth/login_page.dart';
+import 'package:household_manager/pages/todo/create_todo_page.dart';
+import 'package:household_manager/pages/todo/todos_page.dart';
+import 'package:household_manager/pages/user/notification_page.dart';
+import 'package:household_manager/pages/user/profile_page.dart';
 import 'package:household_manager/utils/guards/auth_guard.dart';
 import 'package:household_manager/pages/splash_screen.dart';
 import 'package:household_manager/utils/utility.dart';
@@ -36,5 +42,16 @@ class AppModule extends Module {
         child: (_, __) => CreateHouseholdPage(), guards: [AuthGuard()]),
     ChildRoute('/notifications',
         child: (_, __) => NotificationsPage(), guards: [AuthGuard()]),
+    ChildRoute('/profile',
+        child: (_, __) => ProfilePage(), guards: [AuthGuard()]),
+    ChildRoute('/statistics',
+        child: (_, __) => StatisticsPage(), guards: [AuthGuard()]),
+    ChildRoute('/members',
+        child: (_, __) => MembersPage(), guards: [AuthGuard()]),
+    ChildRoute('/create-todo',
+        child: (_, __) => CreateTodoPage(), guards: [AuthGuard()]),
+    ChildRoute('/todos', child: (_, __) => TodosPage(), guards: [AuthGuard()]),
+    ChildRoute('/settings',
+        child: (_, __) => SettingsPage(), guards: [AuthGuard()]),
   ];
 }
