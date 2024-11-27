@@ -16,7 +16,8 @@ class TodoNotification extends BaseNotification {
           'Are you sure you want to delete this notification?',
         );
         if (confirmed == true) {
-          // TODO: Implement delete action
+          // TODO: Mark notification as deleted, do not delet it for real!
+          // we will ad in future something to see deleted one
         }
       },
       icon: Icon(Icons.delete, color: Colors.grey),

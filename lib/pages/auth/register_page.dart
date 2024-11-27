@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -178,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
         });
         if (mounted) {
           showTopSnackBar(context, 'Registration successful.', Colors.green);
-          Modular.to.navigate('/choose_household');
+          Modular.to.navigate(AppRoute.chooseHousehold.path);
         }
       }
     } on FirebaseAuthException catch (e) {

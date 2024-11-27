@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
 
 const _initialsSize = 12.0;
@@ -28,7 +29,7 @@ class PageTemplate extends StatelessWidget {
       }
       await userService.fetchUserProfile();
       if (userService.householdId == null && context.mounted) {
-        Modular.to.navigate('/choose_household');
+        Modular.to.navigate(AppRoute.chooseHousehold.path);
       }
     });
 
@@ -55,7 +56,7 @@ class PageTemplate extends StatelessWidget {
               child: IconButton(
                 icon: Icon(Icons.notifications),
                 onPressed: () {
-                  Modular.to.pushNamed('/notifications');
+                  Modular.to.pushNamed(AppRoute.notifications.path);
                 },
               ),
             ),
@@ -102,7 +103,7 @@ class PageTemplate extends StatelessWidget {
         ),
       ),
       onPressed: () {
-        Modular.to.navigate('/profile');
+        Modular.to.navigate(AppRoute.profile.path);
       },
     );
   }

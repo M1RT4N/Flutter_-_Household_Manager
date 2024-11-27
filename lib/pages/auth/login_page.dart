@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -82,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: _buttonWidth,
                 height: _buttonHeight,
                 onPressed: () {
-                  Modular.to.pushNamed('/register');
+                  Modular.to.pushNamed(AppRoute.register.path);
                 }),
           ),
           SizedBox(width: _spaceBetweenButtons),
@@ -165,7 +166,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (context.mounted) {
           showTopSnackBar(context, 'Login successful.', Colors.green);
-          Modular.to.navigate('/home');
+          Modular.to.navigate(AppRoute.home.path);
         }
       }
     } on FirebaseAuthException catch (e) {

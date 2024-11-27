@@ -9,7 +9,7 @@ class ProfilePage extends StatelessWidget {
     return PageTemplate(
       title: 'Profile',
       child: Center(
-        child: Text('Prifile Page Content'),
+        child: Text('Profile Page Content'),
       ),
     );
   }

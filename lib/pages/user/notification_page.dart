@@ -10,28 +10,79 @@ const _widthFactor = 0.5;
 const _borderRadius = 8.0;
 const _boxPadding = 16.0;
 
-class NotificationsPage extends StatelessWidget {
-  final List<BaseNotification> notifications = [
-    RequestNotification(),
-    RequestNotification(),
-    TodoNotification(
-        title: 'New TODO assigned',
-        description: 'Someone assigned TODO to you and you need to do it.'),
-    RequestNotification(), // TODO: implement if serivce is ready, pass user
-  ];
+class NotificationsPage extends StatefulWidget {
+  const NotificationsPage({super.key});
 
-  NotificationsPage({super.key});
+  @override
+  createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  final List<BaseNotification> notifications = [];
+
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _loadMoreNotifications();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      _loadMoreNotifications();
+    }
+  }
+
+  Future<void> _loadMoreNotifications() async {
+    if (_isLoading) return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    // TODO: From here down implement this shit, this delay is here just
+    // to know if it works, add something like limit, offset to this and
+    // fetch it by parts to prevent huge trafic between cleitn and server
+    // so lets say it is some kind of mix of pagination and infinite scroll
+    await Future.delayed(Duration(seconds: 2));
+
+    setState(() {
+      notifications.addAll([
+        RequestNotification(),
+        TodoNotification(
+            title: 'Another TODO assigned',
+            description: 'Another TODO has been assigned to you.'),
+      ]);
+
+      // TODO-END: Do not touch :D
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
       title: 'Notifications',
-      child: ListView(
+      child: ListView.builder(
+        controller: _scrollController,
         padding: EdgeInsets.all(_cardInnerPadding),
-        children: notifications
-            .map(
-                (notification) => _buildNotificationCard(context, notification))
-            .toList(),
+        itemCount: notifications.length + (_isLoading ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == notifications.length) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return _buildNotificationCard(context, notifications[index]);
+        },
       ),
     );
   }

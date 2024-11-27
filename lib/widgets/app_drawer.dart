@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/drawer_item.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
@@ -141,7 +142,7 @@ class AppDrawer extends StatelessWidget {
       await userService.leaveHousehold();
 
       if (context.mounted) {
-        Modular.to.navigate('/choose_household');
+        Modular.to.navigate(AppRoute.chooseHousehold.path);
       }
     }
   }
