@@ -8,12 +8,16 @@ import 'package:household_manager/pages/household_wizard/request_household_page.
 import 'package:household_manager/pages/login_page.dart';
 import 'package:household_manager/utils/guards/auth_guard.dart';
 import 'package:household_manager/pages/splash_screen.dart';
+import 'package:household_manager/utils/utility.dart';
 
 class AppModule extends Module {
   @override
   final List<ModularRoute> routes = [
     // Initial route
-    ChildRoute(Modular.initialRoute, child: (_, __) => SplashScreen()),
+    ChildRoute(Modular.initialRoute,
+        child: (_, __) => SplashScreen(
+              actionCallback: checkAuth,
+            )),
 
     // Public routes
     ChildRoute('/login', child: (_, __) => LoginPage()),

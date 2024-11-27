@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_modular/flutter_modular.dart';
+import 'package:household_manager/widgets/loading_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final Future<void> Function() actionCallback;
+
+  const SplashScreen({super.key, required this.actionCallback});
 
   @override
   createState() => _SplashScreenState();
@@ -13,22 +14,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _checkAuth();
-  }
-
-  void _checkAuth() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      Modular.to.navigate('/home');
-      return;
-    }
-    Modular.to.navigate('/login');
+    widget.actionCallback();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(child: CircularProgressIndicator()),
-    );
+    return LoadingScreen();
   }
 }
