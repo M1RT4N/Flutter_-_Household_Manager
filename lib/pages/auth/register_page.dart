@@ -206,8 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       if (mounted) {
-        showTopSnackBar(
-            context, 'An unexpected error occurred: $e', Colors.red);
+        showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
       }
     }
   }

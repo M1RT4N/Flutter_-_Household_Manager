@@ -8,20 +8,44 @@ import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/drawer_item.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
 
+const _logoPath = 'assets/icons/logo.svg';
+const _drawerInnerPadding = 16.0;
+const _logoLeftPadding = 16.0;
+const _logoHeight = 256.0;
+const _logoWidth = 512.0;
+const _themeSwitcherPadding = 8.0;
+const _themeSwitcherPaddingInnerRight = 24.0;
+
 class AppDrawer extends StatelessWidget {
   final drawerItems = [
-    {'title': 'Home', 'icon': Icons.house_outlined, 'route': '/home'},
-    {'title': 'Statistics', 'icon': Icons.auto_graph, 'route': '/statistics'},
+    {
+      'title': 'Home',
+      'icon': Icons.house_outlined,
+      'route': AppRoute.home.path
+    },
+    {
+      'title': 'Statistics',
+      'icon': Icons.auto_graph,
+      'route': AppRoute.statistics.path
+    },
     {
       'title': 'Household Members',
       'icon': Icons.person_2_outlined,
-      'route': '/members'
+      'route': AppRoute.members.path,
     },
     {},
-    {'title': 'Todo List', 'icon': Icons.list, 'route': '/todos'},
-    {'title': 'New Todo', 'icon': Icons.add, 'route': '/create-todo'},
+    {
+      'title': 'Todo List',
+      'icon': Icons.list,
+      'route': AppRoute.todos.path,
+    },
+    {'title': 'New Todo', 'icon': Icons.add, 'route': AppRoute.createTodo.path},
     {},
-    {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
+    {
+      'title': 'Settings',
+      'icon': Icons.settings,
+      'route': AppRoute.settings.path
+    },
   ];
 
   final userService = GetIt.instance<UserService>();
@@ -34,10 +58,10 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 16.0),
+        padding: const EdgeInsets.only(bottom: _drawerInnerPadding),
         child: Column(
           children: [
-            _buildDrawerHeader(),
+            _buildDrawerHeader(context),
             _buildDrawerList(),
             _buildActionButtons(context),
             const Divider(),
@@ -48,13 +72,20 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawerHeader() {
-    return DrawerHeader(
-      padding: EdgeInsets.only(left: 16.0),
-      child: SvgPicture.asset(
-        'assets/icons/logo.svg',
-        width: 512,
-        height: 256,
+// TODO: Fix this, it should work... WTF
+// https://api.flutter.dev/flutter/widgets/GestureDetector-class.html
+  Widget _buildDrawerHeader(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Modular.to.navigate(AppRoute.home.path);
+      },
+      child: DrawerHeader(
+        padding: EdgeInsets.only(left: _logoLeftPadding),
+        child: SvgPicture.asset(
+          _logoPath,
+          width: _logoWidth,
+          height: _logoHeight,
+        ),
       ),
     );
   }
@@ -117,7 +148,7 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildThemeSwitcher() {
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: const EdgeInsets.only(right: _themeSwitcherPadding),
       child: ListTile(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -125,7 +156,8 @@ class AppDrawer extends StatelessWidget {
             Row(
               children: [
                 Padding(
-                    padding: EdgeInsets.only(right: 24.0),
+                    padding:
+                        EdgeInsets.only(right: _themeSwitcherPaddingInnerRight),
                     child: Icon(Icons.brush)),
                 Text('Current theme'),
               ],
@@ -138,12 +170,14 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _leaveHousehold(BuildContext context) async {
-    if (userService.householdId != null) {
-      await userService.leaveHousehold();
+    if (userService.householdId == null) {
+      return;
+    }
 
-      if (context.mounted) {
-        Modular.to.navigate(AppRoute.chooseHousehold.path);
-      }
+    await userService.leaveHousehold();
+
+    if (context.mounted) {
+      Modular.to.navigate(AppRoute.chooseHousehold.path);
     }
   }
 }

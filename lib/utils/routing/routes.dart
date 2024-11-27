@@ -51,4 +51,6 @@ enum AppRoute {
   const AppRoute(this.path, this.pageType, {this.requiresAuth = false});
 
   List<RouteGuard> get guards => requiresAuth ? [AuthGuard()] : [];
+
+  String get route => path;
 }

@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
 const _mainBoxSize = 600.0;
@@ -232,14 +233,14 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
     });
 
     Modular.to.navigate(
-      '/household_request',
+      AppRoute.householdRequest.path,
       arguments: {'hideAppBar': false},
     );
   }
 
   void _navigateToChooseHouseholdPage() {
     Modular.to.navigate(
-      '/choose_household',
+      AppRoute.chooseHousehold.path,
     );
   }
 
