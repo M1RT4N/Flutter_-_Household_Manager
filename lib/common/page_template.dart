@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
@@ -30,7 +31,7 @@ class PageTemplate extends StatelessWidget {
       }
       await userService.fetchUserProfile();
       if (userService.householdId == null && context.mounted) {
-        Navigator.pushReplacementNamed(context, '/choose_household');
+        Modular.to.navigate('/choose_household');
       }
     });
 
@@ -69,7 +70,7 @@ class PageTemplate extends StatelessWidget {
         ),
       ),
       onPressed: () {
-        Navigator.pushNamed(context, '/profile');
+        Modular.to.navigate('/profile');
       },
     );
   }

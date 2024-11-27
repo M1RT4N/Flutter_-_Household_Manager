@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/drawer_item.dart';
@@ -70,7 +71,7 @@ class AppDrawer extends StatelessWidget {
       await userService.leaveHousehold();
 
       if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/choose_household');
+        Modular.to.navigate('/choose_household');
       }
     }
   }
@@ -78,7 +79,7 @@ class AppDrawer extends StatelessWidget {
   void _logout(BuildContext context) async {
     await userService.logout();
     if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      Modular.to.navigate('/login');
     }
   }
 }

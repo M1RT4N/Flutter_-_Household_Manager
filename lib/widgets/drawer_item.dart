@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 class DrawerItem extends StatelessWidget {
   final String title;
@@ -28,11 +29,11 @@ class DrawerItem extends StatelessWidget {
         selected: isSelected,
         onTap: () {
           if (isSelected) {
-            Navigator.pop(context);
+            Modular.to.pop(context);
             return;
           }
 
-          Navigator.popAndPushNamed(context, nextPageRoute);
+          Modular.to.popAndPushNamed(nextPageRoute);
         });
   }
 }

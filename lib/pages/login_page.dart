@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/pages/household_wizard/register_page.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
 import 'package:household_manager/utils/utility.dart';
@@ -82,8 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: _buttonWidth,
                 height: _buttonHeight,
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => RegisterPage()));
+                  Modular.to.pushNamed('/register');
                 }),
           ),
           SizedBox(width: _spaceBetweenButtons),
@@ -166,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (mounted) {
           showTopSnackBar(context, 'Login successful.', Colors.green);
-          Navigator.pushReplacementNamed(context, '/home');
+          Modular.to.navigate('/home');
         }
       }
     } on FirebaseAuthException catch (e) {

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/services/household_service.dart';
@@ -116,12 +117,10 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
         });
 
         if (mounted) {
-          Navigator.pushReplacementNamed(
-              context,
-              userService.householdId != null &&
-                      userService.householdId!.isNotEmpty
-                  ? '/home'
-                  : '/choose_household');
+          Modular.to.navigate(userService.householdId != null &&
+                  userService.householdId!.isNotEmpty
+              ? '/home'
+              : '/choose_household');
         }
         return;
       }

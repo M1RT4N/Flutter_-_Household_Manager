@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/profile_info.dart';
@@ -39,8 +40,7 @@ class ChooseHouseholdPage extends StatelessWidget {
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               if (context.mounted) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/login', (_) => false);
+                Modular.to.navigate('/login');
               }
             },
           ),
@@ -93,15 +93,13 @@ class ChooseHouseholdPage extends StatelessWidget {
                 _buildHouseholdButton(context,
                     icon: Icons.home,
                     label: 'Enter Existing Household',
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/join_household')),
+                    onPressed: () => Modular.to.pushNamed('/join_household')),
                 const SizedBox(width: _mainButtonGap),
                 _buildHouseholdButton(
                   context,
                   icon: Icons.add,
                   label: 'Create New Household',
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/create_household'),
+                  onPressed: () => Modular.to.pushNamed('/create_household'),
                 ),
               ],
             ),

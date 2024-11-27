@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -52,7 +53,7 @@ class HouseholdRequestPage extends StatelessWidget {
   void _logout(BuildContext context) async {
     await userService.logout();
     if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      Modular.to.navigate('/login');
     }
   }
 
@@ -133,7 +134,7 @@ class HouseholdRequestPage extends StatelessWidget {
         if (context.mounted) {
           showTopSnackBar(
               context, 'Request cancelled successfully.', Colors.green);
-          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          Modular.to.navigate('/choose_household');
         }
       } catch (e) {
         if (context.mounted) {
