@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -25,8 +26,10 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          DrawerHeader(
-            child: Text('Household Manager'),
+          SvgPicture.asset(
+            'assets/icons/logo.svg',
+            width: 400,
+            height: 200,
           ),
           Expanded(
             child: ListView(
@@ -39,7 +42,18 @@ class AppDrawer extends StatelessWidget {
               }).toList(),
             ),
           ),
-          ThemeFlipper(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ListTile(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text('Current theme'),
+                  ThemeFlipper(),
+                ],
+              ),
+            ),
+          ),
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Leave Household'),
