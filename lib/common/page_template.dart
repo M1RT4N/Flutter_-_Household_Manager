@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/models/household.dart';
-import 'package:household_manager/models/user.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:get_it/get_it.dart';
+import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
 
-// const _breadcrumbPadding = 8.0;
 const _initialsSize = 12.0;
 const _initialsRadius = 16.0;
 const _initialsRightPadding = 16.0;
@@ -11,34 +11,30 @@ const _initialsRightPadding = 16.0;
 class PageTemplate extends StatelessWidget {
   final String title;
   final Widget child;
-  final String currentRoute;
-  final User user;
-  final Household household;
 
   PageTemplate({
     Key? key,
     required this.title,
     required this.child,
-    required this.currentRoute,
-    required this.user,
-    required this.household,
   }) : super(key: key);
+
+  final userService = GetIt.instance<UserService>();
 
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    //   if (!userService.isLoggedIn) {
-    //     return; // Not logged in
-    //   }
-    //   await userService.fetchUserProfile();
-    //   if (userService.householdId == null && context.mounted) {
-    //     Navigator.pushReplacementNamed(context, '/choose_household');
-    //   }
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!userService.isLoggedIn) {
+        return; // Not logged in
+      }
+      await userService.fetchUserProfile();
+      if (userService.householdId == null && context.mounted) {
+        Modular.to.navigate('/choose_household');
+      }
+    });
 
     return Scaffold(
       appBar: _buildAppBar(context),
-      drawer: AppDrawer(currentRoute: currentRoute),
+      drawer: AppDrawer(),
       body: Column(
         children: [
           // _buildBreadcrumb(),
@@ -71,31 +67,16 @@ class PageTemplate extends StatelessWidget {
         ),
       ),
       onPressed: () {
-        Navigator.pushNamed(context, '/profile');
+        Modular.to.navigate('/profile');
       },
     );
   }
 
-  // Widget _buildBreadcrumb() {
-  //   return Container(
-  //     color: Colors.grey,
-  //     padding: const EdgeInsets.all(_breadcrumbPadding),
-  //     child: Row(
-  //       children: breadcrumbPath.map((crumb) {
-  //         int index = breadcrumbPath.indexOf(crumb);
-  //         bool isLast = index == breadcrumbPath.length - 1;
-  //         return Row(
-  //           children: [
-  //             Text(crumb),
-  //             if (!isLast) Text(' > '),
-  //           ],
-  //         );
-  //       }).toList(),
-  //     ),
-  //   );
-  // }
-
   String _getUserInitials() {
-    return user.name.trim().split(' ').map((e) => e[0]).take(2).join();
+    final userProfile = userService.userProfile;
+    if (userProfile != null && userProfile.name.isNotEmpty) {
+      return userProfile.name.trim().split(' ').map((e) => e[0]).take(2).join();
+    }
+    return '';
   }
 }
