@@ -4,19 +4,19 @@ import 'package:flutter_modular/flutter_modular.dart';
 class DrawerItem extends StatelessWidget {
   final String title;
   final IconData icon;
-  final bool isSelected;
   final String nextPageRoute;
 
   const DrawerItem(
       {Key? key,
       required this.title,
       required this.icon,
-      required this.isSelected,
       required this.nextPageRoute})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    bool isSelected = Modular.to.path == nextPageRoute;
+
     return ListTile(
         leading: Icon(icon, color: isSelected ? Colors.blue : null),
         title: Text(

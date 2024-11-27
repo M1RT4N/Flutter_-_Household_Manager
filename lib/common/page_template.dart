@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
 
-// const _breadcrumbPadding = 8.0;
 const _initialsSize = 12.0;
 const _initialsRadius = 16.0;
 const _initialsRightPadding = 16.0;
@@ -12,13 +11,11 @@ const _initialsRightPadding = 16.0;
 class PageTemplate extends StatelessWidget {
   final String title;
   final Widget child;
-  final String currentRoute;
 
   PageTemplate({
     Key? key,
     required this.title,
     required this.child,
-    required this.currentRoute,
   }) : super(key: key);
 
   final userService = GetIt.instance<UserService>();
@@ -37,7 +34,7 @@ class PageTemplate extends StatelessWidget {
 
     return Scaffold(
       appBar: _buildAppBar(context),
-      drawer: AppDrawer(currentRoute: currentRoute),
+      drawer: AppDrawer(),
       body: Column(
         children: [
           // _buildBreadcrumb(),
@@ -74,25 +71,6 @@ class PageTemplate extends StatelessWidget {
       },
     );
   }
-
-  // Widget _buildBreadcrumb() {
-  //   return Container(
-  //     color: Colors.grey,
-  //     padding: const EdgeInsets.all(_breadcrumbPadding),
-  //     child: Row(
-  //       children: breadcrumbPath.map((crumb) {
-  //         int index = breadcrumbPath.indexOf(crumb);
-  //         bool isLast = index == breadcrumbPath.length - 1;
-  //         return Row(
-  //           children: [
-  //             Text(crumb),
-  //             if (!isLast) Text(' > '),
-  //           ],
-  //         );
-  //       }).toList(),
-  //     ),
-  //   );
-  // }
 
   String _getUserInitials() {
     final userProfile = userService.userProfile;

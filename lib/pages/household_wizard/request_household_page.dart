@@ -4,6 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
 const _mainBoxPadding = 24.0;
@@ -43,18 +44,11 @@ class HouseholdRequestPage extends StatelessWidget {
           child: TextButton.icon(
             icon: const Icon(Icons.logout, color: Colors.white),
             label: const Text('Logout', style: TextStyle(color: Colors.white)),
-            onPressed: () => _logout(context),
+            onPressed: () => logout(context, userService),
           ),
         ),
       ],
     );
-  }
-
-  void _logout(BuildContext context) async {
-    await userService.logout();
-    if (context.mounted) {
-      Modular.to.navigate('/login');
-    }
   }
 
   Widget _buildPendingContent(BuildContext context) {

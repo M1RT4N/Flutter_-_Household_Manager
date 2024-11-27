@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/drawer_item.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
 
 class AppDrawer extends StatelessWidget {
-  final String currentRoute;
   final userService = GetIt.instance<UserService>();
 
   AppDrawer({
     Key? key,
-    required this.currentRoute,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final drawerItems = [
+      {'title': 'Household', 'icon': Icons.house, 'route': '/home'},
+      {'title': 'Todo List', 'icon': Icons.list, 'route': '/todo_list'},
+      {'title': 'Statistics', 'icon': Icons.auto_graph, 'route': '/statistics'},
+      {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
+    ];
+
     return Drawer(
       child: Column(
         children: [
@@ -23,32 +29,15 @@ class AppDrawer extends StatelessWidget {
             child: Text('Household Manager'),
           ),
           Expanded(
-            child: ListView(children: [
-              DrawerItem(
-                title: 'Household',
-                icon: Icons.house,
-                isSelected: currentRoute == '/home',
-                nextPageRoute: '/home',
-              ),
-              DrawerItem(
-                title: 'Todo List',
-                icon: Icons.list,
-                isSelected: currentRoute == '/todo_list',
-                nextPageRoute: '/todo_list',
-              ),
-              DrawerItem(
-                title: 'Statistics',
-                icon: Icons.auto_graph,
-                isSelected: currentRoute == '/statistics',
-                nextPageRoute: '/statistics',
-              ),
-              DrawerItem(
-                title: 'Settings',
-                icon: Icons.settings,
-                isSelected: currentRoute == '/settings',
-                nextPageRoute: '/settings',
-              ),
-            ]),
+            child: ListView(
+              children: drawerItems.map((item) {
+                return DrawerItem(
+                  title: item['title']! as String,
+                  icon: item['icon'] as IconData,
+                  nextPageRoute: item['route'] as String,
+                );
+              }).toList(),
+            ),
           ),
           ThemeFlipper(),
           ListTile(
@@ -59,7 +48,7 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
-            onTap: () => _logout(context),
+            onTap: () => logout(context, userService),
           ),
         ],
       ),
@@ -73,13 +62,6 @@ class AppDrawer extends StatelessWidget {
       if (context.mounted) {
         Modular.to.navigate('/choose_household');
       }
-    }
-  }
-
-  void _logout(BuildContext context) async {
-    await userService.logout();
-    if (context.mounted) {
-      Modular.to.navigate('/login');
     }
   }
 }

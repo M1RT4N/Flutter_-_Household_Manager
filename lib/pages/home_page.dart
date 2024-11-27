@@ -27,7 +27,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return PageTemplate(
         title: 'Home',
-        currentRoute: '/home', // Pass current route
         child: Scaffold(
           body: isLoading
               ? LoadingScreen()
