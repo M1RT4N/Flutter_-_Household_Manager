@@ -8,6 +8,12 @@ import 'package:household_manager/widgets/app_drawer.dart';
 const _initialsSize = 12.0;
 const _initialsRadius = 16.0;
 const _initialsRightPadding = 16.0;
+const _appBarNotificationIconPadding = 10.0;
+const _appBarNotificationCountBubleSize = 14.0;
+const _appBarNotificationCountSize = 10.0;
+const _appBarNotificationBorderRadius = 6.0;
+const _appBarNotificationPadding = 12.0;
+const _appBarNotificationInnerPadding = 2.0;
 
 class PageTemplate extends StatelessWidget {
   final String title;
@@ -38,7 +44,6 @@ class PageTemplate extends StatelessWidget {
       drawer: AppDrawer(),
       body: Column(
         children: [
-          // _buildBreadcrumb(),
           Expanded(child: child),
         ],
       ),
@@ -49,43 +54,48 @@ class PageTemplate extends StatelessWidget {
     return AppBar(
       title: Text(title),
       actions: [
-        Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: IconButton(
-                icon: Icon(Icons.notifications),
-                onPressed: () {
-                  Modular.to.pushNamed(AppRoute.notifications.path);
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 12),
-              child: Container(
-                padding: EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                constraints: BoxConstraints(
-                  minWidth: 14,
-                  minHeight: 14,
-                ),
-                child: Text(
-                  '5', // TODO: This need to be dynamic, implement after service!!
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 8,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
-        ),
+        _buildNotificationIcon(context),
         _buildUserAvatar(context),
         SizedBox(width: _initialsRightPadding),
+      ],
+    );
+  }
+
+  Widget _buildNotificationIcon(BuildContext context) {
+    return Stack(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(top: _appBarNotificationIconPadding),
+          child: IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              Modular.to.pushNamed(AppRoute.notifications.path);
+            },
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: _appBarNotificationPadding),
+          child: Container(
+            padding: EdgeInsets.all(_appBarNotificationInnerPadding),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius:
+                  BorderRadius.circular(_appBarNotificationBorderRadius),
+            ),
+            constraints: BoxConstraints(
+              minWidth: _appBarNotificationCountBubleSize,
+              minHeight: _appBarNotificationCountBubleSize,
+            ),
+            child: Text(
+              _getNotificationCount().toString(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: _appBarNotificationCountSize,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -113,6 +123,10 @@ class PageTemplate extends StatelessWidget {
     if (userProfile != null && userProfile.name.isNotEmpty) {
       return userProfile.name.trim().split(' ').map((e) => e[0]).take(2).join();
     }
-    return '';
+    return '??';
+  }
+
+  int _getNotificationCount() {
+    return 5; // TODO: This need to be dynamic, implement after service!!
   }
 }

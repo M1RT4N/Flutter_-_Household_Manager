@@ -8,5 +8,8 @@ import 'package:household_manager/utils/ioc_container.dart';
 void main() async {
   await FirebasePlatform.setup();
   IocContainer.setup();
-  runApp(ModularApp(module: AppModule(), child: HouseholdManagerApp()));
+  runApp(ModularApp(
+    module: AppModule(),
+    child: HouseholdManagerApp(),
+  ));
 }
