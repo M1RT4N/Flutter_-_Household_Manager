@@ -43,6 +43,9 @@ dependencies:
   cloud_firestore: ^4.10.1
   flutter_modular: ^5.0.3
   flutter_svg: ^1.0.3
+  rxdart: ^0.28.0
+  easy_loading_button: ^0.3.2
+  nanoid2: ^2.0.1
 
 dev_dependencies:
   flutter_test:

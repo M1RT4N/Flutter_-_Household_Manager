@@ -17,6 +17,7 @@ class IocContainer {
         fromJson: Household.fromJson,
         toJson: (household) => household.toJson()));
     getIt.registerSingleton(UserService(getIt<DatabaseService<User>>()));
-    getIt.registerSingleton<HouseholdService>(HouseholdService());
+    getIt.registerSingleton<HouseholdService>(HouseholdService(
+        getIt<DatabaseService<Household>>(), getIt<UserService>()));
   }
 }

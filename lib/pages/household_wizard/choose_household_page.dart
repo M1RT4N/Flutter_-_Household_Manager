@@ -2,9 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/models/household.dart';
-import 'package:household_manager/models/profile_info.dart';
-import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/services/user_service.dart';
 
 const _boxSize = 250.0;
@@ -16,13 +13,15 @@ const _appbarRightPaddingLogout = 24.0;
 const _mainButtonGap = 20.0;
 
 class ChooseHouseholdPage extends StatelessWidget {
-  const ChooseHouseholdPage({super.key});
+  final _userService = GetIt.instance<UserService>();
+
+  ChooseHouseholdPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: _buildBody(context),
+      body: _buildMainContent(context),
     );
   }
 
@@ -49,36 +48,35 @@ class ChooseHouseholdPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context) {
-    final userService = GetIt.instance<UserService>();
-    return FutureBuilder<Map<String, dynamic>>(
-      future: userService.fetchUserProfileWithHousehold(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError || !snapshot.hasData) {
-          return Center(child: Text('Error loading user profile.'));
-        }
-
-        ProfileInfo profileInfo = snapshot.data!['profileInfo'];
-        Household? household = snapshot.data!['household'];
-
-        if (profileInfo.requestedId != null) {
-          return HouseholdRequestPage(hideAppBar: true);
-        }
-
-        if (household != null &&
-            household.requested
-                .contains(FirebaseAuth.instance.currentUser!.uid)) {
-          return HouseholdRequestPage(hideAppBar: true);
-        }
-
-        return _buildMainContent(context);
-      },
-    );
-  }
+  // Widget _buildBody(BuildContext context) {
+  //   return FutureBuilder<Map<String, dynamic>>(
+  //     future: _userService.getUser(),
+  //     builder: (context, snapshot) {
+  //       if (snapshot.connectionState == ConnectionState.waiting) {
+  //         return Center(child: CircularProgressIndicator());
+  //       }
+  //
+  //       if (snapshot.hasError || !snapshot.hasData) {
+  //         return Center(child: Text('Error loading user profile.'));
+  //       }
+  //
+  //       var profileInfo = snapshot.data!['profileInfo'];
+  //       Household? household = snapshot.data!['household'];
+  //
+  //       if (profileInfo.requestedId != null) {
+  //         return HouseholdRequestPage(hideAppBar: true);
+  //       }
+  //
+  //       if (household != null &&
+  //           household.requested
+  //               .contains(FirebaseAuth.instance.currentUser!.uid)) {
+  //         return HouseholdRequestPage(hideAppBar: true);
+  //       }
+  //
+  //       return _buildMainContent(context);
+  //     },
+  //   );
+  // }
 
   Widget _buildMainContent(BuildContext context) {
     return Stack(

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
@@ -19,15 +18,17 @@ const _warningBoxPadding = 16.0;
 const _warningBoxRadius = 8.0;
 
 class HouseholdRequestPage extends StatelessWidget {
-  final bool hideAppBar;
-  final userService = GetIt.instance<UserService>();
+  final bool _hideAppBar;
+  final _userService = GetIt.instance<UserService>();
+  final _householdService = GetIt.instance<HouseholdService>();
 
-  HouseholdRequestPage({super.key, this.hideAppBar = false});
+  HouseholdRequestPage({super.key, bool hideAppBar = false})
+      : _hideAppBar = hideAppBar;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: hideAppBar ? null : _buildAppBar(context),
+      appBar: _hideAppBar ? null : _buildAppBar(context),
       body: Center(
         child: _buildPendingContent(context),
       ),
@@ -44,7 +45,7 @@ class HouseholdRequestPage extends StatelessWidget {
           child: TextButton.icon(
             icon: const Icon(Icons.logout, color: Colors.white),
             label: const Text('Logout', style: TextStyle(color: Colors.white)),
-            onPressed: () => logout(context, userService),
+            onPressed: () => logout(context, _userService),
           ),
         ),
       ],
@@ -112,29 +113,18 @@ class HouseholdRequestPage extends StatelessWidget {
   }
 
   void _cancelRequest(BuildContext context) async {
-    final userService = GetIt.instance<UserService>();
-    final householdService = GetIt.instance<HouseholdService>();
-    String? householdId = userService.userProfile?.requestedId;
-    if (householdId != null) {
-      try {
-        await householdService.cancelHouseholdRequestByCode(householdId);
-        await userService
-            .updateUserProfile({'requestedId': FieldValue.delete()});
-        userService.setUserProfile({
-          ...userService.userProfile!.toMap(),
-          'requestedId': null,
-        }, userService.userProfile!.id);
-
-        if (context.mounted) {
-          showTopSnackBar(
-              context, 'Request cancelled successfully.', Colors.green);
-          Modular.to.navigate('/choose_household');
-        }
-      } catch (e) {
-        if (context.mounted) {
-          showTopSnackBar(context, 'Failed to cancel request: $e', Colors.red);
-        }
-      }
+    String? householdId = _userService.getUser?.householdId;
+    if (householdId == null) {
+      return;
     }
+
+    var errorMessage = await _householdService.cancelHouseholdRequest();
+    if (errorMessage != null) {
+      return showTopSnackBar(
+          context, 'Failed to cancel request: $errorMessage', Colors.red);
+    }
+
+    showTopSnackBar(context, 'Request cancelled successfully.', Colors.green);
+    Modular.to.navigate('/choose_household');
   }
 }

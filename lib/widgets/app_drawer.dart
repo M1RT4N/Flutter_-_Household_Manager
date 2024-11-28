@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
@@ -70,8 +70,8 @@ class AppDrawer extends StatelessWidget {
   }
 
   void _leaveHousehold(BuildContext context) async {
-    if (userService.householdId != null) {
-      await userService.leaveHousehold();
+    if (userService.getUser?.householdId != null) {
+      // await userService.leaveHousehold();
 
       if (context.mounted) {
         Modular.to.navigate('/choose_household');

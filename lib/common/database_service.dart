@@ -6,6 +6,8 @@ typedef DocumentSerializer<T> = Map<String, dynamic> Function(T data);
 class DatabaseService<T> {
   final CollectionReference<T> _reference;
 
+  CollectionReference<T> get reference => _reference;
+
   DatabaseService(
     String collectionName, {
     required DocumentDeserializer<T> fromJson,

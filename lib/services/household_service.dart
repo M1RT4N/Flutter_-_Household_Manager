@@ -1,145 +1,133 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as fb;
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:household_manager/common/database_service.dart';
 import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/user.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:nanoid2/nanoid2.dart';
 import 'package:rxdart/rxdart.dart';
+
+const _codeLength = 8;
 
 class HouseholdService {
   final _householdStream = BehaviorSubject<Household?>.seeded(null);
+  final DatabaseService<Household> _householdRepository;
+  final UserService _userService;
 
   Stream<Household?> get getHouseholdStream => _householdStream.stream;
 
-  Future<String> createHousehold(String householdName) async {
-    String code = _generateRandomCode();
-    var docRef = fb.FirebaseFirestore.instance.collection('households').doc();
-    String householdId = docRef.id;
+  Household? get getHousehold => _householdStream.value;
 
-    Household household = Household(
-      id: householdId,
-      name: householdName,
-      code: code,
-      members: [FirebaseAuth.instance.currentUser!.uid],
-      requested: [],
-      createdAt: fb.Timestamp.now(),
-    );
+  HouseholdService(this._householdRepository, this._userService);
 
-    await docRef.set(household.toJson());
-    return householdId;
+  void _pushToSteam(Household household) {
+    _householdStream.value = household;
   }
 
-  Future<bool> joinHouseholdByCode(String code) async {
-    fb.QuerySnapshot query = await fb.FirebaseFirestore.instance
-        .collection('households')
-        .where('code', isEqualTo: code)
-        .get();
+  Future<void> setHousehold(Household household) async {
+    await _updateHouseholdInRepository(household);
+    _pushToSteam(household);
+  }
 
-    if (query.docs.isEmpty) {
-      return false;
+  Future<void> _updateHouseholdInRepository(Household household) {
+    return _householdRepository.setOrAdd(household.id, household);
+  }
+
+  Future<String?> createHouseholdRequest(String code) async {
+    var householdByCode = await _getHouseholdByCode(code);
+
+    if (householdByCode.docs.isEmpty) {
+      return 'Invalid household code.';
     }
 
-    var householdDoc = query.docs.first;
-    Household household =
-        Household.fromJson(householdDoc.data() as Map<String, dynamic>);
+    var user = _userService.getUser!;
+    var householdDoc = householdByCode.docs.first;
+    var household = householdDoc.data();
 
-    await fb.FirebaseFirestore.instance
-        .collection('households')
-        .doc(household.id)
-        .update({
-      'requested':
-          fb.FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
-    });
+    household =
+        household.copyWith(requested: household.requested..add(user.id));
+    user = user.copyWith(requestedId: household.id);
 
-    await fb.FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .update({
-      'requestedId': household.id,
-    });
-
-    return true;
+    return await _householdRequestTransaction(householdDoc, household, user);
   }
 
-  Future<bool> cancelHouseholdRequestByCode(String code) async {
-    var query = await fb.FirebaseFirestore.instance
-        .collection('households')
-        .where('code', isEqualTo: code)
-        .get();
+  Future<String?> _householdRequestTransaction(
+      QueryDocumentSnapshot<Household> householdDoc,
+      Household newHousehold,
+      User newUser) async {
+    try {
+      await FirebaseFirestore.instance.runTransaction((tx) async {
+        tx.update(householdDoc.reference, newHousehold.toJson());
+        tx.update(_userService.getUserDoc, newUser.toJson());
+      });
+    } catch (e) {
+      return e.toString();
+    }
+    return null;
+  }
 
-    if (query.docs.isEmpty) {
-      return false;
+  Future<QuerySnapshot<Household>> _getHouseholdByCode(String code) {
+    return _householdRepository.reference
+        .where('code', isEqualTo: code)
+        .limit(1)
+        .get();
+  }
+
+  Future<String?> cancelHouseholdRequest() async {
+    var user = _userService.getUser!;
+    var householdByCode = await _getHouseholdByCode(user.requestedId!);
+
+    if (householdByCode.docs.isEmpty) {
+      return 'Invalid household code';
     }
 
-    var householdDoc = query.docs.first;
-    Household household =
-        Household.fromJson(householdDoc.data() as Map<String, dynamic>);
+    var householdDoc = householdByCode.docs.first;
+    var household = householdDoc.data();
 
-    await fb.FirebaseFirestore.instance
-        .collection('households')
-        .doc(household.id)
-        .update({
-      'requested':
-          fb.FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
-    });
+    household =
+        household.copyWith(requested: household.requested..remove(user.id));
+    user = user..copyWith(requestedId: null);
 
-    return true;
+    return await _householdRequestTransaction(householdDoc, household, user);
   }
 
-  // Future<Household?> getHousehold(User user) async {
-  //   if (user.householdId != null) {
-  //     try {
-  //       final householdDoc = await fb.FirebaseFirestore.instance
-  //           .collection('households')
-  //           .doc(user.householdId)
-  //           .get();
-  //       if (householdDoc.exists) {
-  //         return Household.fromJson(householdDoc.data()!);
-  //       }
-  //       // ignore: empty_catches
-  //     } catch (e) {}
-  //   }
-  //   return null;
-  // }
+  // Future<String?> tryLeaveHousehold() async {
+  //   try {
+  //     await _householdService.cancelHouseholdRequest(householdId);
+  //     await _userService
+  //         .updateUserProfile({'requestedId': FieldValue.delete()});
+  //     _userService.setUserProfile({
+  //       ..._userService.userProfile!.toMap(),
+  //       'requestedId': null,
+  //     }, _userService.userProfile!.id);
   //
-  // Future<void> leaveHousehold() async {
-  //   final userService = GetIt.instance<UserService>();
-  //   final userProfile = await userService.getUserProfile();
-  //   final userId = userProfile.id;
-  //   final householdId = userService.householdId;
-  //
-  //   if (householdId != null) {
-  //     await _removeUserFromHousehold(userId, householdId);
-  //     await userService.updateUserProfile({'householdId': null});
-  //     userService.setUser({
-  //       ...userService.userStream!,
-  //       'householdId': null,
-  //     }, userId);
+  //     if (context.mounted) {
+  //       showTopSnackBar(
+  //           context, 'Request cancelled successfully.', Colors.green);
+  //       Modular.to.navigate('/choose_household');
+  //     }
+  //   } catch (e) {
+  //     if (context.mounted) {
+  //       showTopSnackBar(context, 'Failed to cancel request: $e', Colors.red);
+  //     }
   //   }
   // }
-
-  Future<void> _removeUserFromHousehold(
-      String userId, String householdId) async {
-    var householdRef =
-        fb.FirebaseFirestore.instance.collection('households').doc(householdId);
-    var userRef = fb.FirebaseFirestore.instance.collection('users').doc(userId);
-
-    await fb.FirebaseFirestore.instance.runTransaction((transaction) async {
-      var householdSnapshot = await transaction.get(householdRef);
-      if (householdSnapshot.exists) {
-        List<dynamic> members = householdSnapshot.get('members');
-        members.remove(userId);
-        transaction.update(householdRef, {'members': members});
-      }
-      transaction.update(userRef, {'householdId': null});
-    });
-  }
 
   String _generateRandomCode() {
-    var ukey = UniqueKey();
-    var str = ukey.toString();
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return List.generate(
         8,
         (index) => chars[(DateTime.now().millisecondsSinceEpoch + index) %
             chars.length]).join();
+  }
+
+  Future<void> tryCreateHousehold(String householdName, User user) async {
+    await setHousehold(Household(
+        id: UniqueKey().toString(),
+        name: householdName,
+        code: nanoid(length: _codeLength),
+        members: [user.id],
+        requested: [],
+        createdAt: Timestamp.now()));
   }
 }

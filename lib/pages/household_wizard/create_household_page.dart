@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_loading_button/easy_loading_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -14,7 +13,10 @@ const _mainBoxPadding = 16.0;
 const _spaceAfterField = 30.0;
 
 class CreateHouseholdPage extends StatefulWidget {
-  const CreateHouseholdPage({super.key});
+  final householdService = GetIt.instance<HouseholdService>();
+  final userService = GetIt.instance<UserService>();
+
+  CreateHouseholdPage({super.key});
 
   @override
   State<CreateHouseholdPage> createState() => _CreateHouseholdPageState();
@@ -22,7 +24,6 @@ class CreateHouseholdPage extends StatefulWidget {
 
 class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
   final _householdNameController = TextEditingController();
-  bool _isCreating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -58,86 +59,44 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
   }
 
   Widget _buildCreateButton() {
-    return _isCreating
-        ? SizedBox(
-            width: _buttonWidth,
-            height: _buttonHeight,
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor),
-              ),
+    return EasyButton(
+        idleStateWidget: SizedBox(
+          width: _buttonWidth,
+          height: _buttonHeight,
+          child: ElevatedButton(
+            onPressed: _createHousehold,
+            style: ElevatedButton.styleFrom(
+              shape: StadiumBorder(),
             ),
-          )
-        : SizedBox(
-            width: _buttonWidth,
-            height: _buttonHeight,
-            child: ElevatedButton(
-              onPressed: _createHousehold,
-              style: ElevatedButton.styleFrom(
-                shape: StadiumBorder(),
-              ),
-              child: Text('Create'),
+            child: Text('Create'),
+          ),
+        ),
+        loadingStateWidget: SizedBox(
+          width: _buttonWidth,
+          height: _buttonHeight,
+          child: Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
             ),
-          );
+          ),
+        ));
   }
 
   void _createHousehold() async {
     String householdName = _householdNameController.text;
     if (householdName.isEmpty) {
-      showTopSnackBar(context, 'Household name is required.', Colors.red);
-      return;
+      return showTopSnackBar(
+          context, 'Household name is required.', Colors.red);
     }
-    setState(() {
-      _isCreating = true;
-    });
 
-    final householdService = GetIt.instance<HouseholdService>();
-    final userService = GetIt.instance<UserService>();
+    await widget.householdService
+        .tryCreateHousehold(householdName, widget.userService.getUser!);
 
-    try {
-      String householdId =
-          await householdService.createHousehold(householdName);
-
-      await userService.fetchUserProfile();
-
-      if (userService.userProfile != null) {
-        ProfileInfo userProfile = userService.userProfile!;
-        String userId = userProfile.id;
-
-        await FirebaseFirestore.instance.collection('users').doc(userId).set({
-          'householdId': householdId,
-        }, SetOptions(merge: true));
-
-        await userService.fetchUserProfile();
-
-        setState(() {
-          _isCreating = false;
-        });
-
-        if (mounted) {
-          Modular.to.navigate(userService.householdId != null &&
-                  userService.householdId!.isNotEmpty
-              ? '/home'
-              : '/choose_household');
-        }
-        return;
-      }
-
-      setState(() {
-        _isCreating = false;
-      });
-      if (mounted) {
-        showTopSnackBar(context, 'User profile not found.', Colors.red);
-      }
-    } catch (e) {
-      setState(() {
-        _isCreating = false;
-      });
-      if (mounted) {
-        showTopSnackBar(context, 'Failed to create household: $e', Colors.red);
-      }
+    if (mounted) {
+      showTopSnackBar(context, 'Household created successfully.', Colors.green);
+      Modular.to.navigate('/home');
     }
   }
 

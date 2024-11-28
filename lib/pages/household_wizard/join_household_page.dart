@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_loading_button/easy_loading_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/models/profile_info.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -23,7 +22,10 @@ const _qrCodeTextSize = 16.0;
 const _qrCodePadding = 16.0;
 
 class JoinHouseholdPage extends StatefulWidget {
-  const JoinHouseholdPage({super.key});
+  final _userService = GetIt.instance<UserService>();
+  final _householdService = GetIt.instance<HouseholdService>();
+
+  JoinHouseholdPage({super.key});
 
   @override
   State<JoinHouseholdPage> createState() => _JoinHouseholdPageState();
@@ -31,8 +33,6 @@ class JoinHouseholdPage extends StatefulWidget {
 
 class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
   final _codeController = TextEditingController();
-  final HouseholdService _householdService = HouseholdService();
-  bool _isJoining = false;
 
   @override
   Widget build(BuildContext context) {
@@ -97,36 +97,30 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
           controller: _codeController,
         ),
         SizedBox(height: _gapBetweenColumns),
-        _isJoining ? _buildLoadingIndicator() : _buildJoinButton(),
+        EasyButton(
+            idleStateWidget: SizedBox(
+              width: _buttonWidth,
+              height: _buttonHeight,
+              child: ElevatedButton(
+                onPressed: _joinHousehold,
+                style: ElevatedButton.styleFrom(
+                  shape: StadiumBorder(),
+                ),
+                child: Text('Join'),
+              ),
+            ),
+            loadingStateWidget: SizedBox(
+              width: _buttonWidth,
+              height: _buttonHeight,
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Theme.of(context).primaryColor),
+                ),
+              ),
+            ))
       ],
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return SizedBox(
-      width: _buttonWidth,
-      height: _buttonHeight,
-      child: Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor:
-              AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildJoinButton() {
-    return SizedBox(
-      width: _buttonWidth,
-      height: _buttonHeight,
-      child: ElevatedButton(
-        onPressed: _joinHousehold,
-        style: ElevatedButton.styleFrom(
-          shape: StadiumBorder(),
-        ),
-        child: Text('Join'),
-      ),
     );
   }
 
@@ -170,20 +164,12 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
       return;
     }
 
-    setState(() {
-      _isJoining = true;
-    });
-
-    bool success = await _householdService.joinHouseholdByCode(code);
-    if (!success) {
-      _handleJoinFailure('Invalid code.');
-      return;
+    String? errorMessage =
+        await widget._householdService.createHouseholdRequest(code);
+    if (errorMessage != null) {
+      showTopSnackBar(context, errorMessage, Colors.red);
+      return _navigateToChooseHouseholdPage();
     }
-
-    final userService = GetIt.instance<UserService>();
-    ProfileInfo? userProfile = await userService.getUserProfile();
-
-    await _updateUserProfile(userProfile.id, code);
 
     if (mounted) {
       showTopSnackBar(context, 'Request created successfully.', Colors.green);
@@ -191,46 +177,36 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
     _navigateToHouseholdRequestPage();
   }
 
-  Future<void> _updateUserProfile(String userId, String householdCode) async {
-    final userService = GetIt.instance<UserService>();
-    try {
-      QuerySnapshot query = await FirebaseFirestore.instance
-          .collection('households')
-          .where('code', isEqualTo: householdCode)
-          .get();
-
-      if (query.docs.isNotEmpty) {
-        String householdId = query.docs.first.id;
-        await userService.updateUserProfile({'requestedId': householdId});
-        userService.setUserProfile({
-          ...userService.userProfile!.toMap(),
-          'householdId': null,
-        }, userService.userProfile!.id);
-      } else {
-        _handleJoinFailure('Household not found.');
-      }
-    } catch (e) {
-      _handleJoinFailure('Failed to update user profile: ${e.toString()}');
-    }
-  }
+  // Future<void> _updateUserProfile(String userId, String householdCode) async {
+  //   final userService = GetIt.instance<UserService>();
+  //   try {
+  //     QuerySnapshot query = await FirebaseFirestore.instance
+  //         .collection('households')
+  //         .where('code', isEqualTo: householdCode)
+  //         .get();
+  //
+  //     if (query.docs.isNotEmpty) {
+  //       String householdId = query.docs.first.id;
+  //       await userService.updateUserProfile({'requestedId': householdId});
+  //       userService.setUserProfile({
+  //         ...userService.userProfile!.toMap(),
+  //         'householdId': null,
+  //       }, userService.userProfile!.id);
+  //     } else {
+  //       _handleJoinFailure('Household not found.');
+  //     }
+  //   } catch (e) {
+  //     _handleJoinFailure('Failed to update user profile: ${e.toString()}');
+  //   }
+  // }
 
   bool _isValidCode(String code) {
     return code.isNotEmpty && code.length == _codeLength;
   }
 
-  void _handleJoinFailure(String message) {
-    setState(() {
-      _isJoining = false;
-    });
-    showTopSnackBar(context, message, Colors.red);
-    _navigateToChooseHouseholdPage();
-  }
+  void _handleJoinFailure(String message) {}
 
   void _navigateToHouseholdRequestPage() {
-    setState(() {
-      _isJoining = false;
-    });
-
     Modular.to.navigate(
       '/household_request',
       arguments: {'hideAppBar': false},
