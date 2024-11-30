@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -7,12 +5,11 @@ import 'package:household_manager/utils/ioc_container.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
+import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
 const _containerPadding = 16.0;
 const _maxContainerWidth = 400.0;
-const _buttonWidth = 120.0;
-const _buttonHeight = 40.0;
 const _minPasswordLength = 6; // In symbols
 const _spacingHeight = 20.0;
 
@@ -29,8 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _nameController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  bool _isRegistering = false;
+  final _userService = IocContainer.getIt<UserService>();
 
   @override
   Widget build(BuildContext context) {
@@ -73,24 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 icon: Icons.person_outline,
               ),
               SizedBox(height: _spacingHeight),
-              SizedBox(
-                width: _buttonWidth,
-                height: _buttonHeight,
-                child: _isRegistering
-                    ? Center(
-                        child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Theme.of(context).primaryColor),
-                      ))
-                    : ElevatedButton(
-                        onPressed: _register,
-                        style: ElevatedButton.styleFrom(
-                          shape: StadiumBorder(),
-                        ),
-                        child: Text('Register'),
-                      ),
-              )
+              LoadingStadiumButton(buttonText: 'Register', onPressed: _register)
             ],
           ),
         ),
@@ -98,116 +77,52 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  bool _validateInputs() {
+  String? _validateInputs() {
     if (_emailController.text.isEmpty) {
-      showTopSnackBar(context, 'Email is required.', Colors.red);
-      return false;
+      return 'Email is required.';
     }
     if (!Utility.isValidEmail(_emailController.text)) {
-      showTopSnackBar(
-          context, 'Please enter a valid email address.', Colors.red);
-      return false;
+      return 'Please enter a valid email address.';
     }
     if (_usernameController.text.isEmpty) {
-      showTopSnackBar(context, 'Username is required.', Colors.red);
-      return false;
+      return 'Username is required.';
     }
     if (_nameController.text.isEmpty) {
-      showTopSnackBar(context, 'Name is required.', Colors.red);
-      return false;
+      return 'Name is required.';
     }
     if (_passwordController.text.isEmpty) {
-      showTopSnackBar(context, 'Password is required.', Colors.red);
-      return false;
+      return 'Password is required.';
     }
     if (_passwordController.text.length < _minPasswordLength) {
-      showTopSnackBar(
-          context,
-          'Password must be at least $_minPasswordLength characters long.',
-          Colors.red);
-      return false;
+      return 'Password must be at least $_minPasswordLength characters long.';
     }
     if (_confirmPasswordController.text.isEmpty) {
-      showTopSnackBar(context, 'Please confirm your password.', Colors.red);
-      return false;
+      return 'Please confirm your password.';
     }
     if (_passwordController.text != _confirmPasswordController.text) {
-      showTopSnackBar(context, 'Passwords do not match.', Colors.red);
-      return false;
+      return 'Passwords do not match.';
     }
-    return true;
+    return null;
   }
 
   void _register() async {
-    if (!_validateInputs()) {
-      return;
+    var errorMessage = _validateInputs();
+    if (errorMessage != null) {
+      return showTopSnackBar(context, errorMessage, Colors.red);
     }
 
-    setState(() {
-      _isRegistering = true;
-    });
+    errorMessage = await _userService.tryRegister(_usernameController.text,
+        _nameController.text, _emailController.text, _passwordController.text);
 
-    try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .set({
-        'username': _usernameController.text.trim(),
-        'name': _nameController.text.trim(),
-        'email': _emailController.text.trim(),
-        'created_at': Timestamp.now(),
-      });
-
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .get();
-
-      if (userDoc.exists) {
-        UserService userService = IocContainer.getIt<UserService>();
-        await userService.setUserProfile(
-            userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
-
-        setState(() {
-          _isRegistering = false;
-        });
-        if (mounted) {
-          showTopSnackBar(context, 'Registration successful.', Colors.green);
-          Modular.to.navigate(AppRoute.chooseHousehold.path);
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _isRegistering = false;
-      });
-
-      String errorMessage = 'An error occurred.';
-      if (e.code == 'email-already-in-use') {
-        errorMessage = 'The email is already in use.';
-      } else if (e.code == 'weak-password') {
-        errorMessage = 'The password is too weak.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'The email address is badly formatted.';
-      } else {
-        errorMessage = e.message ?? errorMessage;
-      }
+    if (errorMessage != null) {
       if (mounted) {
-        showTopSnackBar(context, errorMessage, Colors.red);
+        return showTopSnackBar(context, errorMessage, Colors.red);
       }
-    } catch (e) {
-      setState(() {
-        _isRegistering = false;
-      });
+    }
 
-      if (mounted) {
-        showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
-      }
+    if (mounted) {
+      showTopSnackBar(context, 'Registration successful.', Colors.green);
+      Modular.to.navigate(AppRoute.chooseHousehold.route);
     }
   }
 
@@ -218,7 +133,6 @@ class _RegisterPageState extends State<RegisterPage> {
     _emailController.dispose();
     _nameController.dispose();
     _confirmPasswordController.dispose();
-
     super.dispose();
   }
 }

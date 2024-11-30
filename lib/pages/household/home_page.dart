@@ -1,55 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import 'package:household_manager/widgets/common/page_template.dart';
-import 'package:household_manager/services/household_service.dart';
-import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/widgets/loading_screen.dart';
+import 'package:household_manager/common/app_state.dart';
+import 'package:household_manager/pages/common/test_page_template.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  String userName = '';
-  String householdName = '';
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return PageTemplate(
-        title: 'Home',
-        child: Scaffold(
-          body: isLoading
-              ? LoadingScreen()
-              : Column(
-                  children: [
-                    Text('User: $userName'),
-                    Text('Household: $householdName'),
-                  ],
-                ),
-        ));
+    return TestPageTemplate(
+      title: 'Home',
+      bodyFunction: buildBody,
+    );
   }
 
-  Future<void> _fetchData() async {
-    final userService = GetIt.instance<UserService>();
-    final householdService = GetIt.instance<HouseholdService>();
-
-    final user = await userService.getUserProfile();
-    final household = await householdService.getHousehold();
-
-    setState(() {
-      userName = user.name;
-      householdName = household?.name ?? 'Unknown Household';
-      isLoading = false;
-    });
+  Widget buildBody(BuildContext context, AppState appState) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Text('User: ${appState.user?.username}'),
+          Text('Household name: ${appState.household?.name}'),
+          Text('Household code: ${appState.household?.code}'),
+        ],
+      ),
+    );
   }
 }

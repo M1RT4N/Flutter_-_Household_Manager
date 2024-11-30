@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:get_it/get_it.dart';
-import 'package:household_manager/services/user_service.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:household_manager/utils/routing/routes.dart';
-import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/drawer_item.dart';
 import 'package:household_manager/widgets/theme_flipper.dart';
 
@@ -17,6 +14,15 @@ const _themeSwitcherPadding = 8.0;
 const _themeSwitcherPaddingInnerRight = 24.0;
 
 class AppDrawer extends StatelessWidget {
+  final void Function(BuildContext) logoutFunc;
+  final void Function(BuildContext) leaveHouseholdFunc;
+
+  AppDrawer({
+    super.key,
+    required this.logoutFunc,
+    required this.leaveHouseholdFunc,
+  });
+
   final drawerItems = [
     {
       'title': 'Home',
@@ -47,12 +53,6 @@ class AppDrawer extends StatelessWidget {
       'route': AppRoute.settings.path
     },
   ];
-
-  final userService = GetIt.instance<UserService>();
-
-  AppDrawer({
-    Key? key,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -107,45 +107,6 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
-            onTap: () async {
-              final confirm = await showConfirmationDialog(
-                context,
-                'Confirm Logout',
-                'Are you sure you want to logout?',
-              );
-              if (confirm == true && context.mounted) {
-                logout(context, userService);
-              }
-            },
-          ),
-        ),
-        Expanded(
-          child: ListTile(
-            leading: Icon(Icons.cancel_outlined),
-            title: Text('Leave Household'),
-            onTap: () async {
-              final confirm = await showConfirmationDialog(
-                context,
-                'Confirm Leave Household',
-                'Are you sure you want to leave the household?',
-              );
-              if (confirm == true && context.mounted) {
-                _leaveHousehold(context);
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildThemeSwitcher() {
     return Padding(
       padding: const EdgeInsets.only(right: _themeSwitcherPadding),
@@ -169,15 +130,110 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  void _leaveHousehold(BuildContext context) async {
-    if (userService.householdId == null) {
-      return;
-    }
-
-    await userService.leaveHousehold();
-
-    if (context.mounted) {
-      Modular.to.navigate(AppRoute.chooseHousehold.path);
-    }
+  Widget _buildActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Logout'),
+            onTap: () => logoutFunc(context),
+          ),
+        ),
+        Expanded(
+          child: ListTile(
+            leading: Icon(Icons.login_outlined),
+            title: Text('Leave Household'),
+            onTap: () => leaveHouseholdFunc(context),
+          ),
+        ),
+      ],
+    );
   }
+
+// Widget _buildActionButtons(BuildContext context) {
+//   return Row(
+//     children: [
+//       Expanded(
+//           child: ListTile(
+//         leading: Icon(Icons.logout),
+//         title: Text('Logout'),
+//         onTap: () async {
+//           final confirm = await Utility.showConfirmationDialog(
+//             context,
+//             'Confirm Logout',
+//             'Are you sure you want to logout?',
+//           );
+//           if (confirm == true && context.mounted) {
+//             _logout(context);
+//           }
+//         },
+//       )),
+//       Expanded(
+//           child: ListTile(
+//         leading: Icon(Icons.login_outlined),
+//         title: Text('Leave Household'),
+//         onTap: () async {
+//           final confirm = await Utility.showConfirmationDialog(
+//             context,
+//             'Confirm Leave Household',
+//             'Are you sure you want to leave the household?',
+//           );
+//           if (confirm == true && context.mounted) {
+//             _leaveHousehold(context);
+//           }
+//         },
+//       )),
+//     ],
+//   );
+// }
+//
+// void _leaveHousehold(BuildContext context) async {
+//   if (_userService.getUser?.householdId == null) {
+//     return;
+//   }
+//
+//   final confirm = await Utility.showConfirmationDialog(
+//     context,
+//     'Confirm Leave',
+//     'Are you sure you want to leave household?',
+//   );
+//
+//   if (confirm != true) {
+//     return;
+//   }
+//
+//   String? errorMessage = await _householdService.tryLeaveHousehold();
+//
+//   if (context.mounted) {
+//     if (errorMessage != null) {
+//       return showTopSnackBar(
+//           context, 'Failed to leave household: $errorMessage', Colors.red);
+//     }
+//     showTopSnackBar(context, 'Household left.', Colors.green);
+//   }
+//   Modular.to.navigate(AppRoute.chooseHousehold.route);
+// }
+//
+// void _logout(BuildContext context) async {
+//   if (_userService.getUser == null) {
+//     return;
+//   }
+//
+//   final confirm = await Utility.showConfirmationDialog(
+//     context,
+//     'Confirm Logout',
+//     'Are you sure you want to logout?',
+//   );
+//
+//   if (confirm != true) {
+//     return;
+//   }
+//
+//   await _userService.logout();
+//   if (context.mounted) {
+//     Modular.to.navigate(AppRoute.login.path);
+//     showTopSnackBar(context, 'Logged out successfully.', Colors.green);
+//   }
+// }
 }

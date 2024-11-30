@@ -1,19 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/ioc_container.dart';
 import 'package:household_manager/utils/routing/routes.dart';
-import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
+import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
-import 'package:household_manager/widgets/stadium_button.dart';
 
 const _containerPadding = 16.0;
 const _maxContainerWidth = 400.0;
-const _buttonWidth = 120.0;
-const _buttonHeight = 40.0;
 const _spaceAfterPassword = 35.0;
 const _spaceBetweenButtons = 10.0;
 
@@ -27,8 +22,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  bool _isLoggingIn = false;
+  final UserService _userService = IocContainer.getIt<UserService>();
 
   @override
   void initState() {
@@ -74,39 +68,13 @@ class _LoginPageState extends State<LoginPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (!_isLoggingIn) ...[
-          SizedBox(
-            width: _buttonWidth,
-            height: _buttonHeight,
-            child: StadiumButton(
-                text: 'Register',
-                width: _buttonWidth,
-                height: _buttonHeight,
-                onPressed: () {
-                  Modular.to.pushNamed(AppRoute.register.path);
-                }),
-          ),
-          SizedBox(width: _spaceBetweenButtons),
-          Text('or'),
-          SizedBox(width: _spaceBetweenButtons),
-        ],
-        SizedBox(
-          width: _buttonWidth,
-          height: _buttonHeight,
-          child: _isLoggingIn
-              ? Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor),
-                  ),
-                )
-              : StadiumButton(
-                  text: 'Log In',
-                  width: _buttonWidth,
-                  height: _buttonHeight,
-                  onPressed: _login),
-        )
+        LoadingStadiumButton(
+            buttonText: 'Register',
+            onPressed: () => Modular.to.navigate(AppRoute.register.path)),
+        SizedBox(width: _spaceBetweenButtons),
+        Text('or'),
+        SizedBox(width: _spaceBetweenButtons),
+        LoadingStadiumButton(buttonText: 'Login', onPressed: _login),
       ],
     );
   }
@@ -128,94 +96,30 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
 
     if (!_validateInputs(usernameOrEmail, password)) {
-      return;
+      if (mounted) {
+        return showTopSnackBar(
+            context, 'Please fill both username and password.', Colors.red);
+      }
     }
 
-    setState(() {
-      _isLoggingIn = true;
-    });
-
-    try {
-      UserCredential userCredential;
-      if (Utility.isValidEmail(usernameOrEmail)) {
-        userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: usernameOrEmail,
-          password: password,
-        );
-      } else {
-        String? email = await _getEmailByUsername(usernameOrEmail);
-        if (email == null) {
-          throw FirebaseAuthException(
-              code: 'user-not-found', message: 'User not found');
-        }
-        userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
+    var errorMessage = await _userService.tryLogin(usernameOrEmail, password);
+    if (errorMessage != null) {
+      if (mounted) {
+        return showTopSnackBar(
+            context, 'Login failed: $errorMessage', Colors.red);
       }
-
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .get();
-
-      if (userDoc.exists) {
-        UserService userService = IocContainer.getIt<UserService>();
-        await userService.setUserProfile(
-            userDoc.data() as Map<String, dynamic>?, userCredential.user!.uid);
-
-        if (context.mounted) {
-          showTopSnackBar(context, 'Login successful.', Colors.green);
-          Modular.to.navigate(AppRoute.home.path);
-        }
-      }
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'An error occurred.';
-
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found with this username or email.';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Incorrect password.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'The email address is badly formatted.';
-      } else {
-        errorMessage = e.message ?? errorMessage;
-      }
-
-      if (context.mounted) {
-        showTopSnackBar(context, errorMessage, Colors.red);
-      }
-      setState(() {
-        _isLoggingIn = false;
-      });
-    } catch (e) {
-      if (context.mounted) {
-        showTopSnackBar(context, 'An unexpected error occurred.', Colors.red);
-      }
-      setState(() {
-        _isLoggingIn = false;
-      });
     }
-  }
 
-  Future<String?> _getEmailByUsername(String username) async {
-    QuerySnapshot query = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: username)
-        .limit(1)
-        .get();
-
-    if (query.docs.isNotEmpty) {
-      return query.docs.first.get('email');
+    if (mounted) {
+      showTopSnackBar(context, 'Login successful.', Colors.green);
+      Modular.to.navigate(AppRoute.home.path);
     }
-    return null;
   }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
-
     super.dispose();
   }
 }

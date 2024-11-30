@@ -1,14 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
+import 'package:household_manager/common/app_state.dart';
+import 'package:household_manager/pages/common/test_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
-import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
-const _mainBoxPadding = 24.0;
 const _pendingSize = 100.0;
 const _pendingIconSize = 80.0;
 const _pendingGapSize = 20.0;
@@ -19,39 +18,29 @@ const _textFontSize = 18.0;
 const _warningBoxPadding = 16.0;
 const _warningBoxRadius = 8.0;
 
-class HouseholdRequestPage extends StatelessWidget {
-  final bool hideAppBar;
+class HouseholdRequestPage extends StatefulWidget {
+  const HouseholdRequestPage({super.key});
 
-  const HouseholdRequestPage({super.key, this.hideAppBar = false});
+  @override
+  State<HouseholdRequestPage> createState() => _HouseholdRequestPageState();
+}
+
+class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
+  final _userService = GetIt.instance<UserService>();
+  final _householdService = GetIt.instance<HouseholdService>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: hideAppBar ? null : _buildAppBar(context),
-      body: Center(
-        child: _buildPendingContent(context),
-      ),
+    return TestPageTemplate(
+      title: 'Household Request',
+      showDrawer: false,
+      showNotifications: false,
+      showLogout: true,
+      bodyFunction: _buildPendingContent,
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: Text('Household Request Status'),
-      automaticallyImplyLeading: false,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: _mainBoxPadding),
-          child: TextButton.icon(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            label: const Text('Logout', style: TextStyle(color: Colors.white)),
-            onPressed: () => logout(context, GetIt.instance<UserService>()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPendingContent(BuildContext context) {
+  Widget _buildPendingContent(BuildContext context, AppState appState) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -112,29 +101,19 @@ class HouseholdRequestPage extends StatelessWidget {
   }
 
   void _cancelRequest(BuildContext context) async {
-    final userService = GetIt.instance<UserService>();
-    final householdService = GetIt.instance<HouseholdService>();
-    String? householdId = userService.userProfile?.requestedId;
-    if (householdId != null) {
-      try {
-        await householdService.cancelHouseholdRequestByCode(householdId);
-        await userService
-            .updateUserProfile({'requestedId': FieldValue.delete()});
-        userService.setUserProfile({
-          ...userService.userProfile!.toMap(),
-          'requestedId': null,
-        }, userService.userProfile!.id);
+    String? householdId = _userService.getUser?.requestedId;
+    if (householdId == null) {
+      return;
+    }
 
-        if (context.mounted) {
-          showTopSnackBar(
-              context, 'Request cancelled successfully.', Colors.green);
-          Modular.to.navigate(AppRoute.chooseHousehold.path);
-        }
-      } catch (e) {
-        if (context.mounted) {
-          showTopSnackBar(context, 'Failed to cancel request: $e', Colors.red);
-        }
+    var errorMessage = await _householdService.cancelHouseholdRequest();
+    if (context.mounted) {
+      if (errorMessage != null) {
+        return showTopSnackBar(context, errorMessage, Colors.red);
       }
+
+      showTopSnackBar(context, 'Request cancelled successfully.', Colors.green);
+      Modular.to.navigate(AppRoute.chooseHousehold.route);
     }
   }
 }

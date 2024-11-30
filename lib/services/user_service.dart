@@ -1,134 +1,129 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:household_manager/models/household.dart';
-import 'package:household_manager/models/profile_info.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:household_manager/models/user.dart';
+import 'package:household_manager/services/database_service.dart';
+import 'package:household_manager/utils/utility.dart';
+import 'package:rxdart/rxdart.dart';
 
 class UserService {
-  ProfileInfo? userProfile;
-  String? _householdId;
+  final _userStream = BehaviorSubject<User?>.seeded(null);
+  final DatabaseService<User> _userRepository;
+  final _fbAuth = fb.FirebaseAuth.instance;
 
-  bool get isLoggedIn => FirebaseAuth.instance.currentUser != null;
+  UserService(this._userRepository);
 
-  String? get householdId => _householdId;
+  Stream<User?> get getUserStream => _userStream.stream;
 
-  Future<void> setUserProfile(Map<String, dynamic>? profile, String uid) async {
-    if (profile != null) {
-      userProfile = ProfileInfo.fromMap(profile, uid);
-      _householdId = userProfile?.householdId;
-    }
+  DocumentReference<User> get getUserDoc =>
+      _userRepository.reference.doc(getUser?.id);
+
+  User? get getUser => _userStream.value;
+
+  get authChangeStream => _fbAuth.authStateChanges();
+
+  bool get isLoggedIn => _fbAuth.currentUser != null;
+
+  void _pushToStream(User? user) {
+    _userStream.value = user;
   }
 
-  Future<void> setUserProfileFromInfo(ProfileInfo profile, String uid) async {
-    await _updateUserProfileInFirestore(profile, uid);
+  Future<User?> fetchUser(String id) async {
+    var user = await _userRepository.getDocument(id);
+    _pushToStream(user);
+    return user;
   }
 
-  Future<void> _updateUserProfileInFirestore(
-      ProfileInfo profile, String uid) async {
-    userProfile = profile;
-    _householdId = profile.householdId;
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .update(profile.toMap());
-  }
-
-  Future<ProfileInfo?> fetchUserProfile() async {
-    if (isLoggedIn) {
-      String uid = FirebaseAuth.instance.currentUser!.uid;
-      await _fetchAndSetUserProfile(uid);
-      return userProfile;
-    } else {
-      _clearUserProfile();
-      return null;
-    }
-  }
-
-  Future<void> _fetchAndSetUserProfile(String uid) async {
-    DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    await setUserProfile(userDoc.data() as Map<String, dynamic>?, uid);
-  }
-
-  Future<Map<String, dynamic>> fetchUserProfileWithHousehold() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      ProfileInfo? profile = await getUserProfile();
-      await fetchUserProfile();
-      return await _fetchHouseholdData(profile);
-    }
-    return {};
-  }
-
-  Future<Map<String, dynamic>> _fetchHouseholdData(ProfileInfo profile) async {
-    DocumentSnapshot householdDoc = await FirebaseFirestore.instance
-        .collection('households')
-        .doc(profile.householdId)
-        .get();
-    Household? household;
-    if (householdDoc.exists) {
-      household =
-          Household.fromJson(householdDoc.data() as Map<String, dynamic>);
-    }
-    return {'profileInfo': profile, 'household': household};
-  }
-
-  Future<void> leaveHousehold() async {
-    if (_householdId != null) {
-      String uid = FirebaseAuth.instance.currentUser!.uid;
-      await _removeUserFromHousehold(uid);
-      _clearUserProfile();
-    }
-  }
-
-  Future<void> _removeUserFromHousehold(String uid) async {
-    if (_householdId == null) return;
-
-    DocumentReference householdRef =
-        FirebaseFirestore.instance.collection('households').doc(_householdId);
-    DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(uid);
-
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      DocumentSnapshot householdSnapshot = await transaction.get(householdRef);
-      if (householdSnapshot.exists) {
-        List<dynamic> members = householdSnapshot.get('members');
-        members.remove(uid);
-        transaction.update(householdRef, {'members': members});
-      }
-      transaction.update(userRef, {'householdId': null});
-    });
-  }
-
-  Future<void> updateUserProfile(Map<String, dynamic> data) async {
-    await fetchUserProfile();
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userProfile!.id)
-          .update(data);
-    } catch (e) {
-      throw Exception('Failed to update user profile: ${e.toString()}');
-    }
-  }
+  // Future<void> leaveHousehold() async {
+  //   if (_householdId != null) {
+  //     String uid = _fbAuth.currentUser!.uid;
+  //     await _removeUserFromHousehold(uid);
+  //     _clearUserProfile();
+  //   }
+  // }
 
   Future<void> logout() async {
-    await FirebaseAuth.instance.signOut();
-    _clearUserProfile();
+    await _fbAuth.signOut();
+    _pushToStream(null);
   }
 
-  void _clearUserProfile() {
-    userProfile = null;
-    _householdId = null;
+  Future<String?> tryLogin(String usernameOrEmail, String password) async {
+    try {
+      var login = Utility.isValidEmail(usernameOrEmail)
+          ? usernameOrEmail
+          : await _getEmailByUsername(usernameOrEmail);
+
+      if (login == null) {
+        return 'User not found.';
+      }
+
+      var userCredential = await _fbAuth.signInWithEmailAndPassword(
+        email: login,
+        password: password,
+      );
+
+      var user = await _userRepository.getDocument(userCredential.user!.uid);
+      _pushToStream(user);
+    } on fb.FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        return 'No user found with this username or email.';
+      } else if (e.code == 'wrong-password') {
+        return 'Incorrect password.';
+      } else if (e.code == 'invalid-email') {
+        return 'The email address is badly formatted.';
+      } else {
+        return e.message ?? 'An unexpected error occurred.';
+      }
+    } catch (e) {
+      return 'An unexpected error occurred.';
+    }
+
+    return null;
   }
 
-  Future<ProfileInfo> getUserProfile() async {
-    if (userProfile == null) {
-      await fetchUserProfile();
+  Future<String?> _getEmailByUsername(String username) async {
+    var query = await _userRepository.reference
+        .where('username', isEqualTo: username)
+        .limit(1)
+        .get();
+
+    if (query.docs.isNotEmpty) {
+      return query.docs.first.get('email');
+    }
+    return null;
+  }
+
+  Future<String?> tryRegister(
+      String username, String name, String email, String password) async {
+    try {
+      var userCredential = await _fbAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      var user = User(
+        id: userCredential.user!.uid,
+        username: username,
+        name: name,
+        email: email,
+        createdAt: Timestamp.now(),
+      );
+
+      await _userRepository.setOrAdd(user.id, user);
+      _pushToStream(user);
+    } on fb.FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        return 'The email is already in use.';
+      } else if (e.code == 'weak-password') {
+        return 'The password is too weak.';
+      } else if (e.code == 'invalid-email') {
+        return 'The email address is badly formatted.';
+      } else {
+        return e.message ?? 'An error occurred.';
+      }
+    } catch (e) {
+      return 'An unexpected error occurred: $e';
     }
 
-    if (userProfile == null) {
-      throw Exception('User profile not found.');
-    }
-    return userProfile!;
+    return null;
   }
 }

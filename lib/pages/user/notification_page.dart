@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/widgets/common/page_template.dart';
+import 'package:household_manager/common/app_state.dart';
+import 'package:household_manager/pages/common/test_page_template.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
-import 'package:household_manager/widgets/notifications/request_notificatiion.dart';
+import 'package:household_manager/widgets/notifications/request_notification.dart';
 import 'package:household_manager/widgets/notifications/todo_notification.dart';
 
 const _cardBottomPadding = 12.0;
@@ -30,13 +31,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     _loadMoreNotifications();
   }
 
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
@@ -52,7 +46,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     // TODO: From here down implement this shit, this delay is here just
     // to know if it works, add something like limit, offset to this and
-    // fetch it by parts to prevent huge trafic between cleitn and server
+    // fetch it by parts to prevent huge traffic between client and server
     // so lets say it is some kind of mix of pagination and infinite scroll
     await Future.delayed(Duration(seconds: 2));
 
@@ -71,19 +65,24 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
+    return TestPageTemplate(
       title: 'Notifications',
-      child: ListView.builder(
-        controller: _scrollController,
-        padding: EdgeInsets.all(_cardInnerPadding),
-        itemCount: notifications.length + (_isLoading ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == notifications.length) {
-            return Center(child: CircularProgressIndicator());
-          }
-          return _buildNotificationCard(context, notifications[index]);
-        },
-      ),
+      showDrawer: false,
+      bodyFunction: _buildBody,
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AppState appState) {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: EdgeInsets.all(_cardInnerPadding),
+      itemCount: notifications.length + (_isLoading ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == notifications.length) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return _buildNotificationCard(context, notifications[index]);
+      },
     );
   }
 
@@ -107,5 +106,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
   }
 }
