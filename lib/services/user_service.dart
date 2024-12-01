@@ -33,14 +33,6 @@ class UserService {
     return user;
   }
 
-  // Future<void> leaveHousehold() async {
-  //   if (_householdId != null) {
-  //     String uid = _fbAuth.currentUser!.uid;
-  //     await _removeUserFromHousehold(uid);
-  //     _clearUserProfile();
-  //   }
-  // }
-
   Future<void> logout() async {
     await _fbAuth.signOut();
     _pushToStream(null);

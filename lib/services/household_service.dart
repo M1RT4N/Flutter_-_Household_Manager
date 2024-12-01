@@ -26,6 +26,15 @@ class HouseholdService {
     _householdStream.value = household;
   }
 
+  Future<Household?> _fetchHouseholdByCode(String code) async {
+    final repo = await _householdRepository.reference
+        .where('code', isEqualTo: code)
+        .limit(1)
+        .get();
+    final householdId = repo.docs.first.data().id;
+    return fetchHousehold(householdId);
+  }
+
   Future<Household?> fetchHousehold(String id) async {
     var household = await _householdRepository.getDocument(id);
     _pushToSteam(household);
@@ -33,22 +42,22 @@ class HouseholdService {
   }
 
   Future<String?> createHouseholdRequest(String code) async {
-    var householdByCode = await _getHouseholdByCode(code);
+    var householdByCode = await _fetchHouseholdByCode(code);
 
-    if (householdByCode.docs.isEmpty) {
+    if (householdByCode == null) {
       return 'Invalid household code.';
     }
 
-    var user = _userService.getUser!;
-    var householdDoc = householdByCode.docs.first;
-    var household = householdDoc.data();
+    final user = _userService.getUser!;
+    final householdDoc = _householdRepository.reference.doc(householdByCode.id);
+    final household = getHousehold!;
 
-    household =
+    final newHousehold =
         household.copyWith(requested: household.requested..add(user.id));
-    user = user.copyWith(requestedId: household.id);
+    final newUser = user.copyWith(requestedId: household.id);
 
     return await _householdRequestTransaction(
-        householdDoc.reference, household, user);
+        householdDoc, newHousehold, newUser);
   }
 
   Future<String?> _householdRequestTransaction(
@@ -56,74 +65,57 @@ class HouseholdService {
       Household newHousehold,
       User newUser) async {
     try {
-      await FirebaseFirestore.instance.runTransaction((tx) async {
-        tx.set(householdDocRef, newHousehold.toJson());
-        tx.update(_userService.getUserDoc, newUser.toJson());
-      });
+      await _householdRepository.setOrAdd(newHousehold.id, newHousehold);
+      await _userService.getUserDoc.update(newUser.toJson());
     } catch (e) {
       return e.toString();
     }
     return null;
   }
 
-  Future<QuerySnapshot<Household>> _getHouseholdByCode(String code) {
-    return _householdRepository.reference
-        .where('code', isEqualTo: code)
-        .limit(1)
-        .get();
-  }
-
   Future<String?> cancelHouseholdRequest() async {
     var user = _userService.getUser!;
-    var householdByCode = await _getHouseholdByCode(user.requestedId!);
+    final household = getHousehold!;
+    final householdDoc = _householdRepository.reference.doc(household.id);
 
-    if (householdByCode.docs.isEmpty) {
-      return 'Invalid household code';
-    }
-
-    var householdDoc = householdByCode.docs.first;
-    var household = householdDoc.data();
-
-    household =
+    final newHousehold =
         household.copyWith(requested: household.requested..remove(user.id));
     user = user..copyWith(requestedId: null);
 
-    return await _householdRequestTransaction(
-        householdDoc.reference, household, user);
+    return await _householdRequestTransaction(householdDoc, newHousehold, user);
   }
 
   Future<String?> tryLeaveHousehold() async {
     try {
-      var snapshot = await _getHouseholdByCode(getHousehold!.code);
-      if (snapshot.docs.isEmpty) {
-        return 'Household not found.';
-      }
-
       var user = _userService.getUser!;
-      user = user.copyWith(householdId: null);
-      var householdDoc = snapshot.docs.first;
-      var household = householdDoc.data();
+      final newUser = user.copyWith(householdId: '-1');
+      var household = getHousehold!;
+      var householdDoc = _householdRepository.reference.doc(household.id);
       household =
           household.copyWith(members: household.members..remove(user.id));
-      return _householdRequestTransaction(
-          householdDoc.reference, household, user);
+      return _householdRequestTransaction(householdDoc, household, newUser);
     } catch (e) {
       return e.toString();
     }
   }
 
   Future<String?> tryCreateHousehold(String householdName) async {
-    var user = _userService.getUser!;
-    var household = Household(
-        id: Utility.generateRandomCode(_householdIdLength),
-        name: householdName,
-        code: Utility.generateRandomCode(_codeLength),
-        members: [user.id],
-        requested: [],
-        createdAt: Timestamp.now());
-    var householdDoc = _householdRepository.reference.doc(household.id);
-    user = user..copyWith(householdId: household.id);
+    try {
+      final user = _userService.getUser!;
+      final household = Household(
+          id: Utility.generateRandomCode(_householdIdLength),
+          name: householdName,
+          code: Utility.generateRandomCode(_codeLength),
+          members: [user.id],
+          requested: [],
+          createdAt: Timestamp.now());
+      final householdDoc = _householdRepository.reference.doc(household.id);
+      final newUser = user.copyWith(householdId: household.id);
 
-    return await _householdRequestTransaction(householdDoc, household, user);
+      return await _householdRequestTransaction(
+          householdDoc, household, newUser);
+    } catch (e) {
+      return e.toString();
+    }
   }
 }

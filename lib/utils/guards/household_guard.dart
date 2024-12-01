@@ -12,15 +12,20 @@ class HouseholdGuard extends RouteGuard {
 
   @override
   Future<bool> canActivate(String path, ModularRoute route) async {
+    final user = _userService.getUser;
+    if (user == null) {
+      return false;
+    }
+
     if (_householdService.getHousehold != null) {
       return true;
     }
 
-    var user = _userService.getUser!;
     if (user.requestedId != null || user.householdId == null) {
       return false;
     }
 
-    return await _householdService.fetchHousehold(user.householdId!) != null;
+    final household = await _householdService.fetchHousehold(user.householdId!);
+    return household != null;
   }
 }

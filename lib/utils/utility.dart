@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'dart:math';
 
 class Utility {
   static bool isValidEmail(String email) {
@@ -9,10 +10,9 @@ class Utility {
 
   static String generateRandomCode(int length) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return List.generate(
-        length,
-        (index) => chars[(DateTime.now().millisecondsSinceEpoch + index) %
-            chars.length]).join();
+    final random = Random.secure();
+    return List.generate(length, (index) => chars[random.nextInt(chars.length)])
+        .join();
   }
 
   static String getUserInitials(String? name) {
