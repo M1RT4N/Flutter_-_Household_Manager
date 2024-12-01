@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:household_manager/common/app_state.dart';
-import 'package:household_manager/pages/common/test_page_template.dart';
+import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notification.dart';
 import 'package:household_manager/widgets/notifications/todo_notification.dart';
@@ -65,7 +65,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return TestPageTemplate(
+    return PageTemplate(
       title: 'Notifications',
       showDrawer: false,
       bodyFunction: _buildBody,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/app_state.dart';
-import 'package:household_manager/pages/common/test_page_template.dart';
+import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
@@ -31,7 +31,7 @@ class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
 
   @override
   Widget build(BuildContext context) {
-    return TestPageTemplate(
+    return PageTemplate(
       title: 'Household Request',
       showDrawer: false,
       showNotifications: false,

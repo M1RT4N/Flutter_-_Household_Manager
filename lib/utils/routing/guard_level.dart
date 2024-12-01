@@ -1,5 +1,1 @@
-enum GuardLevel {
-  none,
-  userFetched,
-  householdFetched,
-}
+enum GuardLevel { none, userFetched, householdFetched, pendingRequest }

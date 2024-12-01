@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/common/app_state.dart';
-import 'package:household_manager/pages/common/test_page_template.dart';
+import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/household_button.dart';
 
@@ -12,7 +12,7 @@ class ChooseHouseholdPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TestPageTemplate(
+    return PageTemplate(
       title: 'Choose Household',
       showDrawer: false,
       showLogout: true,

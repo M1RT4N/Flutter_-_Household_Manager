@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/app_state.dart';
+import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/utils/loading_stream_builder.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
@@ -23,7 +23,7 @@ const _appBarNotificationBorderRadius = 6.0;
 const _appBarNotificationPadding = 12.0;
 const _appBarNotificationInnerPadding = 2.0;
 
-class TestPageTemplate extends StatelessWidget {
+class PageTemplate extends StatelessWidget {
   final String title;
   final Widget Function(BuildContext, AppState) bodyFunction;
   final bool showDrawer;
@@ -31,7 +31,7 @@ class TestPageTemplate extends StatelessWidget {
   final bool showLogout;
   final bool showNotifications;
 
-  const TestPageTemplate({
+  const PageTemplate({
     super.key,
     required this.title,
     required this.bodyFunction,
@@ -171,12 +171,12 @@ class TestPageTemplate extends StatelessWidget {
   }
 
   void _logout(BuildContext context) async {
-    final userService = GetIt.instance<UserService>();
+    final householdService = GetIt.instance<HouseholdService>();
     await _handleActionWithConfirmation(
       context: context,
       title: 'Confirm Logout',
       message: 'Are you sure you want to logout?',
-      action: () async => await userService.logout(),
+      action: () async => await householdService.logout(),
       successMessage: 'Logged out successfully.',
       navigateTo: AppRoute.login.path,
     );

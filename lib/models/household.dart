@@ -24,9 +24,9 @@ class Household {
     required this.createdAt,
   });
 
-  factory Household.fromJson(Map<String, dynamic> json) =>
+  factory Household.fromJson(Map<String, Object?> json) =>
       _$HouseholdFromJson(json);
-  Map<String, dynamic> toJson() => _$HouseholdToJson(this);
+  Map<String, Object?> toJson() => _$HouseholdToJson(this);
 
   Household copyWith({
     String? id,

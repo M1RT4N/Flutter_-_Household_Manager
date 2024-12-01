@@ -28,7 +28,7 @@ class UserService {
   }
 
   Future<User?> fetchUser(String id) async {
-    var user = await _userRepository.getDocument(id);
+    final user = await _userRepository.getDocument(id);
     _pushToStream(user);
     return user;
   }
@@ -40,7 +40,7 @@ class UserService {
 
   Future<String?> tryLogin(String usernameOrEmail, String password) async {
     try {
-      var login = Utility.isValidEmail(usernameOrEmail)
+      final login = Utility.isValidEmail(usernameOrEmail)
           ? usernameOrEmail
           : await _getEmailByUsername(usernameOrEmail);
 
@@ -48,12 +48,12 @@ class UserService {
         return 'User not found.';
       }
 
-      var userCredential = await _fbAuth.signInWithEmailAndPassword(
+      final userCredential = await _fbAuth.signInWithEmailAndPassword(
         email: login,
         password: password,
       );
 
-      var user = await _userRepository.getDocument(userCredential.user!.uid);
+      final user = await _userRepository.getDocument(userCredential.user!.uid);
       _pushToStream(user);
     } on fb.FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -73,7 +73,7 @@ class UserService {
   }
 
   Future<String?> _getEmailByUsername(String username) async {
-    var query = await _userRepository.reference
+    final query = await _userRepository.reference
         .where('username', isEqualTo: username)
         .limit(1)
         .get();
@@ -87,12 +87,12 @@ class UserService {
   Future<String?> tryRegister(
       String username, String name, String email, String password) async {
     try {
-      var userCredential = await _fbAuth.createUserWithEmailAndPassword(
+      final userCredential = await _fbAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      var user = User(
+      final user = User(
         id: userCredential.user!.uid,
         username: username,
         name: name,
@@ -100,8 +100,7 @@ class UserService {
         createdAt: Timestamp.now(),
       );
 
-      await _userRepository.setOrAdd(user.id, user);
-      _pushToStream(user);
+      await setUser(user);
     } on fb.FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         return 'The email is already in use.';
@@ -117,5 +116,10 @@ class UserService {
     }
 
     return null;
+  }
+
+  Future<void> setUser(User newUser) async {
+    await _userRepository.setOrAdd(newUser.id, newUser);
+    _pushToStream(newUser);
   }
 }

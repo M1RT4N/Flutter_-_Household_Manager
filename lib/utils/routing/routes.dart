@@ -16,6 +16,7 @@ import 'package:household_manager/pages/todo/todos_page.dart';
 import 'package:household_manager/pages/user/notification_page.dart';
 import 'package:household_manager/pages/user/profile_page.dart';
 import 'package:household_manager/utils/guards/household_guard.dart';
+import 'package:household_manager/utils/guards/request_guard.dart';
 import 'package:household_manager/utils/guards/user_guard.dart';
 import 'package:household_manager/utils/routing/guard_level.dart';
 
@@ -28,7 +29,7 @@ enum AppRoute {
   login('/login', LoginPage(), guardLevel: GuardLevel.none),
   home('/home', HomePage()),
   chooseHousehold('/choose_household', ChooseHouseholdPage(),
-      guardLevel: GuardLevel.userFetched),
+      guardLevel: GuardLevel.pendingRequest),
   householdRequest('/household_request', HouseholdRequestPage(),
       guardLevel: GuardLevel.userFetched),
   joinHousehold('/join_household', JoinHouseholdPage(),
@@ -56,6 +57,8 @@ enum AppRoute {
         return [UserGuard()];
       case GuardLevel.householdFetched:
         return [UserGuard(), HouseholdGuard()];
+      case GuardLevel.pendingRequest:
+        return [UserGuard(), RequestGuard()];
       default:
         return [];
     }

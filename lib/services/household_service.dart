@@ -36,13 +36,13 @@ class HouseholdService {
   }
 
   Future<Household?> fetchHousehold(String id) async {
-    var household = await _householdRepository.getDocument(id);
+    final household = await _householdRepository.getDocument(id);
     _pushToSteam(household);
     return household;
   }
 
   Future<String?> createHouseholdRequest(String code) async {
-    var householdByCode = await _fetchHouseholdByCode(code);
+    final householdByCode = await _fetchHouseholdByCode(code);
 
     if (householdByCode == null) {
       return 'Invalid household code.';
@@ -65,8 +65,8 @@ class HouseholdService {
       Household newHousehold,
       User newUser) async {
     try {
-      await _householdRepository.setOrAdd(newHousehold.id, newHousehold);
-      await _userService.getUserDoc.update(newUser.toJson());
+      await setHousehold(newHousehold);
+      await _userService.setUser(newUser);
     } catch (e) {
       return e.toString();
     }
@@ -74,26 +74,27 @@ class HouseholdService {
   }
 
   Future<String?> cancelHouseholdRequest() async {
-    var user = _userService.getUser!;
-    final household = getHousehold!;
-    final householdDoc = _householdRepository.reference.doc(household.id);
+    final user = _userService.getUser!;
+    final household = await _householdRepository.getDocument(user.requestedId!);
+    final householdDoc = _householdRepository.reference.doc(household!.id);
 
     final newHousehold =
         household.copyWith(requested: household.requested..remove(user.id));
-    user = user..copyWith(requestedId: null);
+    final newUser = user.copyWith(requestedId: '');
 
-    return await _householdRequestTransaction(householdDoc, newHousehold, user);
+    return await _householdRequestTransaction(
+        householdDoc, newHousehold, newUser);
   }
 
   Future<String?> tryLeaveHousehold() async {
     try {
-      var user = _userService.getUser!;
-      final newUser = user.copyWith(householdId: '-1');
-      var household = getHousehold!;
-      var householdDoc = _householdRepository.reference.doc(household.id);
-      household =
+      final user = _userService.getUser!;
+      final newUser = user.copyWith(householdId: '');
+      final household = getHousehold!;
+      final householdDoc = _householdRepository.reference.doc(household.id);
+      final newHousehold =
           household.copyWith(members: household.members..remove(user.id));
-      return _householdRequestTransaction(householdDoc, household, newUser);
+      return _householdRequestTransaction(householdDoc, newHousehold, newUser);
     } catch (e) {
       return e.toString();
     }
@@ -103,12 +104,13 @@ class HouseholdService {
     try {
       final user = _userService.getUser!;
       final household = Household(
-          id: Utility.generateRandomCode(_householdIdLength),
-          name: householdName,
-          code: Utility.generateRandomCode(_codeLength),
-          members: [user.id],
-          requested: [],
-          createdAt: Timestamp.now());
+        id: Utility.generateRandomCode(_householdIdLength),
+        name: householdName,
+        code: Utility.generateRandomCode(_codeLength),
+        members: [user.id],
+        requested: [],
+        createdAt: Timestamp.now(),
+      );
       final householdDoc = _householdRepository.reference.doc(household.id);
       final newUser = user.copyWith(householdId: household.id);
 
@@ -117,5 +119,15 @@ class HouseholdService {
     } catch (e) {
       return e.toString();
     }
+  }
+
+  Future<void> logout() async {
+    await _userService.logout();
+    _pushToSteam(null);
+  }
+
+  Future<void> setHousehold(Household household) async {
+    await _householdRepository.setOrAdd(household.id, household);
+    _pushToSteam(household);
   }
 }
