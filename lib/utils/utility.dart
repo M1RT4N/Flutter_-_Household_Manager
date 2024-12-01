@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'dart:math';
 
 class Utility {
   static bool isValidEmail(String email) {
@@ -42,6 +45,41 @@ class Utility {
         ],
       ),
     );
+  }
+
+  static Future<void> handleActionWithConfirmation({
+    required BuildContext context,
+    required String title,
+    required String message,
+    required Future<void> Function() action,
+    String successMessage = '',
+    String? errorMessage,
+    String? navigateTo,
+  }) async {
+    final confirm = await Utility.showConfirmationDialog(
+      context,
+      title,
+      message,
+    );
+
+    if (confirm == true) {
+      try {
+        await action();
+
+        if (context.mounted) {
+          if (successMessage.isNotEmpty) {
+            showTopSnackBar(context, successMessage, Colors.green);
+          }
+          if (navigateTo != null) {
+            Modular.to.navigate(navigateTo);
+          }
+        }
+      } catch (e) {
+        if (context.mounted && errorMessage != null) {
+          showTopSnackBar(context, '$errorMessage: $e', Colors.red);
+        }
+      }
+    }
   }
 }
 

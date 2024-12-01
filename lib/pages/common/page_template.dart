@@ -4,14 +4,15 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/app_state.dart';
 import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/app_drawer.dart';
 import 'package:household_manager/widgets/loading_screen.dart';
-import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -43,13 +44,14 @@ class PageTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final householdService = GetIt.instance<HouseholdService>();
-    final userService = GetIt.instance<UserService>();
-    var appStateStream = Rx.combineLatest2<User?, Household?, AppState>(
-        userService.getUserStream,
-        householdService.getHouseholdStream,
-        (User? user, Household? household) =>
-            AppState(user: user, household: household));
+    final appStateStream =
+        Rx.combineLatest3<User?, Household?, List<Todo>, AppState>(
+      GetIt.instance<UserService>().getUserStream,
+      GetIt.instance<HouseholdService>().getHouseholdStream,
+      GetIt.instance<TodoService>().getTodoStream,
+      (User? user, Household? household, List<Todo> todos) =>
+          AppState(user: user, household: household, todos: todos),
+    );
 
     return LoadingStreamBuilder<AppState>(
       stream: appStateStream,
@@ -60,7 +62,6 @@ class PageTemplate extends StatelessWidget {
             drawer: showDrawer
                 ? AppDrawer(
                     logoutFunc: _logout,
-                    leaveHouseholdFunc: _leaveHousehold,
                   )
                 : null,
             body: bodyFunction(context, appState));
@@ -80,6 +81,8 @@ class PageTemplate extends StatelessWidget {
           : null,
       actions: [
         SizedBox(width: _initialsRightPadding),
+        if (showNotifications) _buildNotificationIcon(),
+        SizedBox(width: _initialsRightPadding),
         UserAvatar(
           name: appState.user?.name,
           onPressed: () => Modular.to.pushNamed(AppRoute.profile.path),
@@ -90,8 +93,6 @@ class PageTemplate extends StatelessWidget {
             onPressed: () => _logout(context),
           ),
         ],
-        if (showNotifications) _buildNotificationIcon(),
-        SizedBox(width: _initialsRightPadding),
       ],
     );
   }
@@ -135,71 +136,15 @@ class PageTemplate extends StatelessWidget {
     );
   }
 
-  Future<void> _handleActionWithConfirmation({
-    required BuildContext context,
-    required String title,
-    required String message,
-    required Future<void> Function() action,
-    String successMessage = '',
-    String? errorMessage,
-    String? navigateTo,
-  }) async {
-    final confirm = await Utility.showConfirmationDialog(
-      context,
-      title,
-      message,
-    );
-
-    if (confirm == true) {
-      try {
-        await action();
-
-        if (context.mounted) {
-          if (successMessage.isNotEmpty) {
-            showTopSnackBar(context, successMessage, Colors.green);
-          }
-          if (navigateTo != null) {
-            Modular.to.navigate(navigateTo);
-          }
-        }
-      } catch (e) {
-        if (context.mounted && errorMessage != null) {
-          showTopSnackBar(context, '$errorMessage: $e', Colors.red);
-        }
-      }
-    }
-  }
-
   void _logout(BuildContext context) async {
     final householdService = GetIt.instance<HouseholdService>();
-    await _handleActionWithConfirmation(
+    await Utility.handleActionWithConfirmation(
       context: context,
       title: 'Confirm Logout',
       message: 'Are you sure you want to logout?',
       action: () async => await householdService.logout(),
       successMessage: 'Logged out successfully.',
       navigateTo: AppRoute.login.path,
-    );
-  }
-
-  void _leaveHousehold(BuildContext context) async {
-    final userService = GetIt.instance<UserService>();
-    final householdService = GetIt.instance<HouseholdService>();
-    await _handleActionWithConfirmation(
-      context: context,
-      title: 'Confirm Leave Household',
-      message: 'Are you sure you want to leave the household?',
-      action: () async {
-        if (userService.getUser?.householdId != null) {
-          final errorMessage = await householdService.tryLeaveHousehold();
-          if (errorMessage != null) {
-            throw Exception(errorMessage);
-          }
-        }
-      },
-      successMessage: 'Household left.',
-      errorMessage: 'Failed to leave household',
-      navigateTo: AppRoute.chooseHousehold.route,
     );
   }
 

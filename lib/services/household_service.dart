@@ -14,11 +14,11 @@ class HouseholdService {
   final DatabaseService<Household> _householdRepository;
   final UserService _userService;
 
+  HouseholdService(this._householdRepository, this._userService);
+
   Stream<Household?> get getHouseholdStream => _householdStream.stream;
 
   Household? get getHousehold => _householdStream.value;
-
-  HouseholdService(this._householdRepository, this._userService);
 
   int get codeLength => _codeLength;
 

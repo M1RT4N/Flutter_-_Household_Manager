@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable(explicitToJson: true, includeIfNull: false)
+@JsonSerializable(explicitToJson: true, includeIfNull: true)
 class User {
   final String id;
   final String username;
@@ -12,7 +12,6 @@ class User {
   final String name;
   final String? householdId;
   final String? requestedId;
-
   @TimestampConverter()
   final Timestamp createdAt;
 

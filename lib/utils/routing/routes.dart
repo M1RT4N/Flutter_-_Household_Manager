@@ -3,8 +3,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/pages/auth/login_page.dart';
 import 'package:household_manager/pages/auth/register_page.dart';
 import 'package:household_manager/pages/household/home_page.dart';
-import 'package:household_manager/pages/household/members_page.dart';
-import 'package:household_manager/pages/household/settings.dart';
+import 'package:household_manager/pages/household/household_page.dart';
 import 'package:household_manager/pages/household/statistics_page.dart';
 import 'package:household_manager/pages/household_wizard/choose_household_page.dart';
 import 'package:household_manager/pages/household_wizard/create_household_page.dart';
@@ -39,10 +38,9 @@ enum AppRoute {
   notifications('/notifications', NotificationsPage()),
   profile('/profile', ProfilePage(), guardLevel: GuardLevel.userFetched),
   statistics('/statistics', StatisticsPage()),
-  members('/members', MembersPage()),
+  household('/household', HouseholdPage()),
   createTodo('/create-todo', CreateTodoPage()),
-  todos('/todos', TodosPage()),
-  settings('/settings', SettingsPage());
+  todos('/todos', TodosPage());
 
   final String path;
   final Widget pageType;

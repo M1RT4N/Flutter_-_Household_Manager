@@ -22,7 +22,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'username': instance.username,
       'email': instance.email,
       'name': instance.name,
-      if (instance.householdId != null) 'householdId': instance.householdId,
-      if (instance.requestedId != null) 'requestedId': instance.requestedId,
+      'householdId': instance.householdId,
+      'requestedId': instance.requestedId,
       'createdAt': const TimestampConverter().toJson(instance.createdAt),
     };
