@@ -16,7 +16,13 @@ class HouseholdService {
 
   HouseholdService(this._householdRepository, this._userService);
 
-  Stream<Household?> get getHouseholdStream => _householdStream.stream;
+  Stream<Household?> get getHouseholdStream {
+    final id = _userService.getUser!.householdId;
+    if (id == null) {
+      return Stream<Household?>.value(null);
+    }
+    return _householdRepository.observeDocument(id);
+  }
 
   Household? get getHousehold => _householdStream.value;
 

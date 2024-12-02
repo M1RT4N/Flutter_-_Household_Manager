@@ -38,7 +38,7 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(20),
-        // constraints: BoxConstraints(maxWidth: 500),
+        constraints: BoxConstraints(maxWidth: 500),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

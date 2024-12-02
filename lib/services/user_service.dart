@@ -12,7 +12,10 @@ class UserService {
 
   UserService(this._userRepository);
 
-  Stream<User?> get getUserStream => _userStream.stream;
+  Stream<User?> get getUserStream {
+    final uid = _fbAuth.currentUser!.uid;
+    return _userRepository.observeDocument(uid);
+  }
 
   DocumentReference<User> get getUserDoc =>
       _userRepository.reference.doc(getUser?.id);

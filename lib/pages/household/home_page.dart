@@ -5,10 +5,16 @@ import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
 const _topNBeforeDeadline = 5;
-const _sectionPadding = 10.0;
-const _sectionMarginVer = 1.0;
-const _sectionMarginHor = 8.0;
 const _sectionBubbleRadius = 8.0;
+const _sectionTitleStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 18,
+);
+const _sectionPadding = EdgeInsets.symmetric(vertical: 8, horizontal: 0);
+const _sectionMargin = EdgeInsets.symmetric(
+  vertical: 2,
+  horizontal: 12,
+);
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -25,8 +31,7 @@ class HomePage extends StatelessWidget {
     final top5BeforeDeadline = _getTopNBeforeDeadline(appState.todos);
     final pastDeadline = _getPassedDeadline(appState.todos);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+    return ListView(
       children: [
         ..._buildSection(
             top5BeforeDeadline,
@@ -49,11 +54,8 @@ class HomePage extends StatelessWidget {
     return [
       Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(_sectionPadding),
-        margin: const EdgeInsets.symmetric(
-          vertical: _sectionMarginVer,
-          horizontal: _sectionMarginHor,
-        ),
+        padding: _sectionPadding,
+        margin: _sectionMargin,
         decoration: BoxDecoration(
           color: titleColor,
           borderRadius: BorderRadius.all(Radius.circular(_sectionBubbleRadius)),
@@ -63,7 +65,7 @@ class HomePage extends StatelessWidget {
           children: [
             Text(
               sectionTitle,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: _sectionTitleStyle,
             ),
             ...todos.map((todo) => TodoTile(todo: todo)),
           ],

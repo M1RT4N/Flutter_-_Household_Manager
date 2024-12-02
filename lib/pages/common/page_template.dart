@@ -81,6 +81,7 @@ class PageTemplate extends StatelessWidget {
           SizedBox(width: _initialsRightPadding),
           _buildNotificationIcon(),
         ],
+        SizedBox(width: _initialsRightPadding),
         UserAvatar(
           name: appState.user?.name,
           onPressed: () => Modular.to.pushNamed(AppRoute.profile.path),
@@ -105,7 +106,7 @@ class PageTemplate extends StatelessWidget {
           child: IconButton(
             icon: Icon(Icons.notifications),
             onPressed: () {
-              Modular.to.navigate(AppRoute.notifications.path);
+              Modular.to.pushNamed(AppRoute.notifications.path);
             },
           ),
         ),

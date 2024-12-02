@@ -68,6 +68,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return PageTemplate(
       title: 'Notifications',
       showDrawer: false,
+      showBackArrow: true,
       bodyFunction: _buildBody,
     );
   }
