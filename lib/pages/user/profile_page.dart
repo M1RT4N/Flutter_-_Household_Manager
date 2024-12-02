@@ -8,7 +8,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
-      title: 'ProfilePage',
+      title: 'Your Profile',
       bodyFunction: _buildBody,
       showDrawer: false,
       showBackArrow: true,
@@ -18,7 +18,15 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, AppState appState) {
     return Center(
-      child: Text('ProfilePage'),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Name: ${appState.user!.name}'),
+          Text('Username: ${appState.user!.username}'),
+          Text('Email: ${appState.user!.email}'),
+          Text('Household: ${appState.user!.householdId}'),
+        ],
+      ),
     );
   }
 }
