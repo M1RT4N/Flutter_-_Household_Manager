@@ -3,7 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/theme_controller.dart';
 
 class ThemeFlipper extends StatelessWidget {
-  const ThemeFlipper({Key? key}) : super(key: key);
+  const ThemeFlipper({super.key});
 
   @override
   Widget build(BuildContext context) {

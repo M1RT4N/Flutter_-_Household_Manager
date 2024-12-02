@@ -58,13 +58,10 @@ class PageTemplate extends StatelessWidget {
       noDataWidget: LoadingScreen(),
       builder: (_, appState) {
         return Scaffold(
-            appBar: _buildAppBar(context, appState),
-            drawer: showDrawer
-                ? AppDrawer(
-                    logoutFunc: _logout,
-                  )
-                : null,
-            body: bodyFunction(context, appState));
+          appBar: _buildAppBar(context, appState),
+          drawer: showDrawer ? AppDrawer(logoutFunc: _logout) : null,
+          body: bodyFunction(context, appState),
+        );
       },
     );
   }
@@ -80,19 +77,22 @@ class PageTemplate extends StatelessWidget {
             )
           : null,
       actions: [
-        SizedBox(width: _initialsRightPadding),
-        if (showNotifications) _buildNotificationIcon(),
-        SizedBox(width: _initialsRightPadding),
+        if (showNotifications) ...[
+          SizedBox(width: _initialsRightPadding),
+          _buildNotificationIcon(),
+        ],
         UserAvatar(
           name: appState.user?.name,
           onPressed: () => Modular.to.pushNamed(AppRoute.profile.path),
         ),
         if (showLogout) ...[
+          SizedBox(width: _initialsRightPadding),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () => _logout(context),
           ),
         ],
+        SizedBox(width: _initialsRightPadding),
       ],
     );
   }

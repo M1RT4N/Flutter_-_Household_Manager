@@ -7,11 +7,10 @@ class DrawerItem extends StatelessWidget {
   final String nextPageRoute;
 
   const DrawerItem(
-      {Key? key,
+      {super.key,
       required this.title,
       required this.icon,
-      required this.nextPageRoute})
-      : super(key: key);
+      required this.nextPageRoute});
 
   @override
   Widget build(BuildContext context) {

@@ -7,12 +7,12 @@ class FormTextField extends StatelessWidget {
   final IconData icon;
 
   const FormTextField({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.controller,
     this.obscureText = false,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

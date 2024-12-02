@@ -6,9 +6,9 @@ import 'package:household_manager/common/app_state.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
-import 'package:intl/intl.dart';
 
 class CreateTodoPage extends StatefulWidget {
   const CreateTodoPage({super.key});
@@ -80,8 +80,11 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
         firstDate: DateTime.now(),
         lastDate: DateTime.fromMicrosecondsSinceEpoch(8640000000000000));
 
-    _dateController.text =
-        pickedDate == null ? '' : DateFormat('dd-MM-yyyy').format(pickedDate);
+    if (pickedDate != null) {
+      _dateController.text = Utility.formatDate(pickedDate);
+    } else {
+      _dateController.clear();
+    }
   }
 
   void _create() async {
@@ -90,10 +93,9 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
       return showTopSnackBar(context, errorMessage, Colors.red);
     }
 
-    final deadline = DateFormat("dd-MM-yyyy").parse(_dateController.text);
     await _todoService.create(
       _createdForController.text,
-      Timestamp.fromDate(deadline),
+      Timestamp.fromDate(Utility.parseDate(_dateController.text)),
       _descriptionController.text,
     );
 

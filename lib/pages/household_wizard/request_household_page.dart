@@ -17,6 +17,7 @@ const _cancelButtonFontSize = 16.0;
 const _textFontSize = 18.0;
 const _warningBoxPadding = 16.0;
 const _warningBoxRadius = 8.0;
+const _animationDelay = 0.5;
 
 class HouseholdRequestPage extends StatefulWidget {
   const HouseholdRequestPage({super.key});
@@ -41,26 +42,28 @@ class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
   }
 
   Widget _buildPendingContent(BuildContext context, AppState appState) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: _pendingSize,
-          height: _pendingSize,
-          child: RotationTransition(
-            turns: AlwaysStoppedAnimation(0.5),
-            child: Icon(
-              Icons.sync,
-              size: _pendingIconSize,
-              color: Colors.blue,
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: _pendingSize,
+            height: _pendingSize,
+            child: RotationTransition(
+              turns: AlwaysStoppedAnimation(_animationDelay),
+              child: Icon(
+                Icons.sync,
+                size: _pendingIconSize,
+                color: Colors.blue,
+              ),
             ),
           ),
-        ),
-        SizedBox(height: _pendingGapSize),
-        _buildWarningBox(),
-        SizedBox(height: _pendingGapSize),
-        _buildCancelButton(context),
-      ],
+          SizedBox(height: _pendingGapSize),
+          _buildWarningBox(),
+          SizedBox(height: _pendingGapSize),
+          _buildCancelButton(context),
+        ],
+      ),
     );
   }
 

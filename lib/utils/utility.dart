@@ -4,7 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
+import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+const _dateFormat = 'dd.MM.yyyy';
 
 class Utility {
   static bool isValidEmail(String email) {
@@ -80,6 +83,14 @@ class Utility {
         }
       }
     }
+  }
+
+  static String formatDate(DateTime dateTime) {
+    return DateFormat(_dateFormat).format(dateTime);
+  }
+
+  static DateTime parseDate(String data) {
+    return DateFormat(_dateFormat).parse(data);
   }
 }
 
