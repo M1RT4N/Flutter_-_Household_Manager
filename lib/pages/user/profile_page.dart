@@ -80,7 +80,7 @@ class ProfilePage extends StatelessWidget {
             ),
             InfoField(
               labelText: 'Household',
-              mainText: user.householdId!,
+              mainText: user.householdId ?? '',
             ),
           ],
         ),
