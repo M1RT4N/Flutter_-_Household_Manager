@@ -30,8 +30,12 @@ class UserService {
     _userStream.value = user;
   }
 
+  Future<User?> getById(String id) {
+    return _userRepository.getDocument(id);
+  }
+
   Future<User?> fetchUser(String id) async {
-    final user = await _userRepository.getDocument(id);
+    final user = await getById(id);
     _pushToStream(user);
     return user;
   }
@@ -121,8 +125,12 @@ class UserService {
     return null;
   }
 
+  Future<void> updateUser(User newUser) async {
+    _userRepository.setOrAdd(newUser.id, newUser);
+  }
+
   Future<void> setUser(User newUser) async {
-    await _userRepository.setOrAdd(newUser.id, newUser);
+    await updateUser(newUser);
     _pushToStream(newUser);
   }
 }
