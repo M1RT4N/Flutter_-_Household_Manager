@@ -16,13 +16,15 @@ import 'package:household_manager/widgets/loading_screen.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 import 'package:rxdart/rxdart.dart';
 
-const _initialsRightPadding = 16.0;
+const _appBarGap = SizedBox(width: 16);
 const _appBarNotificationIconPadding = 10.0;
 const _appBarNotificationCountBubbleSize = 14.0;
 const _appBarNotificationCountSize = 10.0;
 const _appBarNotificationBorderRadius = 6.0;
 const _appBarNotificationPadding = 12.0;
 const _appBarNotificationInnerPadding = 2.0;
+const _avatarFontSize = 12.0;
+const _avatarRadius = 16.0;
 
 class PageTemplate extends StatelessWidget {
   final String title;
@@ -78,22 +80,26 @@ class PageTemplate extends StatelessWidget {
           : null,
       actions: [
         if (showNotifications) ...[
-          SizedBox(width: _initialsRightPadding),
+          _appBarGap,
           _buildNotificationIcon(),
         ],
-        SizedBox(width: _initialsRightPadding),
-        UserAvatar(
-          name: appState.user?.name,
+        _appBarGap,
+        IconButton(
+          icon: UserAvatar(
+            name: appState.user!.name,
+            iconRadius: _avatarRadius,
+            fontSize: _avatarFontSize,
+          ),
           onPressed: () => Modular.to.pushNamed(AppRoute.profile.path),
         ),
         if (showLogout) ...[
-          SizedBox(width: _initialsRightPadding),
+          _appBarGap,
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () => _logout(context),
           ),
         ],
-        SizedBox(width: _initialsRightPadding),
+        _appBarGap,
       ],
     );
   }

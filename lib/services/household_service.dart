@@ -128,7 +128,7 @@ class HouseholdService {
   }
 
   Future<void> renameHousehold(String newName) async {
-    _setHousehold(getHousehold!..copyWith(name: newName));
+    _setHousehold(getHousehold!.copyWith(name: newName));
   }
 
   Future<void> logout() async {

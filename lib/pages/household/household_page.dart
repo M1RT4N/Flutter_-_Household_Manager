@@ -8,10 +8,10 @@ import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
-import 'package:household_manager/widgets/editable_row.dart';
+import 'package:household_manager/widgets/editable_field.dart';
+import 'package:household_manager/widgets/info_field.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
-const _middleTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 15);
 const _elevation = 4.0;
 const _borderRadius = 8.0;
 const _padding = EdgeInsets.all(16.0);
@@ -97,17 +97,18 @@ class HouseholdPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            EditableRow(
-              leadingText: 'Household name: ',
+            EditableField(
+              labelText: 'Household name: ',
               editableText: household.name,
-              textStyle: _middleTextStyle,
               onAccept: _renameHousehold,
             ),
-            _buildInfoTile(
-              'Join code: ',
-              household.code,
-              Icons.copy,
-              () => _copyCode(context, household.code),
+            InfoField(
+              labelText: 'Join code',
+              mainText: household.code,
+              trailingWidget: IconButton(
+                onPressed: () => _copyCode(context, household.code),
+                icon: Icon(Icons.copy),
+              ),
             )
           ],
         ),
@@ -116,39 +117,27 @@ class HouseholdPage extends StatelessWidget {
   }
 
   Future<void> _renameHousehold(BuildContext context, String newName) async {
-    await GetIt.instance<HouseholdService>().renameHousehold(newName);
-    if (context.mounted) {
-      showTopSnackBar(context, 'Household name changed.', Colors.blue);
-    }
+    Utility.performActionAndShowInfo(
+      context,
+      () => GetIt.instance<HouseholdService>().renameHousehold(newName),
+      'Household name changed.',
+    );
   }
 
   Future<void> _manageRequest(
       BuildContext context, String request, bool accept) async {
-    await GetIt.instance<HouseholdService>().manageRequest(request, accept);
-    if (context.mounted) {
-      showTopSnackBar(
-          context, 'Request ${accept ? 'accepted' : 'rejected'}.', Colors.blue);
-    }
+    Utility.performActionAndShowInfo(
+      context,
+      () => GetIt.instance<HouseholdService>().manageRequest(request, accept),
+      'Request ${accept ? 'accepted' : 'rejected'}.',
+    );
   }
 
   Future<void> _removeMember(BuildContext context, String member) async {
-    await GetIt.instance<HouseholdService>().removeMember(member);
-    if (context.mounted) {
-      showTopSnackBar(context, 'Member removed.', Colors.blue);
-    }
-  }
-
-  Widget _buildInfoTile(String leadingText, String middleText, IconData icon,
-      VoidCallback onPress) {
-    return Row(
-      children: [
-        Text(leadingText),
-        Text(middleText, style: _middleTextStyle),
-        IconButton(
-          icon: Icon(icon),
-          onPressed: onPress,
-        ),
-      ],
+    Utility.performActionAndShowInfo(
+      context,
+      () => GetIt.instance<HouseholdService>().removeMember(member),
+      'Member removed.',
     );
   }
 

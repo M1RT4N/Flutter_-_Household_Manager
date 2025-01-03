@@ -133,4 +133,16 @@ class UserService {
     await updateUser(newUser);
     _pushToStream(newUser);
   }
+
+  Future<void> changeName(String newName) async {
+    setUser(getUser!.copyWith(name: newName));
+  }
+
+  Future<void> changeUsername(String newUsername) async {
+    setUser(getUser!.copyWith(username: newUsername));
+  }
+
+  Future<void> changeEmail(String newEmail) async {
+    setUser(getUser!.copyWith(email: newEmail));
+  }
 }

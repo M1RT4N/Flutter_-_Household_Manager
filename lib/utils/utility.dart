@@ -21,12 +21,8 @@ class Utility {
         .join();
   }
 
-  static String getUserInitials(String? name) {
-    if (name == null) {
-      return '';
-    }
-
-    return name.trim().split(' ').map((e) => e[0]).take(2).join();
+  static String getUserInitials(String name) {
+    return name.split(" ").map((x) => x[0]).join();
   }
 
   static Future<bool?> showConfirmationDialog(
@@ -82,6 +78,17 @@ class Utility {
           showTopSnackBar(context, '$errorMessage: $e', Colors.red);
         }
       }
+    }
+  }
+
+  static Future<void> performActionAndShowInfo(
+    BuildContext context,
+    Future<void> Function() action,
+    String successMessage,
+  ) async {
+    await action();
+    if (context.mounted) {
+      showTopSnackBar(context, successMessage, Colors.blue);
     }
   }
 

@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:household_manager/utils/utility.dart';
 
-const _initialsSize = 12.0;
-const _initialsRadius = 16.0;
-
 class UserAvatar extends StatelessWidget {
-  final String? name;
-  final VoidCallback onPressed;
+  final String name;
+  final double iconRadius;
+  final double fontSize;
 
-  const UserAvatar({super.key, required this.name, required this.onPressed});
+  const UserAvatar({
+    super.key,
+    required this.name,
+    required this.iconRadius,
+    required this.fontSize,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-        icon: CircleAvatar(
-          radius: _initialsRadius,
-          backgroundColor: Colors.blue,
-          child: Text(
-            Utility.getUserInitials(name),
-            style: TextStyle(color: Colors.white, fontSize: _initialsSize),
-          ),
-        ),
-        onPressed: () => onPressed());
+    return CircleAvatar(
+      radius: iconRadius,
+      backgroundColor: Colors.blue,
+      child: Text(
+        Utility.getUserInitials(name),
+        style: TextStyle(color: Colors.white, fontSize: fontSize),
+      ),
+    );
   }
 }

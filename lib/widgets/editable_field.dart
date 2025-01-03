@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 
-class EditableRow extends StatefulWidget {
-  final String leadingText;
+const _labelTextStyle = TextStyle(fontSize: 16, color: Colors.grey);
+const _editableTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 16);
+const _labelTextGap = SizedBox(width: 8);
+
+class EditableField extends StatefulWidget {
+  final String labelText;
   final String editableText;
-  final TextStyle textStyle;
   final void Function(BuildContext context, String editedText) onAccept;
 
-  const EditableRow({
+  const EditableField({
     super.key,
-    required this.leadingText,
+    required this.labelText,
     required this.editableText,
     required this.onAccept,
-    required this.textStyle,
   });
 
   @override
-  State<EditableRow> createState() => _EditableRowState();
+  State<EditableField> createState() => _EditableFieldState();
 }
 
-class _EditableRowState extends State<EditableRow> {
+class _EditableFieldState extends State<EditableField> {
   bool isEditing = false;
   late TextEditingController editingController;
 
@@ -32,13 +34,14 @@ class _EditableRowState extends State<EditableRow> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(widget.leadingText),
+        Text(widget.labelText, style: _labelTextStyle),
+        _labelTextGap,
         isEditing
             ? Expanded(
                 child: TextField(
                   controller: editingController,
                   autofocus: true,
-                  style: widget.textStyle,
+                  style: _editableTextStyle,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     isDense: true,
@@ -47,7 +50,7 @@ class _EditableRowState extends State<EditableRow> {
               )
             : Text(
                 widget.editableText,
-                style: widget.textStyle,
+                style: _editableTextStyle,
               ),
         IconButton(
           icon: Icon(isEditing ? Icons.check : Icons.edit),
