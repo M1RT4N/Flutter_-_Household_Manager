@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/common/app_state.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notification.dart';
@@ -73,7 +72,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppState appState) {
+  Widget _buildBody(BuildContext context) {
     return ListView.builder(
       controller: _scrollController,
       padding: EdgeInsets.all(_cardInnerPadding),

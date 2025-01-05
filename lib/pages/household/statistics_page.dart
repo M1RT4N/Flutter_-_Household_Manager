@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/common/app_state.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 
 class StatisticsPage extends StatelessWidget {
@@ -13,7 +12,7 @@ class StatisticsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppState appState) {
+  Widget _buildBody(BuildContext context) {
     return Center(
       child: Text('Statistics'),
     );

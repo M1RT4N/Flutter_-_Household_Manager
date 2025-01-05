@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:household_manager/common/app_state.dart';
+import 'package:get_it/get_it.dart';
+import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
 const _topNBeforeDeadline = 5;
@@ -27,22 +29,29 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppState appState) {
-    final top5BeforeDeadline = _getTopNBeforeDeadline(appState.todos);
-    final pastDeadline = _getPassedDeadline(appState.todos);
+  Widget _buildBody(BuildContext context) {
+    return LoadingStreamBuilder(
+      stream: GetIt.instance<TodoService>().getTodoStream,
+      builder: (context, snapshot) {
+        var todos = snapshot as List<Todo>;
+        // TODO here is something wrong - infinite loop
+        final top5BeforeDeadline = _getTopNBeforeDeadline(todos);
+        final pastDeadline = _getPassedDeadline(todos);
 
-    return ListView(
-      children: [
-        ..._buildSection(
-            top5BeforeDeadline,
-            'Top $_topNBeforeDeadline closest to deadline:',
-            Theme.of(context).splashColor),
-        ..._buildSection(
-          pastDeadline,
-          'Past deadline:',
-          Theme.of(context).disabledColor,
-        )
-      ],
+        return ListView(
+          children: [
+            ..._buildSection(
+                top5BeforeDeadline,
+                'Top $_topNBeforeDeadline closest to deadline:',
+                Theme.of(context).splashColor),
+            ..._buildSection(
+              pastDeadline,
+              'Past deadline:',
+              Theme.of(context).disabledColor,
+            )
+          ],
+        );
+      },
     );
   }
 

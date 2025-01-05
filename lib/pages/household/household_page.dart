@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/app_state.dart';
+import 'package:household_manager/common/loading_builder.dart';
+import 'package:household_manager/models/household.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -20,35 +21,47 @@ class HouseholdPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppState appState) {
-    return Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text('Name: ${appState.household!.name}'),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('Code: ${appState.household!.code}'),
-          IconButton(
-            icon: Icon(Icons.copy),
-            onPressed: () async {
-              await Clipboard.setData(
-                ClipboardData(text: appState.household!.code),
-              );
-              if (context.mounted) {
-                showTopSnackBar(context, 'Code copied.', Colors.lightBlue);
-              }
-            },
+  Widget _buildBody(BuildContext context) {
+    return LoadingStreamBuilder(
+      stream: GetIt.instance<HouseholdService>().getHouseholdStream,
+      builder: (context, household_) {
+        var household = household_! as Household;
+
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Name: ${household.name}'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Code: ${household.code}'),
+                  IconButton(
+                    icon: Icon(Icons.copy),
+                    onPressed: () async {
+                      await Clipboard.setData(
+                        ClipboardData(text: household.code),
+                      );
+                      if (context.mounted) {
+                        showTopSnackBar(
+                            context, 'Code copied.', Colors.lightBlue);
+                      }
+                    },
+                  ),
+                ],
+              ),
+              Text('Members: ${household.members.toString()}'),
+              Text('Requests: ${household.requested.toString()}'),
+              ListTile(
+                leading: Icon(Icons.login_outlined),
+                title: Text('Leave Household'),
+                onTap: () => _leaveHousehold(context),
+              ),
+            ],
           ),
-        ],
-      ),
-      Text('Members: ${appState.household!.members.toString()}'),
-      Text('Requests: ${appState.household!.requested.toString()}'),
-      ListTile(
-        leading: Icon(Icons.login_outlined),
-        title: Text('Leave Household'),
-        onTap: () => _leaveHousehold(context),
-      ),
-    ]));
+        );
+      },
+    );
   }
 
   void _leaveHousehold(BuildContext context) async {

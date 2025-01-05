@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/app_state.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
@@ -29,12 +28,13 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
       title: 'Create Household',
       showDrawer: false,
       showBackArrow: true,
+      showLogout: true,
       showNotifications: false,
       bodyFunction: _buildBody,
     );
   }
 
-  Widget _buildBody(BuildContext context, AppState appState) {
+  Widget _buildBody(BuildContext context) {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(_mainBoxPadding),
