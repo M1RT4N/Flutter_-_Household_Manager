@@ -160,4 +160,19 @@ class UserService {
         user.copyWith(householdId: householdId, requestedId: "");
     await setUser(updatedUser);
   }
+
+  Future<void> hideNotification(String notificationId) async {
+    final user = getUser;
+    if (user == null) return;
+
+    final updatedNotifications = user.notifications.map((notification) {
+      if (notification.id == notificationId) {
+        return notification.copyWith(isHidden: true);
+      }
+      return notification;
+    }).toList();
+
+    final updatedUser = user.copyWith(notifications: updatedNotifications);
+    await setUser(updatedUser);
+  }
 }

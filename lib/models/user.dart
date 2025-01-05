@@ -85,4 +85,22 @@ class Notification {
       _$NotificationFromJson(json);
 
   Map<String, dynamic> toJson() => _$NotificationToJson(this);
+
+  Notification copyWith({
+    String? id,
+    NotificationType? type,
+    String? title,
+    String? description,
+    String? link,
+    bool? isHidden,
+  }) {
+    return Notification(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      link: link ?? this.link,
+      isHidden: isHidden ?? this.isHidden,
+    );
+  }
 }
