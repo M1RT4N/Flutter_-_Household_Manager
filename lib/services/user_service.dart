@@ -135,11 +135,17 @@ class UserService {
     final user = getUser;
     if (user == null) return;
 
+    // We would do keys based on time to ensure uniqueness in single user
+    // if two different users have same notification ID we would not care
+    final now = DateTime.now();
+
     final newNotification = Notification(
+      id: now.microsecondsSinceEpoch.toString(),
       type: type,
       title: title,
       description: description,
       link: link,
+      isHidden: false, // By default, notifications are not hidden
     );
 
     final updatedNotifications = List<Notification>.from(user.notifications)

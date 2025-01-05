@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:household_manager/common/loading_builder.dart';
+import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notification.dart';
-import 'package:household_manager/widgets/notifications/todo_notification.dart';
+import 'package:household_manager/widgets/notifications/user_notification.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/services/household_service.dart';
+import 'package:rxdart/rxdart.dart';
 
 const _cardBottomPadding = 12.0;
 const _cardInnerPadding = 32.0;
@@ -18,49 +25,8 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  final List<BaseNotification> notifications = [];
-
-  final ScrollController _scrollController = ScrollController();
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-    _loadMoreNotifications();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
-      _loadMoreNotifications();
-    }
-  }
-
-  Future<void> _loadMoreNotifications() async {
-    if (_isLoading) return;
-    setState(() {
-      _isLoading = true;
-    });
-
-    // TODO: From here down implement this shit, this delay is here just
-    // to know if it works, add something like limit, offset to this and
-    // fetch it by parts to prevent huge traffic between client and server
-    // so lets say it is some kind of mix of pagination and infinite scroll
-    await Future.delayed(Duration(seconds: 2));
-
-    setState(() {
-      notifications.addAll([
-        RequestNotification(),
-        TodoNotification(
-            title: 'Another TODO assigned',
-            description: 'Another TODO has been assigned to you.'),
-      ]);
-
-      // TODO-END: Do not touch :D
-      _isLoading = false;
-    });
-  }
+  final userService = GetIt.instance<UserService>();
+  final householdService = GetIt.instance<HouseholdService>();
 
   @override
   Widget build(BuildContext context) {
@@ -72,15 +38,32 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return ListView.builder(
-      controller: _scrollController,
-      padding: EdgeInsets.all(_cardInnerPadding),
-      itemCount: notifications.length + (_isLoading ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == notifications.length) {
-          return Center(child: CircularProgressIndicator());
-        }
-        return _buildNotificationCard(context, notifications[index]);
+    return LoadingStreamBuilder(
+      stream: CombineLatestStream.combine2(
+        userService.getUserStream,
+        householdService.getHouseholdStream,
+        (user, household) => [user, household],
+      ),
+      builder: (context, data) {
+        final user = (data as List)[0] as User?;
+        final household = (data)[1] as Household?;
+        final notifications = user?.notifications ?? [];
+        final List<BaseNotification> allNotifications = [
+          ...List.generate(
+              household?.requested.length ?? 0,
+              (index) =>
+                  RequestNotification(userId: household?.requested[index])),
+          ...notifications.map(
+              (notification) => UserNotification(notification: notification)),
+        ];
+
+        return ListView.builder(
+          padding: EdgeInsets.all(_cardInnerPadding),
+          itemCount: allNotifications.length,
+          itemBuilder: (context, index) {
+            return _buildNotificationCard(context, allNotifications[index]);
+          },
+        );
       },
     );
   }
@@ -105,12 +88,5 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
-    super.dispose();
   }
 }

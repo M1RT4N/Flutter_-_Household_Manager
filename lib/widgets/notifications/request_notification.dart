@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:household_manager/utils/utility.dart';
 
 import 'base_notification.dart';
 
 class RequestNotification extends BaseNotification {
-  RequestNotification()
+  final String? userId;
+
+  RequestNotification({required this.userId})
       : super(
           icon: Icons.person_add,
           title: '<user> requested joining of household.',
@@ -13,45 +16,44 @@ class RequestNotification extends BaseNotification {
 
   @override
   Widget buildAction(BuildContext context) {
-    return Container();
-    // return Row(
-    //   children: [
-    //     IconButton(
-    //       onPressed: () async {
-    //         bool? confirmed = await showConfirmationDialog(
-    //           context,
-    //           'Accept Request',
-    //           'Are you sure you want to accept this request?',
-    //         );
-    //         if (confirmed == true) {
-    //           // TODO: implement reject action, so it will delete this notification
-    //           // -> it should be easy because we would not be saving notifications
-    //           // for accepted requests but we would only look for our household
-    //           // and add it at top of notifications list...) so we just remove
-    //           // user ID from household requests and add it to household members.
-    //           // Also send to all members (except that new one) notification about it
-    //           // This one can be in style of to do notification or something like that
-    //           // Also send welcome notification to new member
-    //         }
-    //       },
-    //       icon: Icon(Icons.check, color: Colors.green),
-    //     ),
-    //     IconButton(
-    //       onPressed: () async {
-    //         bool? confirmed = await showConfirmationDialog(
-    //           context,
-    //           'Reject Request',
-    //           'Are you sure you want to reject this request?',
-    //         );
-    //         if (confirmed == true) {
-    //           // TODO: for start same as accept but only remove it from requests,
-    //           // but send to all members info about rejection and (this i do not know
-    //           // how  for now but notify also user who requested it)
-    //         }
-    //       },
-    //       icon: Icon(Icons.cancel, color: Colors.red),
-    //     ),
-    //   ],
-    // );
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () async {
+            bool? confirmed = await Utility.showConfirmationDialog(
+              context,
+              'Accept Request',
+              'Are you sure you want to accept this request?',
+            );
+            if (confirmed == true) {
+              // TODO: implement reject action, so it will delete this notification
+              // -> it should be easy because we would not be saving notifications
+              // for accepted requests but we would only look for our household
+              // and add it at top of notifications list...) so we just remove
+              // user ID from household requests and add it to household members.
+              // Also send to all members (except that new one) notification about it
+              // This one can be in style of to do notification or something like that
+              // Also send welcome notification to new member
+            }
+          },
+          icon: Icon(Icons.check, color: Colors.green),
+        ),
+        IconButton(
+          onPressed: () async {
+            bool? confirmed = await Utility.showConfirmationDialog(
+              context,
+              'Reject Request',
+              'Are you sure you want to reject this request?',
+            );
+            if (confirmed == true) {
+              // TODO: for start same as accept but only remove it from requests,
+              // but send to all members info about rejection and (this i do not know
+              // how for now but notify also user who requested it)
+            }
+          },
+          icon: Icon(Icons.cancel, color: Colors.red),
+        ),
+      ],
+    );
   }
 }

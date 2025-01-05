@@ -62,19 +62,22 @@ class User {
   }
 }
 
-// Define the Notification class
 @JsonSerializable()
 class Notification {
+  final String id;
   final String type;
   final String title;
   final String description;
   final String link;
+  final bool isHidden;
 
   Notification({
+    required this.id,
     required this.type,
     required this.title,
     required this.description,
     required this.link,
+    required this.isHidden,
   });
 
   factory Notification.fromJson(Map<String, dynamic> json) =>
