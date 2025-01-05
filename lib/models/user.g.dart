@@ -15,6 +15,10 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       requestedId: json['requestedId'] as String?,
       createdAt:
           const TimestampConverter().fromJson(json['createdAt'] as Object),
+      notifications: (json['notifications'] as List<dynamic>?)
+              ?.map((e) => Notification.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -25,4 +29,20 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'householdId': instance.householdId,
       'requestedId': instance.requestedId,
       'createdAt': const TimestampConverter().toJson(instance.createdAt),
+      'notifications': instance.notifications.map((e) => e.toJson()).toList(),
+    };
+
+Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
+      type: json['type'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String,
+      link: json['link'] as String,
+    );
+
+Map<String, dynamic> _$NotificationToJson(Notification instance) =>
+    <String, dynamic>{
+      'type': instance.type,
+      'title': instance.title,
+      'description': instance.description,
+      'link': instance.link,
     };

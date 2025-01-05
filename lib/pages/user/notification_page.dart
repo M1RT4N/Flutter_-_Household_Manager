@@ -66,8 +66,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: 'Notifications',
-      showDrawer: false,
-      showBackArrow: true,
+      showDrawer: true,
       bodyFunction: _buildBody,
     );
   }

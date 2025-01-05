@@ -69,7 +69,7 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
           context, 'Household name is required.', Colors.red);
     }
 
-    var errorMessage =
+    final errorMessage =
         await _householdService.tryCreateHousehold(householdName);
     if (errorMessage != null) {
       if (mounted) {

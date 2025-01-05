@@ -22,12 +22,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final UserService _userService = IocContainer.getIt<UserService>();
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  final UserService _userService = IocContainer.getIt<UserService>();
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
 
-    var errorMessage = await _userService.tryLogin(usernameOrEmail, password);
+    final errorMessage = await _userService.tryLogin(usernameOrEmail, password);
     if (errorMessage != null) {
       if (mounted) {
         return showTopSnackBar(

@@ -14,6 +14,7 @@ class User {
   final String? requestedId;
   @TimestampConverter()
   final Timestamp createdAt;
+  final List<Notification> notifications;
 
   const User({
     required this.id,
@@ -23,6 +24,7 @@ class User {
     this.householdId,
     this.requestedId,
     required this.createdAt,
+    this.notifications = const [],
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -37,6 +39,7 @@ class User {
     String? householdId,
     String? requestedId,
     Timestamp? createdAt,
+    List<Notification>? notifications,
   }) {
     return User(
       id: id ?? this.id,
@@ -54,6 +57,28 @@ class User {
               ? null
               : requestedId,
       createdAt: createdAt ?? this.createdAt,
+      notifications: notifications ?? this.notifications,
     );
   }
+}
+
+// Define the Notification class
+@JsonSerializable()
+class Notification {
+  final String type;
+  final String title;
+  final String description;
+  final String link;
+
+  Notification({
+    required this.type,
+    required this.title,
+    required this.description,
+    required this.link,
+  });
+
+  factory Notification.fromJson(Map<String, dynamic> json) =>
+      _$NotificationFromJson(json);
+
+  Map<String, dynamic> toJson() => _$NotificationToJson(this);
 }

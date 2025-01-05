@@ -25,7 +25,7 @@ class HouseholdPage extends StatelessWidget {
     return LoadingStreamBuilder(
       stream: GetIt.instance<HouseholdService>().getHouseholdStream,
       builder: (context, household_) {
-        var household = household_! as Household;
+        final household = household_! as Household;
 
         return Center(
           child: Column(

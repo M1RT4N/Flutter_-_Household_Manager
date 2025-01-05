@@ -125,4 +125,27 @@ class UserService {
     await _userRepository.setOrAdd(newUser.id, newUser);
     _pushToStream(newUser);
   }
+
+  Stream<List<Notification>> getUserNotifications() {
+    return getUserStream.map((user) => user?.notifications ?? []);
+  }
+
+  Future<void> addNotification(
+      String type, String title, String description, String link) async {
+    final user = getUser;
+    if (user == null) return;
+
+    final newNotification = Notification(
+      type: type,
+      title: title,
+      description: description,
+      link: link,
+    );
+
+    final updatedNotifications = List<Notification>.from(user.notifications)
+      ..add(newNotification);
+
+    final updatedUser = user.copyWith(notifications: updatedNotifications);
+    await setUser(updatedUser);
+  }
 }

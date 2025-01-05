@@ -33,6 +33,10 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Register'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Modular.to.pushNamed(AppRoute.login.path),
+        ),
       ),
       body: Center(
         child: Container(
@@ -113,14 +117,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
     errorMessage = await _userService.tryRegister(_usernameController.text,
         _nameController.text, _emailController.text, _passwordController.text);
-
-    if (errorMessage != null) {
-      if (mounted) {
+    if (mounted) {
+      if (errorMessage != null) {
         return showTopSnackBar(context, errorMessage, Colors.red);
       }
-    }
 
-    if (mounted) {
       showTopSnackBar(context, 'Registration successful.', Colors.green);
       Modular.to.navigate(AppRoute.chooseHousehold.route);
     }

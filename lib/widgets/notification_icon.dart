@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
+import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/user.dart';
+import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:rxdart/rxdart.dart';
 
 const _notificationIconPadding = 10.0;
 const _notificationCountBubbleSize = 14.0;
@@ -14,16 +17,23 @@ const _notificationInnerPadding = 2.0;
 class NotificationIcon extends StatelessWidget {
   final VoidCallback onPressed;
   final userService = GetIt.instance<UserService>();
+  final householdService = GetIt.instance<HouseholdService>();
 
   NotificationIcon({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return LoadingStreamBuilder(
-        stream: userService.getUserStream,
-        builder: (context, user_) {
-          final user = user_ as User;
-          final notificationCount = _getNotificationCount();
+        stream: CombineLatestStream.combine2(
+            userService.getUserStream,
+            householdService.getHouseholdStream,
+            (user, household) => [user, household]),
+        builder: (context, data) {
+          final user = (data as List)[0] as User?;
+          final household = (data)[1] as Household?;
+          final notifications = user?.notifications ?? [];
+          final notificationCount =
+              household?.requested.length ?? 0 + notifications.length;
 
           return Stack(
             children: [
@@ -64,10 +74,5 @@ class NotificationIcon extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  int _getNotificationCount() {
-    // TODO: implement notification count
-    return 0;
   }
 }

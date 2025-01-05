@@ -108,7 +108,7 @@ class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
       return;
     }
 
-    var errorMessage = await _householdService.cancelHouseholdRequest();
+    final errorMessage = await _householdService.cancelHouseholdRequest();
     if (context.mounted) {
       if (errorMessage != null) {
         return showTopSnackBar(context, errorMessage, Colors.red);

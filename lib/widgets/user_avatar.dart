@@ -24,7 +24,7 @@ class UserAvatar extends StatelessWidget {
           return IconButton(
               icon: CircleAvatar(
                 radius: _initialsRadius,
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.orange,
                 child: Text(
                   Utility.getUserInitials(user.name),
                   style:

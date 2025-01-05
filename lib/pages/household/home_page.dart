@@ -33,8 +33,7 @@ class HomePage extends StatelessWidget {
     return LoadingStreamBuilder(
       stream: GetIt.instance<TodoService>().getTodoStream,
       builder: (context, snapshot) {
-        var todos = snapshot as List<Todo>;
-        // TODO here is something wrong - infinite loop
+        final todos = snapshot as List<Todo>;
         final top5BeforeDeadline = _getTopNBeforeDeadline(todos);
         final pastDeadline = _getPassedDeadline(todos);
 

@@ -23,7 +23,7 @@ class ProfilePage extends StatelessWidget {
     return LoadingStreamBuilder(
       stream: GetIt.instance<UserService>().getUserStream,
       builder: (context, user_) {
-        var user = user_! as User;
+        final user = user_! as User;
 
         return Center(
           child: Column(
