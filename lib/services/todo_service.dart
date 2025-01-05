@@ -12,11 +12,16 @@ class TodoService {
 
   TodoService(this._todoRepository, this._userService);
 
-  Stream<List<Todo>> get getTodoStream =>
-      _todoRepository.reference.snapshots().map((snapShot) => snapShot.docs
-          .map((doc) => doc.data())
-          .where((todo) => todo.createdForId == _userService.getUser!.id)
-          .toList());
+  Stream<List<Todo>> get getTodoStream {
+    final userId = _userService.getUser?.id;
+    if (userId == null) {
+      return Stream.value([]);
+    }
+    return _todoRepository.reference
+        .where('createdForId', isEqualTo: userId)
+        .snapshots()
+        .map((snapShot) => snapShot.docs.map((doc) => doc.data()).toList());
+  }
 
   Future<void> create(
       String createdForId, Timestamp deadline, String description) async {
