@@ -3,6 +3,7 @@ import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/database_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -100,7 +101,22 @@ class HouseholdService {
       final householdDoc = _householdRepository.reference.doc(household.id);
       final newHousehold =
           household.copyWith(members: household.members..remove(user.id));
-      return _householdRequestTransaction(householdDoc, newHousehold, newUser);
+      final result = await _householdRequestTransaction(
+          householdDoc, newHousehold, newUser);
+
+      for (final memberId in household.members) {
+        if (memberId != user.id) {
+          await _userService.addNotification(
+            memberId,
+            NotificationType.userLeft,
+            'Household Member Left',
+            'A member ${user.name} has left the household.',
+            null,
+          );
+        }
+      }
+
+      return result;
     } catch (e) {
       return e.toString();
     }
@@ -135,5 +151,52 @@ class HouseholdService {
   Future<void> setHousehold(Household household) async {
     await _householdRepository.setOrAdd(household.id, household);
     _pushToSteam(household);
+  }
+
+  Future<void> approveJoinRequest(String householdId, User? user) async {
+    final household = await fetchHousehold(householdId);
+    if (household == null || user == null) return;
+
+    final newHousehold = household.copyWith(
+      requested: household.requested..remove(user.id),
+      members: household.members..add(user.id),
+    );
+
+    await setHousehold(newHousehold);
+    await _userService.joinHousehold(user.id, householdId);
+
+    for (final memberId in household.members) {
+      if (memberId != user.id) {
+        await _userService.addNotification(
+          memberId,
+          NotificationType.userJoined,
+          'Join Request Accepted',
+          'A new member ${user.name}  has joined the household.',
+          null,
+        );
+      }
+    }
+  }
+
+  Future<void> rejectJoinRequest(String householdId, User? user) async {
+    final household = await fetchHousehold(householdId);
+    if (household == null || user == null) return;
+
+    final newHousehold = household.copyWith(
+      requested: household.requested..remove(user.id),
+    );
+
+    await setHousehold(newHousehold);
+    await _userService.joinHousehold(user.id, "");
+
+    for (final memberId in household.members) {
+      await _userService.addNotification(
+        memberId,
+        NotificationType.userRejected,
+        'Join Request Rejected',
+        'A join request for ${user.name} has been rejected.',
+        null,
+      );
+    }
   }
 }

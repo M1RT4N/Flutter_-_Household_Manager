@@ -32,8 +32,11 @@ class NotificationIcon extends StatelessWidget {
           final user = (data as List)[0] as User?;
           final household = (data)[1] as Household?;
           final notifications = user?.notifications ?? [];
+          final visibleNotifications = notifications
+              .where((notification) => !notification.isHidden)
+              .toList();
           final notificationCount =
-              household?.requested.length ?? 0 + notifications.length;
+              (household?.requested.length ?? 0) + visibleNotifications.length;
 
           return Stack(
             children: [

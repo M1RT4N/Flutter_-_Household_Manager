@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
+import 'package:household_manager/common/loading_builder.dart';
+import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -31,12 +33,42 @@ class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
 
   @override
   Widget build(BuildContext context) {
+    // NOTE: MicorTask is used to push the route after the current build is done
+    //       to ensure that we woul not loop infinitely between chooseHousehold
+    //       and this page.
+    return LoadingStreamBuilder<User?>(
+      stream: _userService.getUserStream,
+      builder: (context, user) {
+        if (user == null) {
+          Future.microtask(
+              () => Modular.to.pushNamed(AppRoute.chooseHousehold.path));
+          return Container();
+        }
+
+        if (user.requestedId != null && user.requestedId!.isNotEmpty) {
+          return _buildPage(
+              context, (context) => _buildPendingContent(context));
+        }
+
+        if (user.householdId != null && user.householdId!.isNotEmpty) {
+          Future.microtask(() => Modular.to.pushNamed(AppRoute.home.path));
+          return Container();
+        }
+
+        Future.microtask(
+            () => Modular.to.pushNamed(AppRoute.chooseHousehold.path));
+        return Container();
+      },
+    );
+  }
+
+  Widget _buildPage(BuildContext context, bodyBuilder) {
     return PageTemplate(
       title: 'Household Request',
       showDrawer: false,
       showNotifications: false,
       showLogout: true,
-      bodyFunction: _buildPendingContent,
+      bodyFunction: bodyBuilder,
     );
   }
 

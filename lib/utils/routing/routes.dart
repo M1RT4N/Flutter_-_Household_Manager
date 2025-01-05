@@ -15,7 +15,6 @@ import 'package:household_manager/pages/todo/todos_page.dart';
 import 'package:household_manager/pages/user/notification_page.dart';
 import 'package:household_manager/pages/user/profile_page.dart';
 import 'package:household_manager/utils/guards/household_guard.dart';
-import 'package:household_manager/utils/guards/request_guard.dart';
 import 'package:household_manager/utils/guards/user_guard.dart';
 import 'package:household_manager/utils/routing/guard_level.dart';
 
@@ -57,7 +56,9 @@ enum AppRoute {
       case GuardLevel.householdFetched:
         return [UserGuard(), HouseholdGuard()];
       case GuardLevel.pendingRequest:
-        return [UserGuard(), RequestGuard()];
+        // TODO: Reintroduce RequestGuard, but! watch for behaiour
+        //       when user is rejected!
+        return [UserGuard()];
       default:
         return [];
     }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/database_service.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -126,13 +127,9 @@ class UserService {
     _pushToStream(newUser);
   }
 
-  Stream<List<Notification>> getUserNotifications() {
-    return getUserStream.map((user) => user?.notifications ?? []);
-  }
-
-  Future<void> addNotification(
-      String type, String title, String description, String link) async {
-    final user = getUser;
+  Future<void> addNotification(String userId, NotificationType type,
+      String title, String description, String? link) async {
+    final user = await fetchUser(userId);
     if (user == null) return;
 
     // We would do keys based on time to ensure uniqueness in single user
@@ -152,6 +149,15 @@ class UserService {
       ..add(newNotification);
 
     final updatedUser = user.copyWith(notifications: updatedNotifications);
+    await setUser(updatedUser);
+  }
+
+  Future<void> joinHousehold(String userId, String householdId) async {
+    final user = await fetchUser(userId);
+    if (user == null) return;
+
+    final updatedUser =
+        user.copyWith(householdId: householdId, requestedId: "");
     await setUser(updatedUser);
   }
 }

@@ -1,1 +1,7 @@
-enum NotificationType { userJoined, userLeft, todoAssigned, todoCompleted }
+enum NotificationType {
+  userJoined,
+  userRejected,
+  userLeft,
+  todoAssigned,
+  todoCompleted
+}

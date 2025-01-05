@@ -34,19 +34,27 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 
 Notification _$NotificationFromJson(Map<String, dynamic> json) => Notification(
       id: json['id'] as String,
-      type: json['type'] as String,
+      type: $enumDecode(_$NotificationTypeEnumMap, json['type']),
       title: json['title'] as String,
       description: json['description'] as String,
-      link: json['link'] as String,
+      link: json['link'] as String?,
       isHidden: json['isHidden'] as bool,
     );
 
 Map<String, dynamic> _$NotificationToJson(Notification instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'type': instance.type,
+      'type': _$NotificationTypeEnumMap[instance.type]!,
       'title': instance.title,
       'description': instance.description,
       'link': instance.link,
       'isHidden': instance.isHidden,
     };
+
+const _$NotificationTypeEnumMap = {
+  NotificationType.userJoined: 'userJoined',
+  NotificationType.userRejected: 'userRejected',
+  NotificationType.userLeft: 'userLeft',
+  NotificationType.todoAssigned: 'todoAssigned',
+  NotificationType.todoCompleted: 'todoCompleted',
+};

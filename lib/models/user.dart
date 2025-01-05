@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -65,10 +66,10 @@ class User {
 @JsonSerializable()
 class Notification {
   final String id;
-  final String type;
+  final NotificationType type;
   final String title;
   final String description;
-  final String link;
+  final String? link;
   final bool isHidden;
 
   Notification({

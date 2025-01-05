@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:household_manager/models/user.dart';
+import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/utils/utility.dart';
 
 import 'base_notification.dart';
 
 class RequestNotification extends BaseNotification {
-  final String? userId;
+  final User? user;
+  final householdService = GetIt.instance<HouseholdService>();
 
-  RequestNotification({required this.userId})
+  RequestNotification({required this.user})
       : super(
           icon: Icons.person_add,
-          title: '<user> requested joining of household.',
+          title:
+              '${user?.name ?? 'Unknown User'} requested joining of household.',
           description:
               'This action will grant access to household data. Once accepted, the member will have full access to shared resources and it will not be possible to remove them without their consent. They will need to leave the household manually if necessary.',
         );
+
+  Future<void> _handleRequest(BuildContext context, String title,
+      String message, Function onConfirm) async {
+    bool? confirmed =
+        await Utility.showConfirmationDialog(context, title, message);
+    if (confirmed == true && user != null) {
+      onConfirm();
+    }
+  }
 
   @override
   Widget buildAction(BuildContext context) {
@@ -20,36 +34,25 @@ class RequestNotification extends BaseNotification {
       children: [
         IconButton(
           onPressed: () async {
-            bool? confirmed = await Utility.showConfirmationDialog(
+            await _handleRequest(
               context,
               'Accept Request',
               'Are you sure you want to accept this request?',
+              () =>
+                  householdService.approveJoinRequest(user!.requestedId!, user),
             );
-            if (confirmed == true) {
-              // TODO: implement reject action, so it will delete this notification
-              // -> it should be easy because we would not be saving notifications
-              // for accepted requests but we would only look for our household
-              // and add it at top of notifications list...) so we just remove
-              // user ID from household requests and add it to household members.
-              // Also send to all members (except that new one) notification about it
-              // This one can be in style of to do notification or something like that
-              // Also send welcome notification to new member
-            }
           },
           icon: Icon(Icons.check, color: Colors.green),
         ),
         IconButton(
           onPressed: () async {
-            bool? confirmed = await Utility.showConfirmationDialog(
+            await _handleRequest(
               context,
               'Reject Request',
               'Are you sure you want to reject this request?',
+              () =>
+                  householdService.rejectJoinRequest(user!.requestedId!, user),
             );
-            if (confirmed == true) {
-              // TODO: for start same as accept but only remove it from requests,
-              // but send to all members info about rejection and (this i do not know
-              // how for now but notify also user who requested it)
-            }
           },
           icon: Icon(Icons.cancel, color: Colors.red),
         ),
