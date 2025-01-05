@@ -13,9 +13,10 @@ class UserNotification extends BaseNotification {
 
   UserNotification({required this.notification})
       : super(
-            title: notification.title,
-            description: notification.description,
-            icon: Icons.assignment);
+          title: notification.title,
+          description: notification.description,
+          icon: notification.type.getIcon(),
+        );
 
   @override
   Widget buildAction(BuildContext context) {
