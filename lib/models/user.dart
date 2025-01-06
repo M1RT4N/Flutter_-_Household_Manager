@@ -13,6 +13,7 @@ class User {
   final String name;
   final String? householdId;
   final String? requestedId;
+  final String? avatarUrl;
   @TimestampConverter()
   final Timestamp createdAt;
   final List<Notification> notifications;
@@ -26,6 +27,7 @@ class User {
     this.requestedId,
     required this.createdAt,
     this.notifications = const [],
+    this.avatarUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
@@ -41,6 +43,7 @@ class User {
     String? requestedId,
     Timestamp? createdAt,
     List<Notification>? notifications,
+    String? avatarUrl,
   }) {
     return User(
       id: id ?? this.id,
@@ -59,6 +62,11 @@ class User {
               : requestedId,
       createdAt: createdAt ?? this.createdAt,
       notifications: notifications ?? this.notifications,
+      avatarUrl: avatarUrl == null
+          ? this.avatarUrl
+          : avatarUrl == ''
+              ? null
+              : avatarUrl,
     );
   }
 }

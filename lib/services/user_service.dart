@@ -175,4 +175,26 @@ class UserService {
     final updatedUser = user.copyWith(notifications: updatedNotifications);
     await setUser(updatedUser);
   }
+
+  Future<String?> updateUserProfile(
+      String username, String name, String? avatarUrl) async {
+    try {
+      final user = getUser;
+      if (user == null) {
+        return 'User not found.';
+      }
+
+      final updatedUser = user.copyWith(
+        username: username,
+        name: name,
+        avatarUrl: avatarUrl ?? user.avatarUrl,
+      );
+      await setUser(updatedUser);
+      _pushToStream(updatedUser);
+    } catch (e) {
+      return 'An unexpected error occurred: $e';
+    }
+
+    return null;
+  }
 }

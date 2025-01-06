@@ -19,6 +19,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
               ?.map((e) => Notification.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      avatarUrl: json['avatarUrl'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -28,6 +29,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'name': instance.name,
       'householdId': instance.householdId,
       'requestedId': instance.requestedId,
+      'avatarUrl': instance.avatarUrl,
       'createdAt': const TimestampConverter().toJson(instance.createdAt),
       'notifications': instance.notifications.map((e) => e.toJson()).toList(),
     };

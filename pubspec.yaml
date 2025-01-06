@@ -45,6 +45,8 @@ dependencies:
   flutter_svg: ^1.0.3
   rxdart: ^0.28.0
   easy_loading_button: ^0.3.2
+  firebase_storage: ^11.6.0
+  image_picker: ^0.8.4+8
 
 dev_dependencies:
   flutter_test:

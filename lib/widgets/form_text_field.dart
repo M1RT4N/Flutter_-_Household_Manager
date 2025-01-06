@@ -5,6 +5,7 @@ class FormTextField extends StatelessWidget {
   final TextEditingController controller;
   final bool obscureText;
   final IconData icon;
+  final bool enabled;
 
   const FormTextField({
     super.key,
@@ -12,6 +13,7 @@ class FormTextField extends StatelessWidget {
     required this.controller,
     this.obscureText = false,
     required this.icon,
+    this.enabled = true,
   });
 
   @override
@@ -23,6 +25,7 @@ class FormTextField extends StatelessWidget {
       ),
       controller: controller,
       obscureText: obscureText,
+      enabled: enabled,
     );
   }
 }
