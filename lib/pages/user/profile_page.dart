@@ -69,14 +69,16 @@ class _ProfilePageState extends State<ProfilePage> {
     _usernameController.text = user.username;
     _nameController.text = user.name;
 
-    return Center(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width / _cardSizeFactor,
-        child: Column(
-          children: [
-            _buildUserDetailsCard(user),
-            _buildChangePasswordCard(),
-          ],
+    return SingleChildScrollView(
+      child: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width / _cardSizeFactor,
+          child: Column(
+            children: [
+              _buildUserDetailsCard(user),
+              _buildChangePasswordCard(),
+            ],
+          ),
         ),
       ),
     );
