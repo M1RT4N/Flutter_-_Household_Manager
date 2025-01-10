@@ -72,7 +72,7 @@ class HouseholdService {
       Household newHousehold,
       User newUser) async {
     try {
-      await setHousehold(newHousehold);
+      await _setHousehold(newHousehold);
       await _userService.setUser(newUser);
     } catch (e) {
       return e.toString();
@@ -143,12 +143,16 @@ class HouseholdService {
     }
   }
 
+  Future<void> renameHousehold(String newName) async {
+    _setHousehold(getHousehold!.copyWith(name: newName));
+  }
+
   Future<void> logout() async {
     await _userService.logout();
     _pushToSteam(null);
   }
 
-  Future<void> setHousehold(Household household) async {
+  Future<void> _setHousehold(Household household) async {
     await _householdRepository.setOrAdd(household.id, household);
     _pushToSteam(household);
   }
@@ -198,5 +202,32 @@ class HouseholdService {
         null,
       );
     }
+  }
+
+  Future<void> manageRequest(String request, bool accept) async {
+    final household = getHousehold!;
+    final user = await _userService.getById(request);
+
+    final newUser = user!
+        .copyWith(requestedId: '', householdId: accept ? household.id : null);
+
+    final requests = List<String>.from(household.requested)..remove(request);
+    final members = List<String>.from(household.members)..add(user.id);
+
+    final newHousehold = household.copyWith(
+        requested: accept ? requests : null, members: accept ? members : null);
+
+    _userService.updateUser(newUser);
+    _setHousehold(newHousehold);
+  }
+
+  Future<void> removeMember(String member) async {
+    final household = getHousehold!;
+    final user = await _userService.getById(member);
+    final newUser = user!.copyWith(householdId: '');
+    final members = List<String>.from(household.members)..remove(member);
+    final newHousehold = household.copyWith(members: members);
+    _userService.updateUser(newUser);
+    _setHousehold(newHousehold);
   }
 }

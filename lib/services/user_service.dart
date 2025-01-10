@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/database_service.dart';
-import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -31,8 +30,12 @@ class UserService {
     _userStream.value = user;
   }
 
+  Future<User?> getById(String id) {
+    return _userRepository.getDocument(id);
+  }
+
   Future<User?> fetchUser(String id) async {
-    final user = await _userRepository.getDocument(id);
+    final user = await getById(id);
     _pushToStream(user);
     return user;
   }
@@ -122,8 +125,12 @@ class UserService {
     return null;
   }
 
+  Future<void> updateUser(User newUser) async {
+    _userRepository.setOrAdd(newUser.id, newUser);
+  }
+
   Future<void> setUser(User newUser) async {
-    await _userRepository.setOrAdd(newUser.id, newUser);
+    await updateUser(newUser);
     _pushToStream(newUser);
   }
 
@@ -196,5 +203,17 @@ class UserService {
     }
 
     return null;
+  }
+
+  Future<void> changeName(String newName) async {
+    setUser(getUser!.copyWith(name: newName));
+  }
+
+  Future<void> changeUsername(String newUsername) async {
+    setUser(getUser!.copyWith(username: newUsername));
+  }
+
+  Future<void> changeEmail(String newEmail) async {
+    setUser(getUser!.copyWith(email: newEmail));
   }
 }
