@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/user.dart' as user_model;
-import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/models/user.dart';
+import 'package:household_manager/pages/common/loading_page_template.dart';
+import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notification.dart';
 import 'package:household_manager/widgets/notifications/user_notification.dart';
-import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/services/household_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 const _cardBottomPadding = 12.0;
@@ -37,48 +37,50 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
+    return LoadingPageTemplate<(User, Household)>(
       title: 'Notifications',
       showDrawer: true,
-      bodyFunction: _buildBody,
+      stream: CombineLatestStream.combine2(
+        userService.getUserStream,
+        householdService.getHouseholdStream,
+        (user, household) => (user!, household!),
+      ),
+      bodyFunctionWeb: _buildBodyWeb,
+      bodyFunctionPhone: _buildBodyPhone,
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  // TODO: implement
+  Widget _buildBodyPhone(BuildContext context, (User, Household) data) {
+    return Container();
+  }
+
+  Widget _buildBodyWeb(BuildContext context, (User, Household) data) {
+    final user = data.$1;
+    final household = data.$2;
+    final notifications = user.notifications;
+
     return Column(
       children: [
         _buildSearchAndFilterRow(context),
         Expanded(
-          child: LoadingStreamBuilder(
-            stream: CombineLatestStream.combine2(
-              userService.getUserStream,
-              householdService.getHouseholdStream,
-              (user, household) => [user, household],
-            ),
-            builder: (context, data) {
-              final user = (data as List)[0] as user_model.User?;
-              final household = (data)[1] as Household?;
-              final notifications = user?.notifications ?? [];
-
-              return FutureBuilder<List<BaseNotification>>(
-                future: _buildNotificationsList(household, notifications),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  final filteredNotifications =
-                      _filterNotifications(snapshot.data!);
-                  if (filteredNotifications.isEmpty) {
-                    return _buildNoNotificationsMessage();
-                  }
-                  return ListView.builder(
-                    padding: EdgeInsets.all(_cardInnerPadding),
-                    itemCount: filteredNotifications.length,
-                    itemBuilder: (context, index) {
-                      return _buildNotificationCard(
-                          context, filteredNotifications[index]);
-                    },
-                  );
+          child: FutureBuilder<List<BaseNotification>>(
+            future: _buildNotificationsList(household, notifications),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
+              final filteredNotifications =
+                  _filterNotifications(snapshot.data!);
+              if (filteredNotifications.isEmpty) {
+                return _buildNoNotificationsMessage();
+              }
+              return ListView.builder(
+                padding: EdgeInsets.all(_cardInnerPadding),
+                itemCount: filteredNotifications.length,
+                itemBuilder: (context, index) {
+                  return _buildNotificationCard(
+                      context, filteredNotifications[index]);
                 },
               );
             },

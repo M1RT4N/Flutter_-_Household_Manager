@@ -166,7 +166,7 @@ class HouseholdService {
       members: household.members..add(user.id),
     );
 
-    await setHousehold(newHousehold);
+    await _setHousehold(newHousehold);
     await _userService.joinHousehold(user.id, householdId);
 
     for (final memberId in household.members) {
@@ -190,7 +190,7 @@ class HouseholdService {
       requested: household.requested..remove(user.id),
     );
 
-    await setHousehold(newHousehold);
+    await _setHousehold(newHousehold);
     await _userService.joinHousehold(user.id, "");
 
     for (final memberId in household.members) {

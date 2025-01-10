@@ -5,16 +5,23 @@ import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
 
-const _initialsSize = 12.0;
 const _imageBorderWidth = 1.0;
 const _imageRadiusFactor = 2.0;
+const _initialsRadius = 16.0;
+const _initialsFontSize = 12.0;
 
 class UserAvatar extends StatelessWidget {
   final VoidCallback onPressed;
   final userService = GetIt.instance<UserService>();
   final double initialsRadius;
+  final double initialsFontSize;
 
-  UserAvatar({super.key, required this.onPressed, this.initialsRadius = 16.0});
+  UserAvatar({
+    super.key,
+    required this.onPressed,
+    this.initialsRadius = _initialsRadius,
+    this.initialsFontSize = _initialsFontSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +57,10 @@ class UserAvatar extends StatelessWidget {
         child: user.avatarUrl == null
             ? Text(
                 Utility.getUserInitials(user.name),
-                style: TextStyle(color: Colors.white, fontSize: _initialsSize),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: initialsFontSize,
+                ),
               )
             : null,
       ),

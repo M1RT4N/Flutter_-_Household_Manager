@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/todo.dart';
-import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
@@ -23,34 +22,30 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
+    return LoadingPageTemplate<List<Todo>>(
       title: 'Home',
-      bodyFunction: _buildBody,
+      stream: GetIt.instance<TodoService>().getTodoStream,
+      bodyFunctionPhone: _buildBody,
+      bodyFunctionWeb: _buildBody,
     );
   }
 
-  Widget _buildBody(BuildContext context) {
-    return LoadingStreamBuilder(
-      stream: GetIt.instance<TodoService>().getTodoStream,
-      builder: (context, snapshot) {
-        final todos = snapshot as List<Todo>;
-        final top5BeforeDeadline = _getTopNBeforeDeadline(todos);
-        final pastDeadline = _getPassedDeadline(todos);
+  Widget _buildBody(BuildContext context, List<Todo> todos) {
+    final top5BeforeDeadline = _getTopNBeforeDeadline(todos);
+    final pastDeadline = _getPassedDeadline(todos);
 
-        return ListView(
-          children: [
-            ..._buildSection(
-                top5BeforeDeadline,
-                'Top $_topNBeforeDeadline closest to deadline:',
-                Theme.of(context).splashColor),
-            ..._buildSection(
-              pastDeadline,
-              'Past deadline:',
-              Theme.of(context).disabledColor,
-            )
-          ],
-        );
-      },
+    return ListView(
+      children: [
+        ..._buildSection(
+            top5BeforeDeadline,
+            'Top $_topNBeforeDeadline closest to deadline:',
+            Theme.of(context).splashColor),
+        ..._buildSection(
+          pastDeadline,
+          'Past deadline:',
+          Theme.of(context).disabledColor,
+        )
+      ],
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/database_service.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:rxdart/rxdart.dart';
 

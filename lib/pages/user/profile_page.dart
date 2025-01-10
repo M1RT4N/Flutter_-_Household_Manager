@@ -5,23 +5,17 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/user.dart';
-import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/utility.dart';
+import 'package:household_manager/widgets/editable_field.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
+import 'package:household_manager/widgets/info_field.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/app_state.dart';
-import 'package:household_manager/models/user.dart';
-import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/utils/utility.dart';
-import 'package:household_manager/widgets/editable_field.dart';
-import 'package:household_manager/widgets/info_field.dart';
-import 'package:household_manager/widgets/user_avatar.dart';
 
 const _padding = EdgeInsets.all(16.0);
 const _avatarSectionGap = SizedBox(height: 20);
@@ -63,25 +57,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingStreamBuilder(
-      stream: _userService.getUserStream,
-      builder: (context, user_) {
-        final user = user_! as User;
-        final haveHousehold =
-            user.householdId != null && user.householdId!.isNotEmpty;
+    final user = _userService.getUser!;
+    final haveHousehold =
+        user.householdId != null && user.householdId!.isNotEmpty;
 
-        return PageTemplate(
-          title: 'Profile',
-          bodyFunction: (context) => _buildBody(context, user),
-          showDrawer: haveHousehold,
-          showBackArrow: !haveHousehold,
-          showNotifications: haveHousehold,
-        );
-      },
-    );
+    return LoadingPageTemplate<User?>(
+        title: 'Profile',
+        stream: _userService.getUserStream,
+        bodyFunctionWeb: _buildBodyWeb,
+        bodyFunctionPhone: _buildBodyPhone,
+        showDrawer: haveHousehold,
+        showBackArrow: !haveHousehold,
+        showNotifications: haveHousehold);
   }
 
-  Widget _buildBody(BuildContext context, User user) {
+  Widget _buildBodyWeb(BuildContext context, User? user) {
+    if (user == null) {
+      return Center(child: Text('No data available.'));
+    }
+
     _usernameController.text = user.username;
     _nameController.text = user.name;
 
@@ -213,10 +207,7 @@ class _ProfilePageState extends State<ProfilePage> {
       icon: Stack(
         alignment: Alignment.bottomRight,
         children: [
-          UserAvatar(
-            onPressed: _pickImage,
-            initialsRadius: _avatarSize,
-          ),
+          UserAvatar(onPressed: _pickImage, initialsRadius: _avatarSize),
           CircleAvatar(
             radius: _avatarEditIconSize,
             backgroundColor: Colors.grey[400],
@@ -232,26 +223,29 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildActionButtons(User user) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        LoadingStadiumButton(
-          buttonText: 'Update',
-          onPressed: () => _saveProfile(user),
-        ),
-        SizedBox(width: _controlButtonsSpacing),
-        LoadingStadiumButton(
-          buttonText: 'Reset',
-          onPressed: () {
-            setState(() {
-              _usernameController.text = user.username;
-              _nameController.text = user.name;
-            });
-          },
-        ),
-      ],
-  Widget _buildBody(BuildContext context, AppState appState) {
-    final user = appState.user!;
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      LoadingStadiumButton(
+        buttonText: 'Update',
+        onPressed: () => _saveProfile(user),
+      ),
+      SizedBox(width: _controlButtonsSpacing),
+      LoadingStadiumButton(
+        buttonText: 'Reset',
+        onPressed: () {
+          setState(() {
+            _usernameController.text = user.username;
+            _nameController.text = user.name;
+          });
+        },
+      ),
+    ]);
+  }
+
+  Widget _buildBodyPhone(BuildContext context, User? user) {
+    if (user == null) {
+      return Center(child: Text('No data available.'));
+    }
+
     return Center(
       child: Padding(
         padding: _padding,
@@ -260,10 +254,9 @@ class _ProfilePageState extends State<ProfilePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             UserAvatar(
-              name: user.name,
-              iconRadius: _avatarRadius,
-              fontSize: _avatarFontSize,
-            ),
+                onPressed: () {},
+                initialsRadius: _avatarRadius,
+                initialsFontSize: _avatarFontSize),
             _avatarSectionGap,
             _buildInfoCard(user),
           ],

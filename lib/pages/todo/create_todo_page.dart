@@ -2,12 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/household.dart';
-import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/pages/common/loading_page_template.dart';
+import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -28,57 +27,58 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
+    return LoadingPageTemplate<Household>(
       title: 'Create TODO',
-      bodyFunction: _buildBody,
+      stream: GetIt.instance<HouseholdService>().getHouseholdStream
+          as Stream<Household>,
+      bodyFunctionPhone: _buildBodyPhone,
+      bodyFunctionWeb: _buildBodyWeb,
       showBackArrow: true,
       showDrawer: false,
     );
   }
 
-  Widget _buildBody(BuildContext context) {
-    return LoadingStreamBuilder(
-      stream: GetIt.instance<HouseholdService>().getHouseholdStream,
-      builder: (context, household_) {
-        final household = household_! as Household;
+  // TODO: implement
+  Widget _buildBodyWeb(BuildContext context, Household household) {
+    return Container();
+  }
 
-        return Center(
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            constraints: BoxConstraints(maxWidth: 500),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    labelText: 'Todo for:',
-                    hintText: 'Choose member',
-                  ),
-                  value: _createdForController.text,
-                  items: household.members
-                      .map((m) => DropdownMenuItem(value: m, child: Text(m)))
-                      .toList(),
-                  onChanged: (m) => _createdForController.text = m!,
-                ),
-                TextField(
-                  decoration: InputDecoration(
-                      labelText: 'Description:', hintText: 'Write description'),
-                  controller: _descriptionController,
-                ),
-                TextField(
-                    decoration: const InputDecoration(
-                        icon: Icon(Icons.calendar_today),
-                        labelText: "Deadline:",
-                        hintText: 'Choose deadline'),
-                    readOnly: true,
-                    controller: _dateController,
-                    onTap: _pickDate),
-                LoadingStadiumButton(buttonText: 'Create', onPressed: _create)
-              ],
+  Widget _buildBodyPhone(BuildContext context, Household household) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Todo for:',
+                hintText: 'Choose member',
+              ),
+              value: _createdForController.text,
+              items: household.members
+                  .map((m) => DropdownMenuItem(value: m, child: Text(m)))
+                  .toList(),
+              onChanged: (m) => _createdForController.text = m!,
             ),
-          ),
-        );
-      },
+            TextField(
+              decoration: InputDecoration(
+                  labelText: 'Description:', hintText: 'Write description'),
+              controller: _descriptionController,
+            ),
+            TextField(
+                decoration: const InputDecoration(
+                    icon: Icon(Icons.calendar_today),
+                    labelText: "Deadline:",
+                    hintText: 'Choose deadline'),
+                readOnly: true,
+                controller: _dateController,
+                onTap: _pickDate),
+            LoadingStadiumButton(buttonText: 'Create', onPressed: _create)
+          ],
+        ),
+      ),
     );
   }
 

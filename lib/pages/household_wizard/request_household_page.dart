@@ -3,7 +3,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/user.dart';
-import 'package:household_manager/pages/common/page_template.dart';
+import 'package:household_manager/pages/common/static_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
@@ -31,10 +31,11 @@ class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
   final _userService = GetIt.instance<UserService>();
   final _householdService = GetIt.instance<HouseholdService>();
 
+  // TODO: we have loading page template -> use it instead of this nonsense
   @override
   Widget build(BuildContext context) {
-    // NOTE: MicorTask is used to push the route after the current build is done
-    //       to ensure that we woul not loop infinitely between chooseHousehold
+    // NOTE: MicroTask is used to push the route after the current build is done
+    //       to ensure that we would not loop infinitely between chooseHousehold
     //       and this page.
     return LoadingStreamBuilder<User?>(
       stream: _userService.getUserStream,
@@ -63,12 +64,12 @@ class _HouseholdRequestPageState extends State<HouseholdRequestPage> {
   }
 
   Widget _buildPage(BuildContext context, bodyBuilder) {
-    return PageTemplate(
+    return StaticPageTemplate(
       title: 'Household Request',
+      bodyFunction: bodyBuilder,
       showDrawer: false,
       showNotifications: false,
       showLogout: true,
-      bodyFunction: bodyBuilder,
     );
   }
 
