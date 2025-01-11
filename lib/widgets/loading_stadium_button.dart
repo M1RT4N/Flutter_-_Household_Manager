@@ -8,28 +8,33 @@ const _buttonRadius = 20.0;
 const _buttonElevation = 2.0;
 
 class LoadingStadiumButton extends StatelessWidget {
-  final String buttonText;
+  final Widget idleStateWidget;
   final VoidCallback onPressed;
+  final double buttonWidth;
 
   const LoadingStadiumButton(
-      {super.key, required this.buttonText, required this.onPressed});
+      {super.key,
+      required this.idleStateWidget,
+      required this.onPressed,
+      this.buttonWidth = _buttonWidth});
 
   @override
   Widget build(BuildContext context) {
     return EasyButton(
       type: EasyButtonType.elevated,
       elevation: _buttonElevation,
-      width: _buttonWidth,
+      width: buttonWidth,
       height: _buttonHeight,
       buttonColor: Theme.of(context).primaryColor,
       borderRadius: _buttonRadius,
-      idleStateWidget: Text(buttonText),
+      idleStateWidget: idleStateWidget,
       onPressed: onPressed,
       useWidthAnimation: false,
       loadingStateWidget: CircularProgressIndicator(
         strokeWidth: _loadingCircleStrokeWidth,
         valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).secondaryHeaderColor),
+          Theme.of(context).secondaryHeaderColor,
+        ),
       ),
     );
   }

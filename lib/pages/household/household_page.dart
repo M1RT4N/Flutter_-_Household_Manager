@@ -11,12 +11,15 @@ import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/editable_field.dart';
 import 'package:household_manager/widgets/info_field.dart';
+import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 
 const _elevation = 4.0;
 const _borderRadius = 8.0;
 const _padding = EdgeInsets.all(16.0);
 const _sizedBox = SizedBox(height: 16);
+const _buttonsGap = SizedBox(width: 8);
+const _buttonWidth = 30.0;
 
 class HouseholdPage extends StatelessWidget {
   const HouseholdPage({super.key});
@@ -91,51 +94,64 @@ Widget _buildBodyPhone(BuildContext context, Household? household) {
   );
 }
 
-Widget _buildMembersSection(BuildContext context, List<User> members) {
+Widget _buildSection<T>({
+  required BuildContext context,
+  required Icon leadingIcon,
+  required String title,
+  required List<T> items,
+  required Widget Function(T item) buildItem,
+}) {
   return ExpansionTile(
-    leading: const Icon(Icons.group),
-    title: const Text('Members'),
-    children: [
-      for (final member in members)
-        ListTile(
-          title: Text(member.name),
-          trailing: GetIt.instance<UserService>().getUser!.id != member.id
-              // TODO: delete icon is slightly off and I have no idea why
-              ? IconButton(
-                  onPressed: () => _removeMember(context, member.id),
-                  icon: Icon(Icons.delete_forever),
-                )
-              : Text('You'),
-        )
-    ],
+    leading: leadingIcon,
+    title: Text(title),
+    children: items.map(buildItem).toList(),
+  );
+}
+
+Widget _buildMembersSection(BuildContext context, List<User> members) {
+  return _buildSection<User>(
+    context: context,
+    leadingIcon: const Icon(Icons.group),
+    title: 'Members',
+    items: members,
+    buildItem: (member) => ListTile(
+      title: Text(member.name),
+      trailing: GetIt.instance<UserService>().getUser!.id != member.id
+          ? LoadingStadiumButton(
+              onPressed: () => _removeMember(context, member.id),
+              idleStateWidget: const Icon(Icons.delete_forever),
+              buttonWidth: _buttonWidth,
+            )
+          : const Text('You  '),
+    ),
   );
 }
 
 Widget _buildRequestsSection(BuildContext context, List<User> requesters) {
-  return ExpansionTile(
-    leading: const Icon(Icons.mark_as_unread_rounded),
-    title: const Text('Requests'),
-    children: [
-      for (final requester in requesters)
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                requester.name,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            IconButton(
-              onPressed: () => _manageRequest(context, requester.id, true),
-              icon: Icon(Icons.check),
-            ),
-            IconButton(
-              onPressed: () => _manageRequest(context, requester.id, false),
-              icon: Icon(Icons.close),
-            ),
-          ],
-        ),
-    ],
+  return _buildSection<User>(
+    context: context,
+    leadingIcon: const Icon(Icons.mark_as_unread_rounded),
+    title: 'Requests',
+    items: requesters,
+    buildItem: (requester) => ListTile(
+      title: Text(requester.name),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LoadingStadiumButton(
+            onPressed: () => _manageRequest(context, requester.id, true),
+            idleStateWidget: const Icon(Icons.check),
+            buttonWidth: _buttonWidth,
+          ),
+          _buttonsGap,
+          LoadingStadiumButton(
+            onPressed: () => _manageRequest(context, requester.id, false),
+            idleStateWidget: const Icon(Icons.close),
+            buttonWidth: _buttonWidth,
+          ),
+        ],
+      ),
+    ),
   );
 }
 
@@ -168,17 +184,16 @@ Widget _buildHouseholdInfoSection(BuildContext context, Household household) {
   );
 }
 
-Future<void> _renameHousehold(BuildContext context, String newName) async {
-  Utility.performActionAndShowInfo(
+Future<void> _renameHousehold(BuildContext context, String newName) {
+  return Utility.performActionAndShowInfo(
     context: context,
     action: () => GetIt.instance<HouseholdService>().renameHousehold(newName),
     successMessage: 'Household name changed.',
   );
 }
 
-Future<void> _manageRequest(
-    BuildContext context, String request, bool accept) async {
-  Utility.performActionAndShowInfo(
+Future<void> _manageRequest(BuildContext context, String request, bool accept) {
+  return Utility.performActionAndShowInfo(
     context: context,
     action: () =>
         GetIt.instance<HouseholdService>().manageRequest(request, accept),
@@ -186,8 +201,8 @@ Future<void> _manageRequest(
   );
 }
 
-Future<void> _removeMember(BuildContext context, String member) async {
-  Utility.performActionAndShowInfo(
+Future<void> _removeMember(BuildContext context, String member) {
+  return Utility.performActionAndShowInfo(
     context: context,
     action: () => GetIt.instance<HouseholdService>().removeMember(member),
     successMessage: 'Member removed.',
@@ -235,6 +250,7 @@ void _leaveHousehold(BuildContext context) async {
           throw Exception(errorMessage);
         }
       }
+      return null;
     },
     successMessage: 'Household left.',
     errorMessage: 'Failed to leave household',

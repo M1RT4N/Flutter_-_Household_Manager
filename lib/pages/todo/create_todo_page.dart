@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
@@ -74,7 +73,10 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
                   _verticalGap,
                   _buildDeadlinePicker(),
                   _verticalGap,
-                  LoadingStadiumButton(buttonText: 'Create', onPressed: _create)
+                  LoadingStadiumButton(
+                    idleStateWidget: Text('Create'),
+                    onPressed: _create,
+                  )
                 ],
               ),
             ),
@@ -128,7 +130,7 @@ class _CreateTodoPageState extends State<CreateTodoPage> {
 
     final todo = await _todoService.create(
       _createdForController.text,
-      Timestamp.fromDate(Utility.parseDate(_dateController.text)),
+      Utility.parseDate(_dateController.text),
       _descriptionController.text,
     );
 

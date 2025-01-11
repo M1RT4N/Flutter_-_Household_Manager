@@ -25,13 +25,13 @@ class TodoService {
   }
 
   Future<Todo> create(
-      String createdForId, Timestamp deadline, String description) async {
+      String createdForId, DateTime deadline, String description) async {
     final todo = Todo(
       id: Utility.generateRandomCode(_todoIdLength),
       createdById: _userService.getUser!.id,
       createdForId: createdForId,
       createdAt: Timestamp.now(),
-      deadline: deadline,
+      deadline: Timestamp.fromDate(deadline),
       description: description,
     );
 
@@ -45,8 +45,9 @@ class TodoService {
   }
 
   Future<List<TodoDto>> fetchCreators(List<Todo> todos) async {
-    final creators = await _userService
-        .getUsersByIds(todos.map((t) => t.createdById).toList());
+    final creators = await _userService.getUsersByIds(
+      todos.map((t) => t.createdById).toList(),
+    );
 
     final List<TodoDto> todosWithCreators = [];
     for (final todo in todos) {

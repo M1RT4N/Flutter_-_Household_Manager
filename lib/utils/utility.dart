@@ -56,7 +56,7 @@ class Utility {
         lastDate: DateTime.fromMicrosecondsSinceEpoch(_maxEpochDate));
 
     if (pickedDate != null) {
-      controller.text = Utility.formatDate(pickedDate);
+      controller.text = formatDate(pickedDate);
     } else {
       controller.clear();
     }
@@ -66,7 +66,7 @@ class Utility {
     required BuildContext context,
     required String title,
     required String message,
-    required Future<void> Function() action,
+    required Future<String?> Function() action,
     String successMessage = '',
     String? errorMessage,
     String? navigateTo,
@@ -96,13 +96,17 @@ class Utility {
 
   static Future<void> performActionAndShowInfo({
     required BuildContext context,
-    required Future<void> Function() action,
+    required Future<String?> Function() action,
     required String successMessage,
     Color successColor = Colors.blue,
   }) async {
-    await action();
+    final error = await action();
     if (context.mounted) {
-      showTopSnackBar(context, successMessage, successColor);
+      showTopSnackBar(
+        context,
+        error ?? successMessage,
+        error == null ? successColor : Colors.red,
+      );
     }
   }
 

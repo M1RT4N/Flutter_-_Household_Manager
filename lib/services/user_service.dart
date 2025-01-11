@@ -18,9 +18,6 @@ class UserService {
     return _userRepository.observeDocument(uid);
   }
 
-  DocumentReference<User> get getUserDoc =>
-      _userRepository.reference.doc(getUser?.id);
-
   User? get getUser => _userStream.value;
 
   get authChangeStream => _fbAuth.authStateChanges();
@@ -41,8 +38,11 @@ class UserService {
     return user;
   }
 
+  DocumentReference<User> getUserDoc(User user) {
+    return _userRepository.reference.doc(user.id);
+  }
+
   Future<List<User>> getUsersByIds(List<String> userIds) async {
-    await Future.delayed(Duration(seconds: 2));
     return _userRepository.getDocumentsByIds(userIds.toSet());
   }
 
@@ -162,15 +162,6 @@ class UserService {
       ..add(newNotification);
 
     final updatedUser = user.copyWith(notifications: updatedNotifications);
-    await setUser(updatedUser);
-  }
-
-  Future<void> joinHousehold(String userId, String householdId) async {
-    final user = await fetchUser(userId);
-    if (user == null) return;
-
-    final updatedUser =
-        user.copyWith(householdId: householdId, requestedId: "");
     await setUser(updatedUser);
   }
 

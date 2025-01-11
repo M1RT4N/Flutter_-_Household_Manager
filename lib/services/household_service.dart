@@ -64,54 +64,41 @@ class HouseholdService {
       return 'Invalid household code.';
     }
 
-    final user = _userService.getUser!;
-    final householdDoc = _householdRepository.reference.doc(householdByCode.id);
     final household = getHousehold!;
+    final user = _userService.getUser!;
 
     final newHousehold =
         household.copyWith(requested: household.requested..add(user.id));
     final newUser = user.copyWith(requestedId: household.id);
 
-    return await _householdRequestTransaction(
-        householdDoc, newHousehold, newUser);
-  }
-
-  Future<String?> _householdRequestTransaction(
-      DocumentReference<Household> householdDocRef,
-      Household newHousehold,
-      User newUser) async {
-    try {
-      await _setHousehold(newHousehold);
-      await _userService.setUser(newUser);
-    } catch (e) {
-      return e.toString();
-    }
-    return null;
+    return await _householdUserUpdateTransaction(newHousehold, newUser);
   }
 
   Future<String?> cancelHouseholdRequest() async {
     final user = _userService.getUser!;
     final household = await _householdRepository.getDocument(user.requestedId!);
-    final householdDoc = _householdRepository.reference.doc(household!.id);
 
-    final newHousehold =
-        household.copyWith(requested: household.requested..remove(user.id));
+    final newHousehold = household!.copyWith(
+      requested: household.requested..remove(user.id),
+    );
     final newUser = user.copyWith(requestedId: '');
 
-    return await _householdRequestTransaction(
-        householdDoc, newHousehold, newUser);
+    return await _householdUserUpdateTransaction(newHousehold, newUser,
+        pushToStream: false);
   }
 
   Future<String?> tryLeaveHousehold() async {
     try {
       final user = _userService.getUser!;
-      final newUser = user.copyWith(householdId: '');
       final household = getHousehold!;
-      final householdDoc = _householdRepository.reference.doc(household.id);
-      final newHousehold =
-          household.copyWith(members: household.members..remove(user.id));
-      final result = await _householdRequestTransaction(
-          householdDoc, newHousehold, newUser);
+
+      final newUser = user.copyWith(householdId: '');
+      final newHousehold = household.copyWith(
+        members: household.members..remove(user.id),
+      );
+
+      final result =
+          await _householdUserUpdateTransaction(newHousehold, newUser);
 
       for (final memberId in household.members) {
         if (memberId != user.id) {
@@ -142,18 +129,17 @@ class HouseholdService {
         requested: [],
         createdAt: Timestamp.now(),
       );
-      final householdDoc = _householdRepository.reference.doc(household.id);
       final newUser = user.copyWith(householdId: household.id);
 
-      return await _householdRequestTransaction(
-          householdDoc, household, newUser);
+      return await _householdUserUpdateTransaction(household, newUser);
     } catch (e) {
       return e.toString();
     }
   }
 
-  Future<void> renameHousehold(String newName) async {
+  Future<String?> renameHousehold(String newName) async {
     _setHousehold(getHousehold!.copyWith(name: newName));
+    return null;
   }
 
   Future<void> logout() async {
@@ -166,17 +152,25 @@ class HouseholdService {
     _pushToSteam(household);
   }
 
-  Future<void> approveJoinRequest(String householdId, User? user) async {
+  Future<String?> approveJoinRequest(String householdId, User? user) async {
     final household = await fetchHousehold(householdId);
-    if (household == null || user == null) return;
+    if (household == null || user == null) {
+      return "Could not fetch household.";
+    }
 
     final newHousehold = household.copyWith(
       requested: household.requested..remove(user.id),
       members: household.members..add(user.id),
     );
+    final newUser = user.copyWith(
+      householdId: householdId,
+      requestedId: "",
+    );
 
-    await _setHousehold(newHousehold);
-    await _userService.joinHousehold(user.id, householdId);
+    final error = await _householdUserUpdateTransaction(newHousehold, newUser);
+    if (error != null) {
+      return error;
+    }
 
     for (final memberId in household.members) {
       if (memberId != user.id) {
@@ -189,18 +183,28 @@ class HouseholdService {
         );
       }
     }
+
+    return null;
   }
 
-  Future<void> rejectJoinRequest(String householdId, User? user) async {
+  Future<String?> rejectJoinRequest(String householdId, User? user) async {
     final household = await fetchHousehold(householdId);
-    if (household == null || user == null) return;
+    if (household == null || user == null) {
+      return "Could not fetch household.";
+    }
 
     final newHousehold = household.copyWith(
       requested: household.requested..remove(user.id),
     );
+    final newUser = user.copyWith(
+      householdId: "",
+      requestedId: "",
+    );
 
-    await _setHousehold(newHousehold);
-    await _userService.joinHousehold(user.id, "");
+    final error = await _householdUserUpdateTransaction(newHousehold, newUser);
+    if (error != null) {
+      return error;
+    }
 
     for (final memberId in household.members) {
       await _userService.addNotification(
@@ -211,32 +215,60 @@ class HouseholdService {
         null,
       );
     }
+
+    return null;
   }
 
-  Future<void> manageRequest(String request, bool accept) async {
+  Future<String?> manageRequest(String request, bool accept) async {
     final household = getHousehold!;
     final user = await _userService.getById(request);
 
-    final newUser = user!
-        .copyWith(requestedId: '', householdId: accept ? household.id : null);
-
     final requests = List<String>.from(household.requested)..remove(request);
-    final members = List<String>.from(household.members)..add(user.id);
+    final members = List<String>.from(household.members)..add(user!.id);
 
+    final newUser = user.copyWith(
+      requestedId: '',
+      householdId: accept ? household.id : null,
+    );
     final newHousehold = household.copyWith(
-        requested: accept ? requests : null, members: accept ? members : null);
+      requested: accept ? requests : null,
+      members: accept ? members : null,
+    );
 
-    _userService.updateUser(newUser);
-    _setHousehold(newHousehold);
+    return await _householdUserUpdateTransaction(newHousehold, newUser);
   }
 
-  Future<void> removeMember(String member) async {
+  Future<String?> removeMember(String member) async {
     final household = getHousehold!;
     final user = await _userService.getById(member);
-    final newUser = user!.copyWith(householdId: '');
+
     final members = List<String>.from(household.members)..remove(member);
+
+    final newUser = user!.copyWith(householdId: '');
     final newHousehold = household.copyWith(members: members);
-    _userService.updateUser(newUser);
-    _setHousehold(newHousehold);
+
+    return await _householdUserUpdateTransaction(newHousehold, newUser);
+  }
+
+  Future<String?> _householdUserUpdateTransaction(
+      Household newHousehold, User newUser,
+      {bool pushToStream = true}) async {
+    final householdDoc = _householdRepository.reference.doc(newHousehold.id);
+    final userDoc = _userService.getUserDoc(newUser);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((tx) async {
+        tx.set(householdDoc, newHousehold);
+        tx.set(userDoc, newUser);
+
+        if (pushToStream) {
+          _pushToSteam(newHousehold);
+        }
+      });
+    } catch (e) {
+      return e.toString();
+    }
+
+    return null;
   }
 }

@@ -65,12 +65,12 @@ class _LoginPageState extends State<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         LoadingStadiumButton(
-            buttonText: 'Register',
+            idleStateWidget: Text('Register'),
             onPressed: () => Modular.to.navigate(AppRoute.register.path)),
         SizedBox(width: _spaceBetweenButtons),
         Text('or'),
         SizedBox(width: _spaceBetweenButtons),
-        LoadingStadiumButton(buttonText: 'Login', onPressed: _login),
+        LoadingStadiumButton(idleStateWidget: Text('Login'), onPressed: _login),
       ],
     );
   }

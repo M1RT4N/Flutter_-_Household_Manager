@@ -163,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 SizedBox(height: _controlButtonsPadding),
                 LoadingStadiumButton(
-                  buttonText: 'Save',
+                  idleStateWidget: Text('Save'),
                   onPressed: _changePassword,
                 ),
               ],
@@ -215,12 +215,12 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildActionButtons(User user) {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
       LoadingStadiumButton(
-        buttonText: 'Update',
+        idleStateWidget: Text('Update'),
         onPressed: () => _saveProfile(user),
       ),
       SizedBox(width: _controlButtonsSpacing),
       LoadingStadiumButton(
-        buttonText: 'Reset',
+        idleStateWidget: Text('Reset'),
         onPressed: () {
           setState(() {
             _usernameController.text = user.username;
@@ -291,26 +291,29 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<void> _changeName(BuildContext context, String newName) async {
-    Utility.performActionAndShowInfo(
+  Future<void> _changeName(BuildContext context, String newName) {
+    return Utility.performActionAndShowInfo(
       context: context,
-      action: () => GetIt.instance<UserService>().changeName(newName),
+      action: () =>
+          GetIt.instance<UserService>().changeName(newName) as Future<String?>,
       successMessage: 'Name changed.',
     );
   }
 
-  Future<void> _changeUsername(BuildContext context, String newUsername) async {
-    Utility.performActionAndShowInfo(
+  Future<void> _changeUsername(BuildContext context, String newUsername) {
+    return Utility.performActionAndShowInfo(
       context: context,
-      action: () => GetIt.instance<UserService>().changeUsername(newUsername),
+      action: () => GetIt.instance<UserService>().changeUsername(newUsername)
+          as Future<String?>,
       successMessage: 'Username changed.',
     );
   }
 
-  Future<void> _changeEmail(BuildContext context, String newEmail) async {
-    Utility.performActionAndShowInfo(
+  Future<void> _changeEmail(BuildContext context, String newEmail) {
+    return Utility.performActionAndShowInfo(
       context: context,
-      action: () => GetIt.instance<UserService>().changeEmail(newEmail),
+      action: () => GetIt.instance<UserService>().changeEmail(newEmail)
+          as Future<String?>,
       successMessage: 'Email changed.',
     );
   }

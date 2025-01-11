@@ -73,7 +73,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 icon: Icons.person_outline,
               ),
               SizedBox(height: _spacingHeight),
-              LoadingStadiumButton(buttonText: 'Register', onPressed: _register)
+              LoadingStadiumButton(
+                  idleStateWidget: Text('Register'), onPressed: _register)
             ],
           ),
         ),

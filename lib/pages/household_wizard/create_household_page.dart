@@ -45,7 +45,9 @@ class _CreateHouseholdPageState extends State<CreateHouseholdPage> {
             _buildHouseholdNameField(),
             SizedBox(height: _spaceAfterField),
             LoadingStadiumButton(
-                buttonText: 'Create', onPressed: _createHousehold),
+              idleStateWidget: Text('Create'),
+              onPressed: _createHousehold,
+            ),
           ],
         ),
       ),

@@ -157,8 +157,10 @@ class _EditTodoPageState extends State<EditTodoPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        LoadingStadiumButton(buttonText: 'Delete', onPressed: _deleteTodo),
-        LoadingStadiumButton(buttonText: 'Save', onPressed: _updateTodo)
+        LoadingStadiumButton(
+            idleStateWidget: Text('Delete'), onPressed: _deleteTodo),
+        LoadingStadiumButton(
+            idleStateWidget: Text('Save'), onPressed: _updateTodo)
       ],
     );
   }
@@ -169,7 +171,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
         deadline: Timestamp.fromDate(Utility.parseDate(_dateController.text)));
     await Utility.performActionAndShowInfo(
       context: context,
-      action: () => todoService.updateTodo(updatedTodo),
+      action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
       successMessage: 'Todo updated.',
     );
   }
@@ -188,7 +190,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
     if (res == true && mounted) {
       await Utility.performActionAndShowInfo(
         context: context,
-        action: () => todoService.updateTodo(updatedTodo),
+        action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
         successMessage: 'Todo deleted.',
       );
 

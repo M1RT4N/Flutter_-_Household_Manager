@@ -64,7 +64,7 @@ abstract class PageTemplate extends StatelessWidget {
       context: context,
       title: 'Confirm Logout',
       message: 'Are you sure you want to logout?',
-      action: () async => await userService.logout(),
+      action: () async => await userService.logout() as Future<String?>,
       successMessage: 'Logged out successfully.',
       navigateTo: AppRoute.login.path,
     );

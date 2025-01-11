@@ -93,7 +93,8 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
             ),
           ),
           SizedBox(height: _gapBetweenColumns),
-          LoadingStadiumButton(buttonText: 'Join', onPressed: _joinHousehold)
+          LoadingStadiumButton(
+              idleStateWidget: Text('Join'), onPressed: _joinHousehold)
         ],
       ),
     );
