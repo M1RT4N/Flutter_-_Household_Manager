@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 const _dateFormat = 'dd.MM.yyyy';
+const _maxEpochDate = 8640000000000000;
 
 class Utility {
   static bool isValidEmail(String email) {
@@ -44,6 +45,21 @@ class Utility {
         ],
       ),
     );
+  }
+
+  static void pickDate(
+      BuildContext context, TextEditingController controller) async {
+    DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime.now(),
+        lastDate: DateTime.fromMicrosecondsSinceEpoch(_maxEpochDate));
+
+    if (pickedDate != null) {
+      controller.text = Utility.formatDate(pickedDate);
+    } else {
+      controller.clear();
+    }
   }
 
   static Future<void> handleActionWithConfirmation({

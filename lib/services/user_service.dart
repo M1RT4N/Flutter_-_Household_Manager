@@ -41,6 +41,11 @@ class UserService {
     return user;
   }
 
+  Future<List<User>> getUsersByIds(List<String> userIds) async {
+    await Future.delayed(Duration(seconds: 2));
+    return _userRepository.getDocumentsByIds(userIds.toSet());
+  }
+
   Future<void> logout() async {
     await _fbAuth.signOut();
     _pushToStream(null);

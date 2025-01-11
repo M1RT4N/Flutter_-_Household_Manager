@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/todo.dart';
+import 'package:household_manager/models/user.dart';
+import 'package:household_manager/services/todo_service.dart';
+import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
 
 const _maxWidth = 1000.0;
@@ -22,8 +27,15 @@ const _bubbleMargin = EdgeInsets.symmetric(
 
 class TodoTile extends StatelessWidget {
   final Todo todo;
+  final User creator;
+  final VoidCallback onClick;
 
-  const TodoTile({super.key, required this.todo});
+  const TodoTile({
+    super.key,
+    required this.todo,
+    required this.creator,
+    required this.onClick,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +48,7 @@ class TodoTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(_sectionBubbleRadius),
       ),
       child: ListTile(
+        onTap: onClick,
         contentPadding: _contentPadding,
         title: Wrap(
           children: [
@@ -50,14 +63,27 @@ class TodoTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Created by: ${todo.id}',
+              'Created by: ${GetIt.instance<UserService>().getUser!.id == creator.id ? 'You' : creator.name}',
               style: _subtitleStyle,
             ),
             Text('Deadline: ${Utility.formatDate(todo.deadline.toDate())}',
                 style: _subtitleStyle),
           ],
         ),
+        trailing: IconButton(
+          onPressed: () => _completeTodo(context, todo),
+          icon: Icon(Icons.check),
+        ),
       ),
     );
+  }
+
+  void _completeTodo(BuildContext context, Todo todo) async {
+    final updatedTodo =
+        todo.copyWith(completedAt: Timestamp.fromDate(DateTime.now()));
+    await Utility.performActionAndShowInfo(
+        context,
+        () => GetIt.instance<TodoService>().updateTodo(updatedTodo),
+        'Todo completed.');
   }
 }

@@ -9,6 +9,7 @@ class LoadingPageTemplate<T> extends PageTemplate {
   final Stream<T> stream;
   final Widget Function(BuildContext, T) bodyFunctionPhone;
   final Widget Function(BuildContext, T) bodyFunctionWeb;
+  final Widget? floatingActionButton;
 
   const LoadingPageTemplate(
       {super.key,
@@ -19,7 +20,8 @@ class LoadingPageTemplate<T> extends PageTemplate {
       super.showBackArrow,
       super.showDrawer,
       super.showLogout,
-      super.showNotifications});
+      super.showNotifications,
+      this.floatingActionButton});
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +29,14 @@ class LoadingPageTemplate<T> extends PageTemplate {
         appBar: buildAppBar(context),
         drawer: showDrawer ? AppDrawer(logoutFunc: logout) : null,
         body: LoadingStreamBuilder(
-            stream: stream,
-            builder: (context, T model) {
-              return MediaQuery.of(context).size.width > _maxPhoneWidth
-                  ? bodyFunctionWeb(context, model)
-                  : bodyFunctionPhone(context, model);
-            }));
+          stream: stream,
+          builder: (context, T model) {
+            return MediaQuery.of(context).size.width > _maxPhoneWidth
+                ? bodyFunctionWeb(context, model)
+                : bodyFunctionPhone(context, model);
+          },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: floatingActionButton);
   }
 }

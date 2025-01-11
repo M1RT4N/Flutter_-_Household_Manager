@@ -19,23 +19,23 @@ import 'package:image_picker/image_picker.dart';
 
 const _padding = EdgeInsets.all(16.0);
 const _avatarSectionGap = SizedBox(height: 20);
+const _cardMargin = EdgeInsets.all(16.0);
+const _cardInnerPadding = EdgeInsets.symmetric(
+  horizontal: 80.0,
+  vertical: 25.0,
+);
 const _borderRadius = 12.0;
-const _elevation = 4.0;
 const _avatarRadius = 50.0;
 const _avatarFontSize = 32.0;
-
 const _avatarSizeLimit = 50; // In MB
 const _controlButtonsSpacing = 10.0;
 const _avatarSize = 100.0;
 const _avatarEditIconSize = 16.0;
-const _cardHeaderPadding = 16.0;
+const _cardHeaderPadding = EdgeInsets.all(16.0);
 const _cardHeaderFontSize = 20.0;
 const _controlButtonsPadding = 20.0;
-const _cardInnerPaddingVertical = 25.0;
-const _cardInnerPaddingHorizontal = 80.0;
 const _cardSizeFactor = 2.0;
 const _cardElevation = 4.0;
-const _cardMargin = 16.0;
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -57,18 +57,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = _userService.getUser!;
-    final haveHousehold =
-        user.householdId != null && user.householdId!.isNotEmpty;
-
     return LoadingPageTemplate<User?>(
         title: 'Profile',
         stream: _userService.getUserStream,
         bodyFunctionWeb: _buildBodyWeb,
         bodyFunctionPhone: _buildBodyPhone,
-        showDrawer: haveHousehold,
-        showBackArrow: !haveHousehold,
-        showNotifications: haveHousehold);
+        showDrawer: false,
+        showBackArrow: true,
+        showNotifications: false);
   }
 
   Widget _buildBodyWeb(BuildContext context, User? user) {
@@ -97,17 +93,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildUserDetailsCard(User user) {
     return Card(
       elevation: _cardElevation,
-      margin: const EdgeInsets.all(_cardMargin),
+      margin: _cardMargin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildCardHeader('User Details'),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _cardInnerPaddingHorizontal,
-              vertical: _cardInnerPaddingVertical,
-            ),
+            padding: _cardInnerPadding,
             child: Column(
               children: [
                 _buildAvatarSection(),
@@ -140,17 +133,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildChangePasswordCard() {
     return Card(
       elevation: _cardElevation,
-      margin: const EdgeInsets.all(_cardMargin),
+      margin: _cardMargin,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildCardHeader('Change Password'),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _cardInnerPaddingHorizontal,
-              vertical: _cardInnerPaddingVertical,
-            ),
+            padding: _cardInnerPadding,
             child: Column(
               children: [
                 FormTextField(
@@ -186,7 +176,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildCardHeader(String title) {
     return Container(
-      padding: const EdgeInsets.all(_cardHeaderPadding),
+      padding: _cardHeaderPadding,
       color: Colors.blueGrey,
       child: Center(
         child: Text(
@@ -267,7 +257,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildInfoCard(User user) {
     return Card(
-      elevation: _elevation,
+      elevation: _cardElevation,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(_borderRadius),
       ),

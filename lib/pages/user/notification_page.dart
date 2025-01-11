@@ -39,7 +39,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     return LoadingPageTemplate<(User, Household)>(
       title: 'Notifications',
-      showDrawer: true,
+      showDrawer: false,
+      showBackArrow: true,
+      showNotifications: false,
       stream: CombineLatestStream.combine2(
         userService.getUserStream,
         householdService.getHouseholdStream,

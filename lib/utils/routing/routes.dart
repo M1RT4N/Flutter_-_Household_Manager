@@ -11,6 +11,7 @@ import 'package:household_manager/pages/household_wizard/join_household_page.dar
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/pages/splash_screen.dart';
 import 'package:household_manager/pages/todo/create_todo_page.dart';
+import 'package:household_manager/pages/todo/edit_todo_page.dart';
 import 'package:household_manager/pages/todo/todos_page.dart';
 import 'package:household_manager/pages/user/notification_page.dart';
 import 'package:household_manager/pages/user/profile_page.dart';
@@ -25,7 +26,7 @@ enum AppRoute {
   initialRoute('/', SplashScreen(), guardLevel: GuardLevel.none),
   register('/register', RegisterPage(), guardLevel: GuardLevel.none),
   login('/login', LoginPage(), guardLevel: GuardLevel.none),
-  home('/home', HomePage()),
+  home('/home', HomePage(), guardLevel: GuardLevel.householdFetched),
   chooseHousehold('/choose_household', ChooseHouseholdPage(),
       guardLevel: GuardLevel.pendingRequest),
   householdRequest('/household_request', HouseholdRequestPage(),
@@ -37,10 +38,15 @@ enum AppRoute {
   notifications('/notifications', NotificationsPage(),
       guardLevel: GuardLevel.householdFetched),
   profile('/profile', ProfilePage(), guardLevel: GuardLevel.userFetched),
-  statistics('/statistics', StatisticsPage()),
-  household('/household', HouseholdPage()),
-  createTodo('/create-todo', CreateTodoPage()),
-  todos('/todos', TodosPage());
+  statistics('/statistics', StatisticsPage(),
+      guardLevel: GuardLevel.householdFetched),
+  household('/household', HouseholdPage(),
+      guardLevel: GuardLevel.householdFetched),
+  createTodo('/create_todo', CreateTodoPage(),
+      guardLevel: GuardLevel.householdFetched),
+  todos('/todos', TodosPage(), guardLevel: GuardLevel.householdFetched),
+  editTodo('/edit_todo', EditTodoPage(),
+      guardLevel: GuardLevel.householdFetched);
 
   final String path;
   final Widget pageType;
@@ -56,7 +62,7 @@ enum AppRoute {
       case GuardLevel.householdFetched:
         return [UserGuard(), HouseholdGuard()];
       case GuardLevel.pendingRequest:
-        // TODO: Reintroduce RequestGuard, but! watch for behaiour
+        // TODO: Reintroduce RequestGuard, but! watch for behaviour
         //       when user is rejected!
         return [UserGuard()];
       default:

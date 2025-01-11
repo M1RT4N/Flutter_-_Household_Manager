@@ -36,4 +36,8 @@ class TodoService {
 
     await _todoRepository.setOrAdd(todo.id, todo);
   }
+
+  Future<void> updateTodo(Todo updateTodo) async {
+    _todoRepository.setOrAdd(updateTodo.id, updateTodo);
+  }
 }
