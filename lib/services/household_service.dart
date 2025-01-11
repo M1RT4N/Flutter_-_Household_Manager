@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/household_dto.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/database_service.dart';
 import 'package:household_manager/services/user_service.dart';
@@ -31,6 +32,14 @@ class HouseholdService {
 
   void _pushToSteam(Household? household) {
     _householdStream.value = household;
+  }
+
+  Future<HouseholdDto> fetchAdditionalData(Household household) async {
+    return HouseholdDto(
+      household: household,
+      members: await _userService.getUsersByIds(household.members),
+      requesters: await _userService.getUsersByIds(household.requested),
+    );
   }
 
   Future<Household?> _fetchHouseholdByCode(String code) async {

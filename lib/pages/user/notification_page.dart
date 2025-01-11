@@ -52,9 +52,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  // TODO: implement
+  // TODO: implement or use web design
   Widget _buildBodyPhone(BuildContext context, (User, Household) data) {
-    return Container();
+    return _buildBodyWeb(context, data);
   }
 
   Widget _buildBodyWeb(BuildContext context, (User, Household) data) {

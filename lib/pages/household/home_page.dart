@@ -3,10 +3,9 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/todo.dart';
-import 'package:household_manager/models/user.dart';
+import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
-import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
@@ -36,35 +35,31 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, List<Todo> todos) {
-    final top5BeforeDeadline = _getTopNBeforeDeadline(todos);
+    final topNBeforeDeadline = _getTopNBeforeDeadline(todos);
     final pastDeadline = _getPassedDeadline(todos);
-    final userService = GetIt.instance<UserService>();
+    final todoService = GetIt.instance<TodoService>();
 
     return LoadingFutureBuilder(
         future: Future.wait([
-          userService.getUsersByIds(
-              top5BeforeDeadline.map((t) => t.createdById).toList()),
-          userService
-              .getUsersByIds(pastDeadline.map((t) => t.createdById).toList()),
+          todoService.fetchCreators(topNBeforeDeadline),
+          todoService.fetchCreators(pastDeadline),
         ]),
         builder: (context, result) {
-          final top5Creators = result[0];
-          final pastDeadlineCreators = result[1];
+          final topNWithCreators = result[0];
+          final pastDeadlineWithCreators = result[1];
           return Column(
             children: [
-              if (top5BeforeDeadline.isNotEmpty)
+              if (topNBeforeDeadline.isNotEmpty)
                 _buildSection(
                   context,
-                  top5BeforeDeadline,
-                  top5Creators,
+                  topNWithCreators,
                   'Top $_topNBeforeDeadline closest to deadline:',
                   Theme.of(context).splashColor,
                 ),
               if (pastDeadline.isNotEmpty)
                 _buildSection(
                   context,
-                  pastDeadline,
-                  pastDeadlineCreators,
+                  pastDeadlineWithCreators,
                   'Past deadline:',
                   Theme.of(context).disabledColor,
                 ),
@@ -73,8 +68,8 @@ class HomePage extends StatelessWidget {
         });
   }
 
-  Widget _buildSection(BuildContext context, List<Todo> todos,
-      List<User> creators, String sectionTitle, Color titleColor) {
+  Widget _buildSection(BuildContext context, List<TodoDto> todosWithCreators,
+      String sectionTitle, Color titleColor) {
     return Container(
         width: double.infinity,
         padding: _sectionPadding,
@@ -91,17 +86,15 @@ class HomePage extends StatelessWidget {
             ),
             ListView.builder(
               shrinkWrap: true,
-              itemCount: todos.length,
+              itemCount: todosWithCreators.length,
               itemBuilder: (context, index) {
-                final todo = todos[index];
-                final creator =
-                    creators.firstWhere((c) => c.id == todo.createdById);
+                final todoWithCreator = todosWithCreators[index];
                 return TodoTile(
-                  todo: todo,
-                  creator: creator,
+                  todo: todoWithCreator.todo,
+                  creator: todoWithCreator.creator,
                   onClick: () => Modular.to.pushNamed(
                     AppRoute.editTodo.path,
-                    arguments: [todo, creator],
+                    arguments: todoWithCreator,
                   ),
                 );
               },
@@ -112,17 +105,17 @@ class HomePage extends StatelessWidget {
 }
 
 List<Todo> _getTopNBeforeDeadline(List<Todo> todos) {
-  final todosCopy = List<Todo>.from(todos)
+  final filtered = todos
       .where((t) =>
           DateTime.now().isBefore(t.deadline.toDate()) &&
           t.completedAt == null &&
           t.deletedAt == null)
       .toList();
-  todosCopy.sort((t1, t2) => t1.deadline
+  filtered.sort((t1, t2) => t1.deadline
       .toDate()
       .difference(DateTime.now())
       .compareTo(t2.deadline.toDate().difference(DateTime.now())));
-  return todosCopy.take(_topNBeforeDeadline).toList();
+  return filtered.take(_topNBeforeDeadline).toList();
 }
 
 List<Todo> _getPassedDeadline(List<Todo> todos) {

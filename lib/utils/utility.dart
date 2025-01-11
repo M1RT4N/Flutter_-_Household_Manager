@@ -79,12 +79,9 @@ class Utility {
 
     if (confirm == true) {
       try {
-        await action();
-
         if (context.mounted) {
-          if (successMessage.isNotEmpty) {
-            showTopSnackBar(context, successMessage, Colors.green);
-          }
+          await performActionAndShowInfo(
+              context: context, action: action, successMessage: successMessage);
           if (navigateTo != null) {
             Modular.to.navigate(navigateTo);
           }
@@ -97,14 +94,15 @@ class Utility {
     }
   }
 
-  static Future<void> performActionAndShowInfo(
-    BuildContext context,
-    Future<void> Function() action,
-    String successMessage,
-  ) async {
+  static Future<void> performActionAndShowInfo({
+    required BuildContext context,
+    required Future<void> Function() action,
+    required String successMessage,
+    Color successColor = Colors.blue,
+  }) async {
     await action();
     if (context.mounted) {
-      showTopSnackBar(context, successMessage, Colors.blue);
+      showTopSnackBar(context, successMessage, successColor);
     }
   }
 

@@ -69,17 +69,9 @@ Widget _buildBodyPhone(BuildContext context, Household? household) {
     return Center(child: Text('No data available.'));
   }
 
-  final userService = GetIt.instance<UserService>();
-
   return LoadingFutureBuilder(
-    future: Future.wait([
-      userService.getUsersByIds(household.members),
-      userService.getUsersByIds(household.requested),
-    ]),
+    future: GetIt.instance<HouseholdService>().fetchAdditionalData(household),
     builder: (context, result) {
-      final members = result[0];
-      final requesters = result[1];
-
       return SingleChildScrollView(
         padding: _padding,
         child: Column(
@@ -87,9 +79,9 @@ Widget _buildBodyPhone(BuildContext context, Household? household) {
           children: [
             _buildHouseholdInfoSection(context, household),
             _sizedBox,
-            _buildMembersSection(context, members),
+            _buildMembersSection(context, result.members),
             _sizedBox,
-            _buildRequestsSection(context, requesters),
+            _buildRequestsSection(context, result.requesters),
             _sizedBox,
             _buildLeaveButton(context),
           ],
@@ -178,26 +170,27 @@ Widget _buildHouseholdInfoSection(BuildContext context, Household household) {
 
 Future<void> _renameHousehold(BuildContext context, String newName) async {
   Utility.performActionAndShowInfo(
-    context,
-    () => GetIt.instance<HouseholdService>().renameHousehold(newName),
-    'Household name changed.',
+    context: context,
+    action: () => GetIt.instance<HouseholdService>().renameHousehold(newName),
+    successMessage: 'Household name changed.',
   );
 }
 
 Future<void> _manageRequest(
     BuildContext context, String request, bool accept) async {
   Utility.performActionAndShowInfo(
-    context,
-    () => GetIt.instance<HouseholdService>().manageRequest(request, accept),
-    'Request ${accept ? 'accepted' : 'rejected'}.',
+    context: context,
+    action: () =>
+        GetIt.instance<HouseholdService>().manageRequest(request, accept),
+    successMessage: 'Request ${accept ? 'accepted' : 'rejected'}.',
   );
 }
 
 Future<void> _removeMember(BuildContext context, String member) async {
   Utility.performActionAndShowInfo(
-    context,
-    () => GetIt.instance<HouseholdService>().removeMember(member),
-    'Member removed.',
+    context: context,
+    action: () => GetIt.instance<HouseholdService>().removeMember(member),
+    successMessage: 'Member removed.',
   );
 }
 

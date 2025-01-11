@@ -5,7 +5,6 @@ import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
-import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 import 'package:rxdart/rxdart.dart';
@@ -35,28 +34,24 @@ class TodosPage extends StatelessWidget {
 
   // TODO: implement or use the same design as is for phone
   Widget _buildBodyWeb(BuildContext context, List<Todo> todos) {
-    return Container();
+    return _buildBodyPhone(context, todos);
   }
 
   Widget _buildBodyPhone(BuildContext context, List<Todo> todos) {
     return LoadingFutureBuilder(
-        future: GetIt.instance<UserService>()
-            .getUsersByIds(todos.map((t) => t.createdById).toList()),
-        builder: (context, creators) {
+        future: GetIt.instance<TodoService>().fetchCreators(todos),
+        builder: (context, todosWithCreators) {
           return Center(
             child: ListView(
               children: [
                 if (todos.isNotEmpty) ...[
-                  for (final todo in todos)
+                  for (final todoWithCreator in todosWithCreators)
                     TodoTile(
-                      todo: todo,
-                      creator:
-                          creators.firstWhere((c) => c.id == todo.createdById),
-                      onClick: () => Modular.to
-                          .pushNamed(AppRoute.editTodo.path, arguments: [
-                        todo,
-                        creators.firstWhere((c) => c.id == todo.createdById)
-                      ]),
+                      todo: todoWithCreator.todo,
+                      creator: todoWithCreator.creator,
+                      onClick: () => Modular.to.pushNamed(
+                          AppRoute.editTodo.path,
+                          arguments: todoWithCreator),
                     )
                 ],
               ],

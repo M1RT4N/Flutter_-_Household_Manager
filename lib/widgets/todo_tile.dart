@@ -81,9 +81,9 @@ class TodoTile extends StatelessWidget {
   void _completeTodo(BuildContext context, Todo todo) async {
     final updatedTodo =
         todo.copyWith(completedAt: Timestamp.fromDate(DateTime.now()));
-    await Utility.performActionAndShowInfo(
-        context,
-        () => GetIt.instance<TodoService>().updateTodo(updatedTodo),
-        'Todo completed.');
+    Utility.performActionAndShowInfo(
+        context: context,
+        action: () => GetIt.instance<TodoService>().updateTodo(updatedTodo),
+        successMessage: 'Todo completed.');
   }
 }

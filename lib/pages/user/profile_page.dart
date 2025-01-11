@@ -293,25 +293,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _changeName(BuildContext context, String newName) async {
     Utility.performActionAndShowInfo(
-      context,
-      () => GetIt.instance<UserService>().changeName(newName),
-      'Name changed.',
+      context: context,
+      action: () => GetIt.instance<UserService>().changeName(newName),
+      successMessage: 'Name changed.',
     );
   }
 
   Future<void> _changeUsername(BuildContext context, String newUsername) async {
     Utility.performActionAndShowInfo(
-      context,
-      () => GetIt.instance<UserService>().changeUsername(newUsername),
-      'Username changed.',
+      context: context,
+      action: () => GetIt.instance<UserService>().changeUsername(newUsername),
+      successMessage: 'Username changed.',
     );
   }
 
   Future<void> _changeEmail(BuildContext context, String newEmail) async {
     Utility.performActionAndShowInfo(
-      context,
-      () => GetIt.instance<UserService>().changeEmail(newEmail),
-      'Email changed.',
+      context: context,
+      action: () => GetIt.instance<UserService>().changeEmail(newEmail),
+      successMessage: 'Email changed.',
     );
   }
 

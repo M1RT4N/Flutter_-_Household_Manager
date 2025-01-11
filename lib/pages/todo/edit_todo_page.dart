@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/todo.dart';
+import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/static_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
@@ -16,7 +17,7 @@ const _borderRadius = 12.0;
 const _labelTextStyle = TextStyle(fontSize: 18, color: Colors.grey);
 const _editableTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 16);
 const _labelTextGap = SizedBox(width: 8);
-const _rowGap = SizedBox(height: 8);
+const _rowGap = SizedBox(height: 16);
 const _cardMargin = EdgeInsets.all(16);
 
 class EditTodoPage extends StatefulWidget {
@@ -37,8 +38,9 @@ class _EditTodoPageState extends State<EditTodoPage> {
 
   @override
   void initState() {
-    todo = Modular.args.data[0] as Todo;
-    creator = Modular.args.data[1] as User;
+    final todoWithCreator = Modular.args.data as TodoDto;
+    todo = todoWithCreator.todo;
+    creator = todoWithCreator.creator;
     super.initState();
   }
 
@@ -67,42 +69,44 @@ class _EditTodoPageState extends State<EditTodoPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Description:', style: _labelTextStyle),
-              _rowGap,
               _buildDescriptionRow(),
               _rowGap,
               _buildDeadlineRow(),
               _rowGap,
               _buildCreatorRow(),
-              _rowGap,
-              _buildButtonsRow()
+              if (userId == creator.id) ...[_rowGap, _buildButtonsRow()]
             ],
           ),
         ));
   }
 
   Widget _buildDescriptionRow() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: userId == creator.id
-              ? EditableText(
-                  maxLines: null,
-                  controller: _descriptionController,
-                  focusNode: _editableTextFocusNode,
-                  style: _editableTextStyle,
-                  cursorColor: Colors.grey,
-                  backgroundCursorColor: Colors.amber,
-                )
-              : Text(
-                  todo.description,
-                  style: _editableTextStyle,
-                ),
+        Row(
+          children: [
+            Text('Description:', style: _labelTextStyle),
+            if (userId == creator.id)
+              IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () => _editableTextFocusNode.requestFocus(),
+              ),
+          ],
         ),
         if (userId == creator.id)
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () => _editableTextFocusNode.requestFocus(),
+          EditableText(
+            maxLines: null,
+            controller: _descriptionController,
+            focusNode: _editableTextFocusNode,
+            style: _editableTextStyle,
+            cursorColor: Colors.grey,
+            backgroundCursorColor: Colors.amber,
+          )
+        else
+          Text(
+            todo.description,
+            style: _editableTextStyle,
           ),
       ],
     );
@@ -154,34 +158,42 @@ class _EditTodoPageState extends State<EditTodoPage> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         LoadingStadiumButton(buttonText: 'Delete', onPressed: _deleteTodo),
-        LoadingStadiumButton(
-            buttonText: 'Save',
-            onPressed: () => _updateTodo(
-                  _descriptionController.text,
-                  _dateController.text,
-                ))
+        LoadingStadiumButton(buttonText: 'Save', onPressed: _updateTodo)
       ],
     );
   }
 
-  void _updateTodo(String newDescription, String newDeadline) async {
+  void _updateTodo() async {
     final updatedTodo = todo.copyWith(
-        description: newDescription,
-        deadline: Timestamp.fromDate(Utility.parseDate(newDeadline)));
+        description: _descriptionController.text,
+        deadline: Timestamp.fromDate(Utility.parseDate(_dateController.text)));
     await Utility.performActionAndShowInfo(
-        context, () => todoService.updateTodo(updatedTodo), 'Todo updated.');
+      context: context,
+      action: () => todoService.updateTodo(updatedTodo),
+      successMessage: 'Todo updated.',
+    );
   }
 
   void _deleteTodo() async {
-    final updatedTodo =
-        todo.copyWith(deletedAt: Timestamp.fromDate(DateTime.now()));
-    final res =
-        await Utility.showConfirmationDialog(context, 'Delete', 'Delete todo?');
-    if (res == true) {
+    final updatedTodo = todo.copyWith(
+      deletedAt: Timestamp.fromDate(DateTime.now()),
+    );
+
+    final res = await Utility.showConfirmationDialog(
+      context,
+      'Delete',
+      'Delete todo?',
+    );
+
+    if (res == true && mounted) {
       await Utility.performActionAndShowInfo(
-          context, () => todoService.updateTodo(updatedTodo), 'Todo deleted.');
+        context: context,
+        action: () => todoService.updateTodo(updatedTodo),
+        successMessage: 'Todo deleted.',
+      );
+
+      Modular.to.pop();
     }
-    Modular.to.pop();
   }
 
   @override
