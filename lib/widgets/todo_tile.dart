@@ -4,22 +4,20 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/todo_service.dart';
-import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
 
 const _maxWidth = 1000.0;
-const double _sectionPaddingHor = 16.0;
-const double _sectionMarginVer = 4.0;
-const double _sectionMarginHor = 16.0;
-const double _sectionBubbleRadius = 8.0;
-const _descriptionTextStyle = TextStyle(
+const _sectionPaddingHor = 16.0;
+const _sectionMarginVer = 4.0;
+const _sectionMarginHor = 16.0;
+const _sectionBubbleRadius = 8.0;
+const _importantTextStyle = TextStyle(
   fontWeight: FontWeight.bold,
-  color: Colors.white,
 );
+const _normalTextStyle = TextStyle(color: Colors.white70);
 const _contentPadding = EdgeInsets.symmetric(
   horizontal: _sectionPaddingHor,
 );
-const _subtitleStyle = TextStyle(color: Colors.white70);
 const _bubbleMargin = EdgeInsets.symmetric(
   horizontal: _sectionMarginHor,
   vertical: _sectionMarginVer,
@@ -28,14 +26,17 @@ const _bubbleMargin = EdgeInsets.symmetric(
 class TodoTile extends StatelessWidget {
   final Todo todo;
   final User creator;
+  final User assignee;
   final VoidCallback onClick;
+  final bool showTickMark;
 
-  const TodoTile({
-    super.key,
-    required this.todo,
-    required this.creator,
-    required this.onClick,
-  });
+  const TodoTile(
+      {super.key,
+      required this.todo,
+      required this.creator,
+      required this.assignee,
+      required this.onClick,
+      this.showTickMark = false});
 
   @override
   Widget build(BuildContext context) {
@@ -52,28 +53,56 @@ class TodoTile extends StatelessWidget {
         contentPadding: _contentPadding,
         title: Wrap(
           children: [
-            Text('Description: '),
+            Text(
+              'Description: ',
+              style: _normalTextStyle,
+            ),
             Text(
               todo.description,
-              style: _descriptionTextStyle,
+              style: _importantTextStyle,
             ),
           ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Created by: ${GetIt.instance<UserService>().getUser!.id == creator.id ? 'You' : creator.name}',
-              style: _subtitleStyle,
+            Row(
+              children: [
+                Text('Deadline: ', style: _normalTextStyle),
+                Text(
+                  Utility.formatDate(todo.deadline.toDate()),
+                  style: _importantTextStyle,
+                )
+              ],
             ),
-            Text('Deadline: ${Utility.formatDate(todo.deadline.toDate())}',
-                style: _subtitleStyle),
+            Text(
+              'Created by: ${creator.name}',
+              style: _normalTextStyle,
+            ),
+            Text(
+              'Created for: ${assignee.name}',
+              style: _normalTextStyle,
+            ),
+            Text('Created at: ${Utility.formatDate(todo.createdAt.toDate())}',
+                style: _normalTextStyle),
+            if (todo.completedAt != null)
+              Text(
+                'Completed at: ${Utility.formatDate(todo.completedAt!.toDate())}',
+                style: _normalTextStyle,
+              ),
+            if (todo.deletedAt != null)
+              Text(
+                'Deleted at: ${Utility.formatDate(todo.deletedAt!.toDate())}',
+                style: _normalTextStyle,
+              ),
           ],
         ),
-        trailing: IconButton(
-          onPressed: () => _completeTodo(context, todo),
-          icon: Icon(Icons.check),
-        ),
+        trailing: showTickMark
+            ? IconButton(
+                onPressed: () => _completeTodo(context, todo),
+                icon: Icon(Icons.check),
+              )
+            : null,
       ),
     );
   }

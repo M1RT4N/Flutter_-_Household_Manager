@@ -11,7 +11,6 @@ import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/editable_field.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
-import 'package:household_manager/widgets/info_field.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
@@ -280,10 +279,6 @@ class _ProfilePageState extends State<ProfilePage> {
               labelText: 'Email',
               editableText: user.email,
               onAccept: _changeEmail,
-            ),
-            InfoField(
-              labelText: 'Household',
-              mainText: user.householdId ?? '',
             ),
           ],
         ),

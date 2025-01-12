@@ -142,7 +142,7 @@ class UserService {
 
   Future<void> addNotification(String userId, NotificationType type,
       String title, String description, String? link) async {
-    final user = await fetchUser(userId);
+    final user = await getById(userId);
     if (user == null) return;
 
     // We would do keys based on time to ensure uniqueness in single user
@@ -162,7 +162,7 @@ class UserService {
       ..add(newNotification);
 
     final updatedUser = user.copyWith(notifications: updatedNotifications);
-    await setUser(updatedUser);
+    await updateUser(updatedUser);
   }
 
   Future<void> hideNotification(String notificationId) async {

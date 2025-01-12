@@ -35,7 +35,7 @@ class AppDrawer extends StatelessWidget {
     {
       'title': 'TODOs',
       'icon': Icons.list,
-      'route': AppRoute.todos.path,
+      'route': AppRoute.myTodos.path,
     },
     {
       'title': 'Statistics',

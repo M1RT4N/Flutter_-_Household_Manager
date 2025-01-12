@@ -5,9 +5,11 @@ import 'todo.dart';
 class TodoDto {
   final Todo todo;
   final User creator;
+  final User assignee;
 
   TodoDto({
     required this.todo,
     required this.creator,
+    required this.assignee,
   });
 }

@@ -2,14 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
-import 'package:household_manager/models/todo.dart';
+import 'package:household_manager/common/loading_builder.dart';
+import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/household_dto.dart';
 import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/models/user.dart';
-import 'package:household_manager/pages/common/static_page_template.dart';
+import 'package:household_manager/pages/common/loading_page_template.dart';
+import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
+import 'package:household_manager/widgets/snack_bar.dart';
 
 const _padding = EdgeInsets.all(20);
 const _cardElevation = 4.0;
@@ -28,56 +33,104 @@ class EditTodoPage extends StatefulWidget {
 }
 
 class _EditTodoPageState extends State<EditTodoPage> {
-  late Todo todo;
-  late User creator;
   final _descriptionController = TextEditingController();
   final _dateController = TextEditingController();
+  final _createdForController = TextEditingController();
   final _editableTextFocusNode = FocusNode();
-  final userId = GetIt.instance<UserService>().getUser!.id;
+  final userService = GetIt.instance<UserService>();
   final todoService = GetIt.instance<TodoService>();
+  final householdService = GetIt.instance<HouseholdService>();
+
+  late TodoDto? editTodo;
+  late bool editable;
+
+  String? _selectedMemberId;
 
   @override
   void initState() {
-    final todoWithCreator = Modular.args.data as TodoDto;
-    todo = todoWithCreator.todo;
-    creator = todoWithCreator.creator;
+    editTodo = Modular.args.data;
+    if (editTodo != null) {
+      _descriptionController.text = editTodo!.todo.description;
+      _dateController.text =
+          Utility.formatDate(editTodo!.todo.deadline.toDate());
+      _createdForController.text = editTodo!.assignee.name;
+      _selectedMemberId = editTodo!.assignee.id;
+      editable = editTodo!.creator.id == userService.getUser!.id &&
+          editTodo!.todo.completedAt == null &&
+          editTodo!.todo.deletedAt == null;
+    } else {
+      editable = true;
+      _createdForController.text = userService.getUser!.name;
+      _dateController.text = Utility.formatDate(DateTime.now());
+      _selectedMemberId = userService.getUser!.id;
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StaticPageTemplate(
-        title: 'Todos',
-        bodyFunction: _buildBody,
-        showNotifications: false,
-        showBackArrow: true,
-        showDrawer: false);
+    return LoadingPageTemplate(
+      stream: householdService.getHouseholdStream,
+      title: 'My Todos',
+      showNotifications: false,
+      showBackArrow: true,
+      showDrawer: false,
+      bodyFunctionPhone: _buildBodyPhone,
+      bodyFunctionWeb: _buildBodyWeb,
+    );
   }
 
-  Widget _buildBody(BuildContext context) {
-    _descriptionController.text = todo.description;
-    _dateController.text = Utility.formatDate(todo.deadline.toDate());
+  // TODO: implement or use phone design
+  Widget _buildBodyWeb(BuildContext context, Household? household) {
+    return _buildBodyPhone(context, household);
+  }
 
-    return Card(
-        margin: _cardMargin,
-        elevation: _cardElevation,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(_borderRadius)),
-        child: Padding(
-          padding: _padding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildDescriptionRow(),
-              _rowGap,
-              _buildDeadlineRow(),
-              _rowGap,
-              _buildCreatorRow(),
-              if (userId == creator.id) ...[_rowGap, _buildButtonsRow()]
-            ],
-          ),
-        ));
+  Widget _buildBodyPhone(BuildContext context, Household? household) {
+    if (household == null) {
+      return Center(child: Text('No data available.'));
+    }
+
+    return LoadingFutureBuilder<HouseholdDto>(
+      future: householdService.fetchUsers(household),
+      builder: (context, householdWithUsers) => Card(
+          margin: _cardMargin,
+          elevation: _cardElevation,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(_borderRadius)),
+          child: Padding(
+            padding: _padding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(editable.toString()),
+                _buildDescriptionRow(),
+                _rowGap,
+                _buildDeadlineRow(),
+                _rowGap,
+                _buildAssigneeRow(householdWithUsers.members),
+                _rowGap,
+                if (editTodo == null)
+                  _buildCreateButton()
+                else
+                  _buildCreatorRow(),
+                if (editable && editTodo != null) ...[
+                  _rowGap,
+                  _buildButtonsRow()
+                ]
+              ],
+            ),
+          )),
+    );
+  }
+
+  Widget _buildCreateButton() {
+    return Center(
+      child: LoadingStadiumButton(
+        idleStateWidget: Text('Create'),
+        onPressed: _createTodo,
+      ),
+    );
   }
 
   Widget _buildDescriptionRow() {
@@ -87,27 +140,23 @@ class _EditTodoPageState extends State<EditTodoPage> {
         Row(
           children: [
             Text('Description:', style: _labelTextStyle),
-            if (userId == creator.id)
+            if (editable)
               IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () => _editableTextFocusNode.requestFocus(),
               ),
           ],
         ),
-        if (userId == creator.id)
-          EditableText(
-            maxLines: null,
-            controller: _descriptionController,
-            focusNode: _editableTextFocusNode,
-            style: _editableTextStyle,
-            cursorColor: Colors.grey,
-            backgroundCursorColor: Colors.amber,
-          )
-        else
-          Text(
-            todo.description,
-            style: _editableTextStyle,
-          ),
+        EditableText(
+          maxLines: null,
+          controller: _descriptionController,
+          focusNode: _editableTextFocusNode,
+          style: _editableTextStyle,
+          cursorColor: Colors.grey,
+          backgroundCursorColor: Colors.amber,
+          readOnly: !editable,
+          autofocus: editTodo == null,
+        )
       ],
     );
   }
@@ -115,26 +164,54 @@ class _EditTodoPageState extends State<EditTodoPage> {
   Widget _buildDeadlineRow() {
     return Row(children: [
       Flexible(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 135),
-          child: TextField(
-            decoration: const InputDecoration(
-              icon: Icon(Icons.calendar_today),
-              labelText: "Deadline:",
-              hintText: 'Choose deadline',
-            ),
-            readOnly: true,
-            controller: _dateController,
-            onTap: () {},
+        child: TextField(
+          decoration: const InputDecoration(
+            icon: Icon(Icons.calendar_today),
+            labelText: "Deadline:",
+            hintText: 'Choose deadline',
           ),
+          readOnly: !editable,
+          controller: _dateController,
+          onTap: () {
+            if (editable) {
+              Utility.pickDate(context, _dateController);
+            }
+          },
         ),
       ),
-      if (userId == creator.id)
+      if (editable)
         IconButton(
           onPressed: () => Utility.pickDate(context, _dateController),
           icon: Icon(Icons.edit),
         )
     ]);
+  }
+
+  Widget _buildAssigneeRow(List<User> members) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: 'Todo for:',
+        hintText: 'Choose member',
+      ),
+      value: _selectedMemberId ?? userService.getUser!.id,
+      items: [
+        for (final member in members)
+          DropdownMenuItem<String>(
+            value: member.id,
+            child: Text(member.name),
+          ),
+      ],
+      onChanged: !editable
+          ? null
+          : (String? value) {
+              if (value != null) {
+                setState(() {
+                  _selectedMemberId = value;
+                  _createdForController.text = value;
+                });
+              }
+            },
+    );
   }
 
   Widget _buildCreatorRow() {
@@ -146,7 +223,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
         ),
         _labelTextGap,
         Text(
-          userId == creator.id ? 'You' : creator.name,
+          editTodo!.creator.name,
           style: _editableTextStyle,
         )
       ],
@@ -166,9 +243,16 @@ class _EditTodoPageState extends State<EditTodoPage> {
   }
 
   void _updateTodo() async {
-    final updatedTodo = todo.copyWith(
-        description: _descriptionController.text,
-        deadline: Timestamp.fromDate(Utility.parseDate(_dateController.text)));
+    if (_selectedMemberId == null) {
+      showTopSnackBar(context, 'Please choose a member.', Colors.red);
+      return;
+    }
+
+    final updatedTodo = editTodo!.todo.copyWith(
+      description: _descriptionController.text,
+      deadline: Timestamp.fromDate(Utility.parseDate(_dateController.text)),
+    );
+
     await Utility.performActionAndShowInfo(
       context: context,
       action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
@@ -177,7 +261,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
   }
 
   void _deleteTodo() async {
-    final updatedTodo = todo.copyWith(
+    final updatedTodo = editTodo!.todo.copyWith(
       deletedAt: Timestamp.fromDate(DateTime.now()),
     );
 
@@ -193,9 +277,58 @@ class _EditTodoPageState extends State<EditTodoPage> {
         action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
         successMessage: 'Todo deleted.',
       );
+    }
 
+    Modular.to.pop();
+  }
+
+  void _createTodo() async {
+    if (_selectedMemberId == null) {
+      showTopSnackBar(context, 'Please choose a member.', Colors.red);
+      return;
+    }
+
+    String? errorMessage = _validateInputs();
+    if (errorMessage != null) {
+      return showTopSnackBar(context, errorMessage, Colors.red);
+    }
+
+    final todo = await todoService.createTodo(
+      _selectedMemberId!,
+      Utility.parseDate(_dateController.text),
+      _descriptionController.text,
+    );
+
+    if (userService.getUser!.id != todo.createdForId) {
+      await userService.addNotification(
+        todo.createdForId,
+        NotificationType.todoAssigned,
+        'New TODO assigned.',
+        todo.description,
+        null,
+      );
+    }
+
+    if (mounted) {
+      showTopSnackBar(context, 'TODO created.', Colors.green);
       Modular.to.pop();
     }
+  }
+
+  String? _validateInputs() {
+    if (_selectedMemberId == null) {
+      return 'Please choose member';
+    }
+
+    if (_descriptionController.text.isEmpty) {
+      return 'Please provide description';
+    }
+
+    if (_dateController.text.isEmpty) {
+      return 'Please choose deadline';
+    }
+
+    return null;
   }
 
   @override

@@ -73,7 +73,7 @@ Widget _buildBodyPhone(BuildContext context, Household? household) {
   }
 
   return LoadingFutureBuilder(
-    future: GetIt.instance<HouseholdService>().fetchAdditionalData(household),
+    future: GetIt.instance<HouseholdService>().fetchUsers(household),
     builder: (context, result) {
       return SingleChildScrollView(
         padding: _padding,

@@ -94,6 +94,10 @@ class Utility {
     }
   }
 
+  static String getStringFromEnum(Enum enumValue) {
+    return enumValue.toString().split('.')[1];
+  }
+
   static Future<void> performActionAndShowInfo({
     required BuildContext context,
     required Future<String?> Function() action,

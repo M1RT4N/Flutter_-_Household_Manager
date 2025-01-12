@@ -34,7 +34,7 @@ class HouseholdService {
     _householdStream.value = household;
   }
 
-  Future<HouseholdDto> fetchAdditionalData(Household household) async {
+  Future<HouseholdDto> fetchUsers(Household household) async {
     return HouseholdDto(
       household: household,
       members: await _userService.getUsersByIds(household.members),
@@ -143,8 +143,8 @@ class HouseholdService {
   }
 
   Future<void> logout() async {
-    await _userService.logout();
     _pushToSteam(null);
+    await _userService.logout();
   }
 
   Future<void> _setHousehold(Household household) async {

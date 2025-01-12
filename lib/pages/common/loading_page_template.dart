@@ -25,18 +25,21 @@ class LoadingPageTemplate<T> extends PageTemplate {
 
   @override
   Widget build(BuildContext context) {
+    final isPhone = MediaQuery.of(context).size.width < _maxPhoneWidth;
+
     return Scaffold(
-        appBar: buildAppBar(context),
-        drawer: showDrawer ? AppDrawer(logoutFunc: logout) : null,
-        body: LoadingStreamBuilder(
-          stream: stream,
-          builder: (context, T model) {
-            return MediaQuery.of(context).size.width > _maxPhoneWidth
-                ? bodyFunctionWeb(context, model)
-                : bodyFunctionPhone(context, model);
-          },
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: floatingActionButton);
+      appBar: buildAppBar(context),
+      drawer: showDrawer ? AppDrawer(logoutFunc: logout) : null,
+      body: LoadingStreamBuilder(
+        stream: stream,
+        builder: (context, T model) {
+          return isPhone
+              ? bodyFunctionPhone(context, model)
+              : bodyFunctionWeb(context, model);
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: floatingActionButton,
+    );
   }
 }
