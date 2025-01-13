@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/notification_icon.dart';
@@ -72,11 +73,18 @@ abstract class PageTemplate extends StatelessWidget {
 
   void logout(BuildContext context) async {
     final householdService = GetIt.instance<HouseholdService>();
+    final userService = GetIt.instance<UserService>();
+
     await Utility.handleActionWithConfirmation(
       context: context,
       title: 'Confirm Logout',
       message: 'Are you sure you want to logout?',
-      action: () async => await householdService.logout() as Future<String?>,
+      action: () async {
+        await userService.logout();
+        await householdService.logout();
+
+        return null;
+      },
       successMessage: 'Logged out successfully.',
       navigateTo: AppRoute.login.path,
     );
