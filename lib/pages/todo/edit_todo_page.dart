@@ -35,7 +35,6 @@ class EditTodoPage extends StatefulWidget {
 class _EditTodoPageState extends State<EditTodoPage> {
   final _descriptionController = TextEditingController();
   final _dateController = TextEditingController();
-  final _createdForController = TextEditingController();
   final _editableTextFocusNode = FocusNode();
   final userService = GetIt.instance<UserService>();
   final todoService = GetIt.instance<TodoService>();
@@ -53,14 +52,12 @@ class _EditTodoPageState extends State<EditTodoPage> {
       _descriptionController.text = editTodo!.todo.description;
       _dateController.text =
           Utility.formatDate(editTodo!.todo.deadline.toDate());
-      _createdForController.text = editTodo!.assignee.name;
       _selectedMemberId = editTodo!.assignee.id;
       editable = editTodo!.creator.id == userService.getUser!.id &&
           editTodo!.todo.completedAt == null &&
           editTodo!.todo.deletedAt == null;
     } else {
       editable = true;
-      _createdForController.text = userService.getUser!.name;
       _dateController.text = Utility.formatDate(DateTime.now());
       _selectedMemberId = userService.getUser!.id;
     }
@@ -207,7 +204,6 @@ class _EditTodoPageState extends State<EditTodoPage> {
               if (value != null) {
                 setState(() {
                   _selectedMemberId = value;
-                  _createdForController.text = value;
                 });
               }
             },
