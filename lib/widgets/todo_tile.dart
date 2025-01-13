@@ -112,8 +112,7 @@ class TodoTile extends StatelessWidget {
         todo.copyWith(completedAt: Timestamp.fromDate(DateTime.now()));
     await Utility.performActionAndShowInfo(
         context: context,
-        action: () => GetIt.instance<TodoService>().updateTodo(updatedTodo)
-            as Future<String?>,
+        action: () => GetIt.instance<TodoService>().updateTodo(updatedTodo),
         successMessage: 'Todo completed.');
   }
 }

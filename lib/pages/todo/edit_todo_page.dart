@@ -251,7 +251,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
 
     await Utility.performActionAndShowInfo(
       context: context,
-      action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
+      action: () => todoService.updateTodo(updatedTodo),
       successMessage: 'Todo updated.',
     );
   }
@@ -265,7 +265,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
       context: context,
       title: 'Delete TODO',
       message: 'Are you sure?',
-      action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
+      action: () => todoService.updateTodo(updatedTodo),
       successMessage: 'Deleted TODO',
       errorMessage: 'Could not delete.',
     );

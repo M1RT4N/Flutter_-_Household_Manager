@@ -202,15 +202,18 @@ class UserService {
     return null;
   }
 
-  Future<void> changeName(String newName) async {
+  Future<String?> changeName(String newName) async {
     setUser(getUser!.copyWith(name: newName));
+    return null;
   }
 
-  Future<void> changeUsername(String newUsername) async {
+  Future<String?> changeUsername(String newUsername) async {
     setUser(getUser!.copyWith(username: newUsername));
+    return null;
   }
 
-  Future<void> changeEmail(String newEmail) async {
+  Future<String?> changeEmail(String newEmail) async {
     setUser(getUser!.copyWith(email: newEmail));
+    return null;
   }
 }

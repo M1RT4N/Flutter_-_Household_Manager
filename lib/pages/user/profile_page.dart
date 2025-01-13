@@ -289,8 +289,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _changeName(BuildContext context, String newName) {
     return Utility.performActionAndShowInfo(
       context: context,
-      action: () =>
-          GetIt.instance<UserService>().changeName(newName) as Future<String?>,
+      action: () => GetIt.instance<UserService>().changeName(newName),
       successMessage: 'Name changed.',
     );
   }
@@ -298,8 +297,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _changeUsername(BuildContext context, String newUsername) {
     return Utility.performActionAndShowInfo(
       context: context,
-      action: () => GetIt.instance<UserService>().changeUsername(newUsername)
-          as Future<String?>,
+      action: () => GetIt.instance<UserService>().changeUsername(newUsername),
       successMessage: 'Username changed.',
     );
   }

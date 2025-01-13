@@ -56,8 +56,9 @@ class TodoService {
     return todo;
   }
 
-  Future<void> updateTodo(Todo updateTodo) async {
+  Future<String?> updateTodo(Todo updateTodo) async {
     _todoRepository.setOrAdd(updateTodo.id, updateTodo);
+    return null;
   }
 
   Future<List<TodoDto>> fetchUsers(List<Todo> todos) async {
