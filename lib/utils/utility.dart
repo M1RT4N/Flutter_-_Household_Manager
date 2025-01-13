@@ -87,8 +87,8 @@ class Utility {
           }
         }
       } catch (e) {
-        if (context.mounted && errorMessage != null) {
-          showTopSnackBar(context, '$errorMessage: $e', Colors.red);
+        if (context.mounted) {
+          showTopSnackBar(context, '${errorMessage ?? e}', Colors.red);
         }
       }
     }

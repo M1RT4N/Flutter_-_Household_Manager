@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
+import 'package:household_manager/enums/stat_range.dart';
 import 'package:household_manager/enums/todo_section.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
+import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
-import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
 const _buttonPadding = EdgeInsets.all(12.0);
@@ -34,14 +35,14 @@ class MyTodosPage extends StatefulWidget {
 }
 
 class _MyTodosPageState extends State<MyTodosPage> {
-  TodoSection _selectedSection = TodoSection.values.first;
-  final _todoService = GetIt.instance<TodoService>();
+  TodoSection _selectedSection = TodoSection.todoSections.first;
+  final userService = GetIt.instance<UserService>();
 
   @override
   Widget build(BuildContext context) {
     return LoadingPageTemplate<List<Todo>>(
       title: 'My TODOs',
-      stream: GetIt.instance<TodoService>().getTodoStreamSectionFiltered,
+      stream: GetIt.instance<TodoService>().getTodoStream,
       bodyFunctionPhone: _buildBodyPhone,
       bodyFunctionWeb: _buildBodyWeb,
       floatingActionButton: _buildFloatingActionButton(),
@@ -55,7 +56,8 @@ class _MyTodosPageState extends State<MyTodosPage> {
 
   Widget _buildBodyPhone(BuildContext context, List<Todo> todos) {
     return LoadingFutureBuilder(
-        future: GetIt.instance<TodoService>().fetchUsers(todos),
+        future: GetIt.instance<TodoService>().fetchUsers(_selectedSection
+            .filter(todos, userService.getUser!, StatRange.AllTime)),
         builder: (context, todosWithUsers) {
           return Column(
             children: [
@@ -79,7 +81,8 @@ class _MyTodosPageState extends State<MyTodosPage> {
               todo: todoWithUsers.todo,
               creator: todoWithUsers.creator,
               assignee: todoWithUsers.assignee,
-              showTickMark: _selectedSection == TodoSection.Active,
+              showTickMark: _selectedSection == TodoSection.activeTodo ||
+                  _selectedSection == TodoSection.created,
               onClick: () => Modular.to.pushNamed(
                 AppRoute.editTodo.path,
                 arguments: todoWithUsers,
@@ -95,7 +98,7 @@ class _MyTodosPageState extends State<MyTodosPage> {
       decoration: _sectionButtonsBorder,
       child: Row(
         children: [
-          for (final section in TodoSection.values)
+          for (final section in TodoSection.todoSections)
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -110,11 +113,10 @@ class _MyTodosPageState extends State<MyTodosPage> {
                         : Colors.transparent,
                   ),
                   onPressed: () => setState(() {
-                    _todoService.setSectionFilter(section);
                     _selectedSection = section;
                   }),
                   child: Text(
-                    Utility.getStringFromEnum(section),
+                    section.label,
                     style: TextStyle(
                       color: section == _selectedSection ? Colors.blue : null,
                       fontWeight: section == _selectedSection

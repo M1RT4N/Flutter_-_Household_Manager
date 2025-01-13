@@ -261,19 +261,14 @@ class _EditTodoPageState extends State<EditTodoPage> {
       deletedAt: Timestamp.fromDate(DateTime.now()),
     );
 
-    final res = await Utility.showConfirmationDialog(
-      context,
-      'Delete',
-      'Delete todo?',
+    await Utility.handleActionWithConfirmation(
+      context: context,
+      title: 'Delete TODO',
+      message: 'Are you sure?',
+      action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
+      successMessage: 'Deleted TODO',
+      errorMessage: 'Could not delete.',
     );
-
-    if (res == true && mounted) {
-      await Utility.performActionAndShowInfo(
-        context: context,
-        action: () => todoService.updateTodo(updatedTodo) as Future<String?>,
-        successMessage: 'Todo deleted.',
-      );
-    }
 
     Modular.to.pop();
   }
