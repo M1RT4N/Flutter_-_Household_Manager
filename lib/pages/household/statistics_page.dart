@@ -60,7 +60,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               children: [
                 _buildRangePicker(),
                 _verticalGap,
-                Expanded(child: _buildBarChart(todos, householdDto.members)),
+                _buildBarChart(todos, householdDto.members),
               ],
             ),
           ),
@@ -70,80 +70,79 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   Widget _buildBarChart(List<Todo> todos, List<User> members) {
-    return BarChart(
-      BarChartData(
-        barTouchData: BarTouchData(
-          touchTooltipData: BarTouchTooltipData(
-            getTooltipItem: (group, groupIndex, rod, rodIndex) {
-              return BarTooltipItem(
-                '${TodoSection.statSections[rodIndex].label}: ${rod.toY.toInt()}',
-                const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold),
-              );
-            },
-          ),
-        ),
-        titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              interval: 1,
-              reservedSize: 40,
-              getTitlesWidget: (value, meta) {
-                return Text(value.toInt().toString());
+    return Expanded(
+      child: BarChart(
+        BarChartData(
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '${TodoSection.statSections[rodIndex].label}: ${rod.toY.toInt()}',
+                  const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                );
               },
             ),
           ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: AxisTitles(
-            axisNameWidget: Text(
-              'Household Statistics',
-              style: _chartNameStyle,
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                interval: 1,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  return Text(value.toInt().toString());
+                },
+              ),
             ),
-            axisNameSize: 40,
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (value, meta) {
-                int index = value.toInt();
-                if (index >= 0 && index < members.length) {
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: AxisTitles(
+              axisNameWidget: Text(
+                'Household Statistics',
+                style: _chartNameStyle,
+              ),
+              axisNameSize: 40,
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
                   return SideTitleWidget(
                     axisSide: AxisSide.bottom,
                     child: Column(
                       children: [
-                        for (final namePart in members[index].name.split(' '))
+                        for (final namePart
+                            in members[value.toInt()].name.split(' '))
                           Text(namePart),
                       ],
                     ),
                   );
-                }
-                return const SizedBox.shrink();
-              },
-              reservedSize: 200,
+                },
+                reservedSize: 200,
+              ),
             ),
           ),
+          barGroups: [
+            for (int i = 0; i < members.length; i++)
+              BarChartGroupData(
+                x: i,
+                barRods: [
+                  for (final section in TodoSection.statSections)
+                    BarChartRodData(
+                      toY: section
+                          .filter(todos, members[i], _selectedRange)
+                          .length
+                          .toDouble(),
+                      color: section.color,
+                      borderRadius: BorderRadius.circular(4),
+                    )
+                ],
+              ),
+          ],
         ),
-        barGroups: [
-          for (int i = 0; i < members.length; i++)
-            BarChartGroupData(
-              x: i,
-              barRods: [
-                for (final section in TodoSection.statSections)
-                  BarChartRodData(
-                    toY: section
-                        .filter(todos, members[i], _selectedRange)
-                        .length
-                        .toDouble(),
-                    color: section.color,
-                    borderRadius: BorderRadius.circular(4),
-                  )
-              ],
-            ),
-        ],
       ),
     );
   }
