@@ -143,3 +143,33 @@ class TodoSection {
         deleted,
       ];
 }
+
+enum TodoSectionEnum {
+  All('All'),
+  Active('Active'),
+  Done('Done'),
+  Created('Created'),
+  Deleted('Deleted');
+
+  final String customName;
+
+  const TodoSectionEnum(this.customName);
+
+  static TodoSection? getSectionInstance(TodoSectionEnum val) {
+    switch (val) {
+      case TodoSectionEnum.All:
+        return null;
+      case TodoSectionEnum.Active:
+        return TodoSection.activeTodo;
+      case TodoSectionEnum.Done:
+        return TodoSection.doneTodo;
+      case TodoSectionEnum.Created:
+        return TodoSection.created;
+      case TodoSectionEnum.Deleted:
+        return TodoSection.deleted;
+    }
+  }
+
+  @override
+  toString() => customName;
+}

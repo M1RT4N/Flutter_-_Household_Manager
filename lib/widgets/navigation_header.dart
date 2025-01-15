@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 const _sectionBubbleRadius = 8.0;
-const _buttonPadding = 16.0;
+const _buttonPadding = 4.0;
 const _sectionBarSize = 60.0;
-const _buttonPaddingSection = 16.0;
+const _buttonPaddingSection = 14.0;
 
 class NavigationHeader<E extends Enum> extends StatefulWidget {
   final List<E> values;
@@ -41,20 +41,26 @@ class _NavigationHeaderState<E extends Enum>
   Widget build(BuildContext context) {
     return SizedBox(
       height: MediaQuery.of(context).size.height - _sectionBarSize,
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _SliverAppBarDelegate(
-              minHeight: _sectionBarSize,
-              maxHeight: _sectionBarSize,
-              child: _buildSectionButtons(),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [widget.selectionCallback(_selectedSection)],
+      child: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _SliverAppBarDelegate(
+                    minHeight: _sectionBarSize,
+                    maxHeight: _sectionBarSize,
+                    child: _buildSectionButtons(),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    [widget.selectionCallback(_selectedSection)],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

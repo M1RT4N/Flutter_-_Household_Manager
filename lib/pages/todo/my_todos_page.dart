@@ -10,22 +10,14 @@ import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/filters/stat_range.dart';
 import 'package:household_manager/utils/tabs/todo_section.dart';
+import 'package:household_manager/widgets/info_bubble.dart';
+import 'package:household_manager/widgets/navigation_header.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
 const _buttonPadding = EdgeInsets.all(12.0);
 const _buttonBorderRadius = 24.0;
-const _verticalGap = SizedBox(height: 12);
-const _sectionButtonsBorder = BoxDecoration(
-  border: Border(
-    bottom: BorderSide(color: Colors.grey, width: 1),
-    left: BorderSide(color: Colors.grey, width: 1),
-  ),
-);
-const _sectionButtonShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.zero,
-);
-const _sectionButtonPadding = EdgeInsets.all(16);
-const _sectionButtonOpacity = 0.2;
+const _mediaQueryLimit = 600.0;
+const _widthFactorWeb = 0.6;
 
 class MyTodosPage extends StatefulWidget {
   const MyTodosPage({super.key});
@@ -35,45 +27,38 @@ class MyTodosPage extends StatefulWidget {
 }
 
 class _MyTodosPageState extends State<MyTodosPage> {
-  TodoSection _selectedSection = TodoSection.todoSections.first;
   final userService = GetIt.instance<UserService>();
 
   @override
   Widget build(BuildContext context) {
     return LoadingPageTemplate<List<Todo>>(
-      title: 'My TODOs',
+      title: 'TODOs',
       stream: GetIt.instance<TodoService>().getTodoStream,
-      bodyFunctionPhone: _buildBodyPhone,
-      bodyFunctionWeb: _buildBodyWeb,
+      bodyFunctionPhone: _buildBodyCommon,
+      bodyFunctionWeb: _buildBodyCommon,
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
-  // TODO: implement or use the same design as is for phone
-  Widget _buildBodyWeb(BuildContext context, List<Todo> todos) {
-    return _buildBodyPhone(context, todos);
-  }
-
-  Widget _buildBodyPhone(BuildContext context, List<Todo> todos) {
-    return LoadingFutureBuilder(
-        future: GetIt.instance<TodoService>().fetchUsers(_selectedSection
-            .filter(todos, userService.getUser!, StatRange.AllTime)),
-        builder: (context, todosWithUsers) {
-          return Column(
-            children: [
-              _buildSectionButtons(),
-              _verticalGap,
-              _buildSection(todosWithUsers),
-            ],
-          );
-        });
+  Widget _buildBodyCommon(BuildContext context, List<Todo> todos) {
+    return Center(
+      child: NavigationHeader<TodoSectionEnum>(
+        values: TodoSectionEnum.values,
+        selectionCallback: (TodoSectionEnum s) =>
+            renderSelectedContent(s, todos),
+      ),
+    );
   }
 
   Widget _buildSection(List<TodoDto> todosWithUsers) {
     if (todosWithUsers.isEmpty) {
-      return Center(child: Text('No todos found for this section'));
+      return InfoBubble(labelText: 'No todos found for this section');
     }
-    return Expanded(
+    return SizedBox(
+      width: MediaQuery.of(context).size.width > _mediaQueryLimit
+          ? MediaQuery.of(context).size.width * _widthFactorWeb
+          : MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
       child: ListView(
         children: [
           for (final todoWithUsers in todosWithUsers)
@@ -82,8 +67,8 @@ class _MyTodosPageState extends State<MyTodosPage> {
               creator: todoWithUsers.creator,
               assignee: todoWithUsers.assignee,
               solver: todoWithUsers.solver,
-              showTickMark: _selectedSection == TodoSection.activeTodo ||
-                  _selectedSection == TodoSection.created,
+              showTickMark: todoWithUsers.todo.completedAt != null &&
+                  todoWithUsers.todo.deletedAt == null,
               onClick: () => Modular.to.pushNamed(
                 AppRoute.editTodo.path,
                 arguments: todoWithUsers,
@@ -94,43 +79,17 @@ class _MyTodosPageState extends State<MyTodosPage> {
     );
   }
 
-  Widget _buildSectionButtons() {
-    return Container(
-      decoration: _sectionButtonsBorder,
-      child: Row(
-        children: [
-          for (final section in TodoSection.todoSections)
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(right: BorderSide(color: Colors.grey)),
-                ),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: _sectionButtonShape,
-                    padding: _sectionButtonPadding,
-                    backgroundColor: section == _selectedSection
-                        ? Colors.blue.withOpacity(_sectionButtonOpacity)
-                        : Colors.transparent,
-                  ),
-                  onPressed: () => setState(() {
-                    _selectedSection = section;
-                  }),
-                  child: Text(
-                    section.label,
-                    style: TextStyle(
-                      color: section == _selectedSection ? Colors.blue : null,
-                      fontWeight: section == _selectedSection
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+  Widget renderSelectedContent(TodoSectionEnum section, List<Todo> todos) {
+    TodoSection? selectedSection = TodoSectionEnum.getSectionInstance(section);
+
+    return LoadingFutureBuilder(
+        future: GetIt.instance<TodoService>().fetchUsers(selectedSection == null
+            ? todos
+            : selectedSection.filter(
+                todos, userService.getUser!, StatRange.AllTime)),
+        builder: (context, todosWithUsers) {
+          return _buildSection(todosWithUsers);
+        });
   }
 
   Widget _buildFloatingActionButton() {
