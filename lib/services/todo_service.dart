@@ -71,27 +71,15 @@ class TodoService {
   }
 
   Future<List<TodoDto>> fetchUsers(List<Todo> todos) async {
-    final res = await Future.wait([
-      _userService.getUsersByIds(
-        todos.map((t) => t.createdById).toList(),
-      ),
-      _userService.getUsersByIds(
-        todos.map((t) => t.createdForId).toList(),
-      )
-    ]);
-
-    final creators = res[0];
-    final assignees = res[1];
-
-    final List<TodoDto> todosWithUsers = [];
-    for (final todo in todos) {
-      todosWithUsers.add(TodoDto(
-          todo: todo,
-          creator: creators.firstWhere((c) => c.id == todo.createdById),
-          assignee: assignees.firstWhere((c) => c.id == todo.createdForId)));
-    }
-
-    return todosWithUsers;
+    final userMap = await _userService.getUserMap();
+    return todos
+        .map((todo) => TodoDto(
+              todo: todo,
+              creator: userMap[todo.createdById]!,
+              assignee: userMap[todo.createdForId]!,
+              solver: userMap[todo.doneById],
+            ))
+        .toList();
   }
 
   Stream<List<Todo>> getTodoStreamAll(List<String> userIds) {

@@ -140,6 +140,11 @@ class UserService {
     _pushToStream(newUser);
   }
 
+  Future<Map<String, User>> getUserMap() async {
+    final users = await _userRepository.getDocuments();
+    return {for (var user in users) user.id: user};
+  }
+
   Future<void> addNotification(String userId, NotificationType type,
       String title, String description, String? link) async {
     final user = await getById(userId);

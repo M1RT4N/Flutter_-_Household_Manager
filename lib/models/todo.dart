@@ -9,6 +9,7 @@ class Todo {
   final String id;
   final String createdById;
   final String createdForId;
+  final String? doneById;
   @TimestampConverter()
   final Timestamp createdAt;
   @TimestampConverter()
@@ -25,6 +26,7 @@ class Todo {
     required this.id,
     required this.createdById,
     required this.createdForId,
+    this.doneById,
     required this.createdAt,
     required this.deadline,
     required this.description,
@@ -42,6 +44,7 @@ class Todo {
     String? id,
     String? createdById,
     String? createdForId,
+    String? doneById,
     Timestamp? createdAt,
     Timestamp? deadline,
     String? description,
@@ -54,6 +57,7 @@ class Todo {
       id: id ?? this.id,
       createdById: createdById ?? this.createdById,
       createdForId: createdForId ?? this.createdForId,
+      doneById: doneById ?? this.doneById,
       createdAt: createdAt ?? this.createdAt,
       deadline: deadline ?? this.deadline,
       description: description ?? this.description,

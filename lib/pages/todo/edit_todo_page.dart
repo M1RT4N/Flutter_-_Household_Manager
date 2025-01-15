@@ -63,7 +63,6 @@ class _EditTodoPageState extends State<EditTodoPage> {
     } else {
       editable = true;
       _titleController.text = '';
-      // TODO: WTF? _createdForController.text = userService.getUser!.name;
       _dateController.text = Utility.formatDate(DateTime.now());
       _selectedMemberId = userService.getUser!.id;
     }
@@ -95,37 +94,39 @@ class _EditTodoPageState extends State<EditTodoPage> {
 
     return LoadingFutureBuilder<HouseholdDto>(
       future: householdService.fetchUsers(household),
-      builder: (context, householdWithUsers) => Card(
-          margin: _cardMargin,
-          elevation: _cardElevation,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(_borderRadius)),
-          child: Padding(
-            padding: _padding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(editable.toString()),
-                _buildDescriptionRow(),
-                _rowGap,
-                _buildTitleRow(),
-                _rowGap,
-                _buildDeadlineRow(),
-                _rowGap,
-                _buildAssigneeRow(householdWithUsers.members),
-                _rowGap,
-                if (editTodo == null)
-                  _buildCreateButton(household)
-                else
-                  _buildCreatorRow(),
-                if (editable && editTodo != null) ...[
+      builder: (context, householdWithUsers) => Center(
+        child: Card(
+            margin: _cardMargin,
+            elevation: _cardElevation,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(_borderRadius)),
+            child: Padding(
+              padding: _padding,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDescriptionRow(),
                   _rowGap,
-                  _buildButtonsRow()
-                ]
-              ],
-            ),
-          )),
+                  _buildTitleRow(),
+                  _rowGap,
+                  _buildDeadlineRow(),
+                  _rowGap,
+                  _buildAssigneeRow(householdWithUsers.members),
+                  _rowGap,
+                  if (editTodo == null)
+                    _buildCreateButton(household)
+                  else ...[
+                    _buildCreatorRow(),
+                    if (editTodo!.solver != null) _buildDoneByRow(),
+                  ],
+                  if (editable && editTodo != null) ...[
+                    _rowGap,
+                    _buildButtonsRow()
+                  ]
+                ],
+              ),
+            )),
+      ),
     );
   }
 
@@ -233,12 +234,28 @@ class _EditTodoPageState extends State<EditTodoPage> {
     return Row(
       children: [
         Text(
-          'CreatedBy:',
+          'Created By:',
           style: _labelTextStyle,
         ),
         _labelTextGap,
         Text(
           editTodo!.creator.name,
+          style: _editableTextStyle,
+        )
+      ],
+    );
+  }
+
+  Widget _buildDoneByRow() {
+    return Row(
+      children: [
+        Text(
+          'Done By:',
+          style: _labelTextStyle,
+        ),
+        _labelTextGap,
+        Text(
+          editTodo!.solver!.name,
           style: _editableTextStyle,
         )
       ],
@@ -258,9 +275,9 @@ class _EditTodoPageState extends State<EditTodoPage> {
   }
 
   void _updateTodo() async {
-    if (_selectedMemberId == null) {
-      showTopSnackBar(context, 'Please choose a member.', Colors.red);
-      return;
+    String? errorMessage = _validateInputs();
+    if (errorMessage != null) {
+      return showTopSnackBar(context, errorMessage, Colors.red);
     }
 
     final updatedTodo = editTodo!.todo.copyWith(
@@ -337,11 +354,6 @@ class _EditTodoPageState extends State<EditTodoPage> {
   }
 
   void _createTodo(Household household) async {
-    if (_selectedMemberId == null) {
-      showTopSnackBar(context, 'Please choose a member.', Colors.red);
-      return;
-    }
-
     String? errorMessage = _validateInputs();
     if (errorMessage != null) {
       return showTopSnackBar(context, errorMessage, Colors.red);
@@ -382,6 +394,10 @@ class _EditTodoPageState extends State<EditTodoPage> {
 
     if (_dateController.text.isEmpty) {
       return 'Please choose deadline';
+    }
+
+    if (_titleController.text.isEmpty) {
+      return 'Please provide title.';
     }
 
     return null;
