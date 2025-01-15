@@ -5,36 +5,31 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/user.dart';
-import 'package:household_manager/pages/common/loading_page_template.dart';
+import 'package:household_manager/pages/common/static_page_template.dart';
 import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/utils/utility.dart';
-import 'package:household_manager/widgets/editable_field.dart';
+import 'package:household_manager/utils/tabs/profile_section.dart';
 import 'package:household_manager/widgets/form_text_field.dart';
+import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
+import 'package:household_manager/widgets/navigation_header.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 import 'package:image_picker/image_picker.dart';
 
-const _padding = EdgeInsets.all(16.0);
-const _avatarSectionGap = SizedBox(height: 20);
 const _cardMargin = EdgeInsets.all(16.0);
-const _cardInnerPadding = EdgeInsets.symmetric(
-  horizontal: 80.0,
-  vertical: 25.0,
-);
-const _borderRadius = 12.0;
-const _avatarRadius = 50.0;
-const _avatarFontSize = 32.0;
 const _avatarSizeLimit = 50; // In MB
 const _controlButtonsSpacing = 10.0;
 const _avatarSize = 100.0;
 const _avatarEditIconSize = 16.0;
-const _cardHeaderPadding = EdgeInsets.all(16.0);
-const _cardHeaderFontSize = 20.0;
 const _controlButtonsPadding = 20.0;
-const _cardSizeFactor = 2.0;
 const _cardElevation = 4.0;
+const _paddingMobile = 20.0;
+const _paddingWeb = 80.0;
+const _mediaQueryLimit = 800.0;
+const _paddingHorizontalCommon = 25.0;
+const _cardWidthFactor = 0.6;
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -56,37 +51,53 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingPageTemplate<User?>(
-        title: 'Profile',
-        stream: _userService.getUserStream,
-        bodyFunctionWeb: _buildBodyWeb,
-        bodyFunctionPhone: _buildBodyPhone,
-        showDrawer: false,
-        showBackArrow: true,
-        showNotifications: false);
+    return LoadingStreamBuilder(
+        stream: GetIt.instance<UserService>().getUserStream,
+        builder: (context, user) {
+          return StaticPageTemplate(
+            title: 'Profile',
+            bodyFunction: (context) => _buildBodyCommon(context, user),
+            showDrawer: user?.householdId != null,
+            showBackArrow: user?.householdId == null,
+            showNotifications: user?.householdId != null,
+          );
+        });
   }
 
-  Widget _buildBodyWeb(BuildContext context, User? user) {
+  EdgeInsets _getPadding(BuildContext context) {
+    return EdgeInsets.symmetric(
+      horizontal: MediaQuery.of(context).size.width > _mediaQueryLimit
+          ? _paddingWeb
+          : _paddingMobile,
+      vertical: _paddingHorizontalCommon,
+    );
+  }
+
+  Widget _buildBodyCommon(BuildContext context, User? user) {
     if (user == null) {
-      return Center(child: Text('No data available.'));
+      return InfoBubble(labelText: 'No data available.');
     }
 
-    _usernameController.text = user.username;
-    _nameController.text = user.name;
+    return NavigationHeader<ProfileSection>(
+      values: ProfileSection.values,
+      selectionCallback: (ProfileSection s) => renderSelectedContent(s, user),
+    );
+  }
+
+  Widget renderSelectedContent(ProfileSection section, user) {
+    var child = _buildChangePasswordCard();
+    if (section == ProfileSection.UserDetail) {
+      child = _buildUserDetailsCard(user);
+    }
 
     return SingleChildScrollView(
-      child: Center(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width / _cardSizeFactor,
-          child: Column(
-            children: [
-              _buildUserDetailsCard(user),
-              _buildChangePasswordCard(),
-            ],
-          ),
-        ),
-      ),
-    );
+        child: Center(
+            child: SizedBox(
+      width: MediaQuery.of(context).size.width > _mediaQueryLimit
+          ? MediaQuery.of(context).size.width * _cardWidthFactor
+          : double.infinity,
+      child: child,
+    )));
   }
 
   Widget _buildUserDetailsCard(User user) {
@@ -97,9 +108,8 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildCardHeader('User Details'),
           Padding(
-            padding: _cardInnerPadding,
+            padding: _getPadding(context),
             child: Column(
               children: [
                 _buildAvatarSection(),
@@ -137,9 +147,8 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildCardHeader('Change Password'),
           Padding(
-            padding: _cardInnerPadding,
+            padding: _getPadding(context),
             child: Column(
               children: [
                 FormTextField(
@@ -169,23 +178,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCardHeader(String title) {
-    return Container(
-      padding: _cardHeaderPadding,
-      color: Colors.blueGrey,
-      child: Center(
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: _cardHeaderFontSize,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
       ),
     );
   }
@@ -228,86 +220,6 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       ),
     ]);
-  }
-
-  Widget _buildBodyPhone(BuildContext context, User? user) {
-    if (user == null) {
-      return Center(child: Text('No data available.'));
-    }
-
-    return Center(
-      child: Padding(
-        padding: _padding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            UserAvatar(
-                onPressed: () {},
-                initialsRadius: _avatarRadius,
-                initialsFontSize: _avatarFontSize),
-            _avatarSectionGap,
-            _buildInfoCard(user),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(User user) {
-    return Card(
-      elevation: _cardElevation,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(_borderRadius),
-      ),
-      child: Padding(
-        padding: _padding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            EditableField(
-              labelText: 'Name',
-              editableText: user.name,
-              onAccept: _changeName,
-            ),
-            EditableField(
-              labelText: 'Username',
-              editableText: user.username,
-              onAccept: _changeUsername,
-            ),
-            EditableField(
-              labelText: 'Email',
-              editableText: user.email,
-              onAccept: _changeEmail,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _changeName(BuildContext context, String newName) {
-    return Utility.performActionAndShowInfo(
-      context: context,
-      action: () => GetIt.instance<UserService>().changeName(newName),
-      successMessage: 'Name changed.',
-    );
-  }
-
-  Future<void> _changeUsername(BuildContext context, String newUsername) {
-    return Utility.performActionAndShowInfo(
-      context: context,
-      action: () => GetIt.instance<UserService>().changeUsername(newUsername),
-      successMessage: 'Username changed.',
-    );
-  }
-
-  Future<void> _changeEmail(BuildContext context, String newEmail) {
-    return Utility.performActionAndShowInfo(
-      context: context,
-      action: () => GetIt.instance<UserService>().changeEmail(newEmail),
-      successMessage: 'Email changed.',
-    );
   }
 
   Future<void> _pickImage() async {

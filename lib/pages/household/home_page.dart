@@ -83,8 +83,10 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   if (topTodos.isNotEmpty)
                     _buildTopTodoCards(context, topNWithUsers)
-                  else
+                  else ...[
+                    _buildSearchAndFilterRow(context),
                     InfoBubble(labelText: "No TODOs to show."),
+                  ]
                 ],
               ),
             );

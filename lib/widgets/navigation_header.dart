@@ -39,23 +39,26 @@ class _NavigationHeaderState<E extends Enum>
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _SliverAppBarDelegate(
-            minHeight: _sectionBarSize,
-            maxHeight: _sectionBarSize,
-            child: _buildSectionButtons(),
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - _sectionBarSize,
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _SliverAppBarDelegate(
+              minHeight: _sectionBarSize,
+              maxHeight: _sectionBarSize,
+              child: _buildSectionButtons(),
+            ),
           ),
-        ),
-        SliverList(
-          delegate: SliverChildListDelegate(
-            [widget.selectionCallback(_selectedSection)],
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [widget.selectionCallback(_selectedSection)],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

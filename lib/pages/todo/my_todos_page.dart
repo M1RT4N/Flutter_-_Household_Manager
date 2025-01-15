@@ -8,7 +8,7 @@ import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
-import 'package:household_manager/utils/tabs/stat_range.dart';
+import 'package:household_manager/utils/filters/stat_range.dart';
 import 'package:household_manager/utils/tabs/todo_section.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 

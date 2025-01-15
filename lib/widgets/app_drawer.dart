@@ -8,10 +8,13 @@ import 'package:household_manager/widgets/theme_flipper.dart';
 const _logoPath = 'assets/icons/logo.svg';
 const _drawerInnerPadding = 16.0;
 const _logoLeftPadding = 16.0;
-const _logoHeight = 256.0;
+const _logoHeight = 128.0;
 const _logoWidth = 512.0;
 const _themeSwitcherPadding = 8.0;
 const _themeSwitcherPaddingInnerRight = 24.0;
+const _drawerHeaderHeight = 200.0;
+const _logoFontSize = 20.0;
+const _subLogoFontSize = 12.0;
 
 class AppDrawer extends StatelessWidget {
   final void Function(BuildContext) logoutFunc;
@@ -62,19 +65,40 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-// TODO: Fix this, it should work... WTF
-// https://api.flutter.dev/flutter/widgets/GestureDetector-class.html
   Widget _buildDrawerHeader(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Modular.to.navigate(AppRoute.home.path);
-      },
-      child: DrawerHeader(
-        padding: EdgeInsets.only(left: _logoLeftPadding),
-        child: SvgPicture.asset(
-          _logoPath,
-          width: _logoWidth,
-          height: _logoHeight,
+    return SizedBox(
+      height: _drawerHeaderHeight,
+      child: GestureDetector(
+        onTap: () {
+          Modular.to.navigate(AppRoute.home.path);
+        },
+        child: DrawerHeader(
+          padding: EdgeInsets.only(left: _logoLeftPadding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                _logoPath,
+                width: _logoWidth,
+                height: _logoHeight,
+              ),
+              Text(
+                'HOUSEHOLD MANAGER',
+                style: TextStyle(
+                  fontSize: _logoFontSize,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Run your household efficiently!',
+                style: TextStyle(
+                  fontSize: _subLogoFontSize,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
