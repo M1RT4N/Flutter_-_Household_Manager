@@ -271,9 +271,36 @@ class _EditTodoPageState extends State<EditTodoPage> {
 
     await Utility.performActionAndShowInfo(
       context: context,
-      action: () => todoService.updateTodo(updatedTodo),
+      action: () async {
+        if (editTodo!.todo.createdForId != _selectedMemberId) {
+          await userService.addNotification(
+            _selectedMemberId!,
+            NotificationType.todoAssigned,
+            'New TODO assigned.',
+            'User ${userService.getUser!.name} assigned you new TODO. Deadline: ${Utility.formatDate(updatedTodo.deadline.toDate())}.',
+            updatedTodo.id,
+          );
+          await userService.addNotification(
+            editTodo!.todo.createdForId,
+            NotificationType.todoUpdated,
+            'TODO Reassigned.',
+            'TODO ${editTodo!.todo.title} was re-assigned to different user ${userService.getUser!.name}.',
+            updatedTodo.id,
+          );
+        }
+        await userService.addNotification(
+          editTodo!.todo.createdForId,
+          NotificationType.todoUpdated,
+          'TODO Updated.',
+          'TODO ${editTodo!.todo.title} wa updated!',
+          updatedTodo.id,
+        );
+        return todoService.updateTodo(updatedTodo);
+      },
       successMessage: 'Todo updated.',
     );
+
+    Modular.to.popAndPushNamed(AppRoute.myTodos.path);
   }
 
   void _deleteTodo() async {
@@ -291,6 +318,14 @@ class _EditTodoPageState extends State<EditTodoPage> {
       await Utility.performActionAndShowInfo(
         context: context,
         action: () async {
+          await GetIt.instance<UserService>().addNotification(
+            updatedTodo.createdById,
+            NotificationType.todoDeleted,
+            'TODO was deleted',
+            'TODO ${updatedTodo.title} was deleted!',
+            null,
+          );
+
           await todoService.updateTodo(updatedTodo);
           return null;
         },

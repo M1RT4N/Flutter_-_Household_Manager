@@ -3,6 +3,7 @@ import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/services/database_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 
 const _todoIdLength = 28;
@@ -52,6 +53,14 @@ class TodoService {
     );
 
     await _todoRepository.setOrAdd(todo.id, todo);
+
+    await _userService.addNotification(
+      createdForId,
+      NotificationType.todoAssigned,
+      'New TODO: $title',
+      'User ${_userService.getUser!.name} assigned you new TODO. Deadline: ${Utility.formatDate(deadline)}.',
+      todo.id,
+    );
 
     return todo;
   }

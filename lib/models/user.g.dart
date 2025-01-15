@@ -59,4 +59,6 @@ const _$NotificationTypeEnumMap = {
   NotificationType.userLeft: 'userLeft',
   NotificationType.todoAssigned: 'todoAssigned',
   NotificationType.todoCompleted: 'todoCompleted',
+  NotificationType.todoDeleted: 'todoDeleted',
+  NotificationType.todoUpdated: 'todoUpdated',
 };

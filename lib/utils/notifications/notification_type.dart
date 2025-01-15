@@ -5,7 +5,9 @@ enum NotificationType {
   userRejected(Icons.person_remove),
   userLeft(Icons.exit_to_app),
   todoAssigned(Icons.assignment),
-  todoCompleted(Icons.check_circle);
+  todoCompleted(Icons.check_circle),
+  todoDeleted(Icons.delete),
+  todoUpdated(Icons.edit);
 
   final IconData icon;
 

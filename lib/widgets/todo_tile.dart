@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/todo_service.dart';
+import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 
@@ -34,7 +36,9 @@ class TodoTile extends StatelessWidget {
   final VoidCallback onClick;
   final bool showTickMark;
 
-  const TodoTile(
+  final _userService = GetIt.instance<UserService>();
+
+  TodoTile(
       {super.key,
       required this.todo,
       required this.creator,
@@ -240,6 +244,26 @@ class TodoTile extends StatelessWidget {
     await Utility.performActionAndShowInfo(
         context: context,
         action: () async {
+          // Send notification to creator but only if creator is not assignee
+          if (todo.createdById != todo.createdForId) {
+            await _userService.addNotification(
+              todo.createdById,
+              NotificationType.todoCompleted,
+              'TODO You Assigned Completed',
+              'Yor TODO ${todo.title} was marked as completed.',
+              todo.id,
+            );
+          }
+
+          // Send notification to assignee
+          await _userService.addNotification(
+            todo.createdById,
+            NotificationType.todoCompleted,
+            'You Successfully Completed TODO',
+            'Congratulations! You have successfully completed the TODO ${todo.title}.',
+            todo.id,
+          );
+
           await GetIt.instance<TodoService>().updateTodo(updatedTodo);
           return null;
         },
