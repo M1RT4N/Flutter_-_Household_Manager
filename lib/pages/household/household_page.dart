@@ -4,16 +4,24 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/household_dto.dart';
+import 'package:household_manager/models/todo.dart';
+import 'package:household_manager/models/todo_dto.dart';
+import 'package:household_manager/models/household_dto.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
+import 'package:household_manager/utils/tabs/stat_range.dart';
+import 'package:household_manager/utils/tabs/todo_section.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/editable_field.dart';
 import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
+import 'package:household_manager/widgets/todo_tile.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -38,8 +46,14 @@ class HouseholdPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LoadingPageTemplate<Household?>(
+    return LoadingPageTemplate<(Household?, List<Todo>)>(
       title: 'Your Household',
+      stream: Rx.combineLatest2(
+          GetIt.instance<HouseholdService>().getHouseholdStream,
+          GetIt.instance<TodoService>().getTodoStream,
+          (household, todos) => (household, todos)),
+      bodyFunctionPhone: _buildBodyPhone,
+      bodyFunctionWeb: _buildBodyWeb,
       stream: GetIt.instance<HouseholdService>().getHouseholdStream,
       bodyFunctionPhone: (context, household) =>
           _buildCommonBody(context, household, _buildBodyPhone),
@@ -48,6 +62,8 @@ class HouseholdPage extends StatelessWidget {
     );
   }
 
+  Widget _buildBodyWeb(BuildContext context, (Household?, List<Todo>) stream) {
+    final (household, todos) = stream;
   Widget _buildCommonBody(BuildContext context, Household? household,
       Function(BuildContext, Household, HouseholdDto) bodyFunction) {
     if (household == null) {
@@ -91,6 +107,44 @@ class HouseholdPage extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildBodyPhone(BuildContext context, (Household?, List<Todo>) stream) {
+  final (household, todos) = stream;
+  if (household == null) {
+    return Center(child: Text('No data available.'));
+  }
+
+  return LoadingFutureBuilder(
+    future: Future.wait([
+      GetIt.instance<HouseholdService>().fetchUsers(household),
+      GetIt.instance<TodoService>().fetchUsers(
+          TodoSection.activeTodo.filter(todos, null, StatRange.AllTime)),
+    ]),
+    builder: (context, fetched) {
+      final household = fetched[0] as HouseholdDto;
+      final todos = fetched[1] as List<TodoDto>;
+
+      return SingleChildScrollView(
+        padding: _padding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHouseholdInfoSection(context, household.household),
+            _sizedBox,
+            _buildMembersSection(context, household.members),
+            _sizedBox,
+            _buildRequestsSection(context, household.requesters),
+            _sizedBox,
+            _buildTodosSection(context, todos),
+            _sizedBox,
+            _buildLeaveButton(context),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildBodyPhone(BuildContext context, Household household,
       HouseholdDto householdWithUsers) {
@@ -207,6 +261,40 @@ class HouseholdPage extends StatelessWidget {
     );
   }
 
+Widget _buildMembersSection(BuildContext context, List<User> members) {
+  return _buildSection<User>(
+    context: context,
+    leadingIcon: const Icon(Icons.group),
+    title: 'Members',
+    items: members,
+    buildItem: (member) => ListTile(
+      title: Text(member.name),
+      trailing: GetIt.instance<UserService>().getUser!.id != member.id
+          ? LoadingStadiumButton(
+              onPressed: () => _removeMember(context, member.id),
+              idleStateWidget: const Icon(Icons.delete_forever),
+              buttonWidth: _buttonWidth,
+            )
+          : const Text('You  '),
+    ),
+  );
+}
+
+Widget _buildTodosSection(BuildContext context, List<TodoDto> todos) {
+  return _buildSection<TodoDto>(
+    context: context,
+    leadingIcon: const Icon(Icons.list),
+    title: 'Active Todos',
+    items: todos,
+    buildItem: (todo) => TodoTile(
+      todo: todo.todo,
+      creator: todo.creator,
+      assignee: todo.assignee,
+      showTickMark: true,
+      onClick: () {},
+    ),
+  );
+}
   Widget _buildMembersSection(BuildContext context, List<User> members) {
     return _buildSection<User>(
       context: context,

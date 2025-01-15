@@ -105,7 +105,7 @@ class TodoTile extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.deferToChild,
       onTap: onClick,
-      child: Row(
+      child: Wrap(
         children: [
           Text(
             todo.title,
