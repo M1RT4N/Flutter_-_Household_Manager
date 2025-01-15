@@ -6,7 +6,6 @@ import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/notifications/notification_type.dart';
-import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 
