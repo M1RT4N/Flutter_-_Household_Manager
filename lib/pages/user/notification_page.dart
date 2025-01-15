@@ -14,12 +14,16 @@ import 'package:rxdart/rxdart.dart';
 
 const _cardBottomPadding = 12.0;
 const _cardInnerPadding = 32.0;
-const _widthFactor = 0.5;
+const _widthFactorWeb = 0.6;
+const _widthFactorMobile = 1.0;
+const _mobileWidthLimitMax = 1000;
 const _borderRadius = 8.0;
 const _boxPadding = 16.0;
 const _searchBarPadding = 8.0;
 const _searchBarPaddingTop = 16.0;
 const _menuBarGapRight = 8.0;
+const _filterWidthFactor = 3;
+const _filterMobileGap = 40.0;
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -45,17 +49,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         householdService.getHouseholdStream,
         (user, household) => (user!, household!),
       ),
-      bodyFunctionWeb: _buildBodyWeb,
-      bodyFunctionPhone: _buildBodyPhone,
+      bodyFunctionWeb: _buildBodyCommon,
+      bodyFunctionPhone: _buildBodyCommon,
     );
   }
 
-  // TODO: implement or use web design
-  Widget _buildBodyPhone(BuildContext context, (User, Household) data) {
-    return _buildBodyWeb(context, data);
-  }
-
-  Widget _buildBodyWeb(BuildContext context, (User, Household) data) {
+  Widget _buildBodyCommon(BuildContext context, (User, Household) data) {
     final user = data.$1;
     final household = data.$2;
     final notifications = user.notifications;
@@ -97,11 +96,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
           left: _searchBarPadding,
           right: _searchBarPadding,
           bottom: _searchBarPadding),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: MediaQuery.of(context).size.width / 3,
+            width: MediaQuery.of(context).size.width < _mobileWidthLimitMax
+                ? MediaQuery.of(context).size.width - _filterMobileGap
+                : MediaQuery.of(context).size.width / _filterWidthFactor,
             child: TextField(
               decoration: InputDecoration(
                 labelText: 'Search',
@@ -114,8 +115,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
               },
             ),
           ),
-          SizedBox(width: _menuBarGapRight),
+          SizedBox(height: _menuBarGapRight),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Checkbox(
                 value: _showHidden,
@@ -171,7 +173,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       padding: EdgeInsets.only(bottom: _cardBottomPadding),
       child: Center(
         child: FractionallySizedBox(
-          widthFactor: _widthFactor,
+          widthFactor: MediaQuery.of(context).size.width < _mobileWidthLimitMax
+              ? _widthFactorMobile
+              : _widthFactorWeb,
           child: Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(_borderRadius),
