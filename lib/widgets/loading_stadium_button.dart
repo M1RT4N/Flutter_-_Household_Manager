@@ -25,7 +25,6 @@ class LoadingStadiumButton extends StatelessWidget {
       elevation: _buttonElevation,
       width: buttonWidth,
       height: _buttonHeight,
-      buttonColor: Theme.of(context).primaryColor,
       borderRadius: _buttonRadius,
       idleStateWidget: idleStateWidget,
       onPressed: onPressed,

@@ -74,7 +74,11 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               SizedBox(height: _spacingHeight),
               LoadingStadiumButton(
-                  idleStateWidget: Text('Register'), onPressed: _register)
+                  idleStateWidget: Text('Register',
+                      style: TextStyle(
+                        color: Colors.black,
+                      )),
+                  onPressed: _register)
             ],
           ),
         ),

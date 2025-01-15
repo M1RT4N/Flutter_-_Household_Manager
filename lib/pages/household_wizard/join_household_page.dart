@@ -4,8 +4,11 @@ import 'package:get_it/get_it.dart';
 import 'package:household_manager/pages/common/static_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
+import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
+import 'package:flutter/foundation.dart'; // Added import
+import 'package:qr_code_dart_scan/qr_code_dart_scan.dart'; // Added import
 
 const _mainBoxSize = 600.0;
 const _mainBoxPadding = 20.0;
@@ -30,6 +33,8 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
   final _codeController = TextEditingController();
   final _householdService = GetIt.instance<HouseholdService>();
 
+  bool _isScanning = false;
+
   @override
   Widget build(BuildContext context) {
     return StaticPageTemplate(
@@ -37,7 +42,7 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
       showDrawer: false,
       showBackArrow: true,
       showNotifications: false,
-      bodyFunction: _buildMainContent,
+      bodyFunction: _isScanning ? _buildQRScanner : _buildMainContent,
     );
   }
 
@@ -49,7 +54,10 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildInfoBox(),
+              InfoBubble(
+                labelText:
+                    'Please obtain the household code from the household member, or scan the QR code.',
+              ),
               SizedBox(height: _gapBetweenColumns),
               _buildForm(),
               SizedBox(height: _gapBetweenColumns),
@@ -57,22 +65,6 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoBox() {
-    return Container(
-      padding: EdgeInsets.all(_infoBoxPadding),
-      decoration: BoxDecoration(
-        color: Colors.blue[50],
-        border: Border.all(color: Colors.blue),
-        borderRadius: BorderRadius.circular(_infoBoxRadius),
-      ),
-      child: Text(
-        'Please obtain the household code from the household member, or scan the QR code.',
-        style: TextStyle(color: Colors.blue),
-        textAlign: TextAlign.center,
       ),
     );
   }
@@ -94,7 +86,11 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
           ),
           SizedBox(height: _gapBetweenColumns),
           LoadingStadiumButton(
-              idleStateWidget: Text('Join'), onPressed: _joinHousehold)
+              idleStateWidget: Text(
+                'Join',
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () => _joinHousehold)
         ],
       ),
     );
@@ -132,8 +128,8 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
     );
   }
 
-  void _joinHousehold() async {
-    String code = _codeController.text.trim();
+  void _joinHousehold(String? codeInt) async {
+    String code = codeInt ?? _codeController.text.trim();
     if (!_isValidCode(code)) {
       showTopSnackBar(
           context, 'Please enter a valid 8-character code.', Colors.red);
@@ -166,8 +162,37 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
     );
   }
 
-  void _scanQRCode() {
-    // TODO: Implement QR code scanning functionality
+  void _scanQRCode() async {
+    if (kIsWeb) {
+      showTopSnackBar(
+          context, 'QR code scanning is not supported on web.', Colors.red);
+      return;
+    }
+
+    setState(() {
+      _isScanning = true;
+    });
+  }
+
+  Widget _buildQRScanner(BuildContext context) {
+    return Scaffold(
+      body: QRCodeDartScanView(
+        typeScan: TypeScan.live,
+        intervalScan: const Duration(seconds: 1),
+        takePictureButtonBuilder: (context, controller, isLoading) {
+          return ElevatedButton(
+            onPressed: controller.takePictureAndDecode,
+            child: Text('Take a picture'),
+          );
+        },
+        formats: [
+          BarcodeFormat.qrCode,
+        ],
+        onCapture: (Result result) {
+          _joinHousehold(result.text);
+        },
+      ),
+    );
   }
 
   @override
