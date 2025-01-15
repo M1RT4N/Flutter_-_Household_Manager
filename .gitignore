@@ -49,3 +49,6 @@ app.*.map.json
 pubspec.lock
 firebase.json
 secret_config.dart
+
+.vscode/
+.metadata

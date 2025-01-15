@@ -5,23 +5,27 @@ import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/utils/utility.dart';
+import 'package:household_manager/widgets/user_avatar.dart';
 
-const _maxWidth = 1000.0;
 const _sectionPaddingHor = 16.0;
-const _sectionMarginVer = 4.0;
-const _sectionMarginHor = 16.0;
-const _sectionBubbleRadius = 8.0;
-const _importantTextStyle = TextStyle(
-  fontWeight: FontWeight.bold,
-);
-const _normalTextStyle = TextStyle(color: Colors.white70);
-const _contentPadding = EdgeInsets.symmetric(
-  horizontal: _sectionPaddingHor,
-);
-const _bubbleMargin = EdgeInsets.symmetric(
-  horizontal: _sectionMarginHor,
-  vertical: _sectionMarginVer,
-);
+const _titleFontSize = 18.0;
+const _titleDescriptionGap = 4.0;
+const _cardBottomPadding = 12.0;
+const _borderRadius = 8.0;
+const _boxPadding = 16.0;
+const _maxWidthFactor = 0.5;
+const _minWidthFactor = 1.0;
+const _mediaControlMinSize = 600.0;
+const _titleLinkIconLeftPadding = 4.0;
+const _statusUpperPadding = 8.0;
+const _dateIconSize = 14.0;
+const _dateIconPadding = 3.0;
+const _userSpacing = 16.0;
+const _smallUserAvatarRadius = 10.0;
+const _smallUserAvatarFontSize = 8.0;
+const _statusIconSize = 16.0;
+const _statusDatePadding = 3.0;
+const _statusDateFontSize = 16.0;
 
 class TodoTile extends StatelessWidget {
   final Todo todo;
@@ -40,70 +44,193 @@ class TodoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(maxWidth: _maxWidth),
-      margin: _bubbleMargin,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.white10),
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(_sectionBubbleRadius),
+    return Padding(
+      padding: EdgeInsets.only(bottom: _cardBottomPadding),
+      child: Center(
+        child: FractionallySizedBox(
+          widthFactor: MediaQuery.of(context).size.width > _mediaControlMinSize
+              ? _maxWidthFactor
+              : _minWidthFactor,
+          child: _buildCard(context),
+        ),
       ),
-      child: ListTile(
-        onTap: onClick,
-        contentPadding: _contentPadding,
-        title: Wrap(
-          children: [
-            Text(
-              'Description: ',
-              style: _normalTextStyle,
-            ),
-            Text(
-              todo.description,
-              style: _importantTextStyle,
-            ),
-          ],
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(_borderRadius),
+        side: BorderSide(color: Colors.grey[600]!),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: _boxPadding,
+          horizontal: _boxPadding,
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Text('Deadline: ', style: _normalTextStyle),
-                Text(
-                  Utility.formatDate(todo.deadline.toDate()),
-                  style: _importantTextStyle,
-                )
-              ],
-            ),
-            Text(
-              'Created by: ${creator.name}',
-              style: _normalTextStyle,
-            ),
-            Text(
-              'Created for: ${assignee.name}',
-              style: _normalTextStyle,
-            ),
-            Text('Created at: ${Utility.formatDate(todo.createdAt.toDate())}',
-                style: _normalTextStyle),
-            if (todo.completedAt != null)
-              Text(
-                'Completed at: ${Utility.formatDate(todo.completedAt!.toDate())}',
-                style: _normalTextStyle,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: EdgeInsets.symmetric(
+                  horizontal: _sectionPaddingHor,
+                ).vertical),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTitleRow(),
+                    SizedBox(height: _titleDescriptionGap),
+                    _buildDetailsColumn(),
+                  ],
+                ),
               ),
-            if (todo.deletedAt != null)
-              Text(
-                'Deleted at: ${Utility.formatDate(todo.deletedAt!.toDate())}',
-                style: _normalTextStyle,
-              ),
-          ],
-        ),
-        trailing: showTickMark
-            ? IconButton(
+            ),
+            if (showTickMark)
+              IconButton(
                 onPressed: () => _completeTodo(context, todo),
                 icon: Icon(Icons.check),
-              )
-            : null,
+              ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildTitleRow() {
+    return GestureDetector(
+      behavior: HitTestBehavior.deferToChild,
+      onTap: onClick,
+      child: Row(
+        children: [
+          Text(
+            todo.title,
+            style: TextStyle(
+              fontSize: _titleFontSize,
+              fontWeight: FontWeight.bold,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: _titleLinkIconLeftPadding),
+            child: Icon(
+              Icons.link,
+              size: 10,
+              color: Colors.grey[500],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailsColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDateRow(),
+        Text(
+          todo.description,
+          style: TextStyle(color: Colors.grey[400]),
+        ),
+        SizedBox(height: _statusUpperPadding),
+        _buildUserRows(),
+        if (todo.completedAt != null)
+          _buildStatusRow(
+            icon: Icons.check,
+            color: Colors.green,
+            label: "COMPLETED",
+            date: todo.completedAt!,
+          ),
+        if (todo.deletedAt != null)
+          _buildStatusRow(
+            icon: Icons.delete_forever_outlined,
+            color: Colors.red,
+            label: "DELETED",
+            date: todo.deletedAt!,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDateRow() {
+    return Row(
+      children: [
+        Icon(
+          Icons.calendar_month,
+          size: _dateIconSize,
+          color: Colors.grey[600],
+        ),
+        SizedBox(width: _dateIconPadding),
+        Text(
+          Utility.formatDate(todo.createdAt.toDate()),
+          style: TextStyle(color: Colors.grey),
+        ),
+        Text(
+          ' - ',
+          style: TextStyle(color: Colors.grey),
+        ),
+        Text(
+          Utility.formatDate(todo.deadline.toDate()),
+          style: TextStyle(color: Colors.grey),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUserRows() {
+    return Wrap(
+      spacing: _userSpacing,
+      children: [
+        _buildUserRow('Creator: ', creator),
+        _buildUserRow('Assignee: ', assignee),
+      ],
+    );
+  }
+
+  Widget _buildUserRow(String label, User user) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey)),
+        UserAvatar(
+          selectedUser: user,
+          initialsRadius: _smallUserAvatarRadius,
+          initialsFontSize: _smallUserAvatarFontSize,
+        ),
+        Text(
+          ' ${user.name}',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusRow({
+    required IconData icon,
+    required Color color,
+    required String label,
+    required Timestamp date,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: _statusIconSize, color: color),
+        SizedBox(width: _statusDatePadding),
+        Text(
+          label,
+          style: TextStyle(color: color, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(width: _dateIconPadding),
+        Text(
+          '(${Utility.formatDate(date.toDate())})',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: _statusDateFontSize,
+          ),
+        ),
+      ],
     );
   }
 
@@ -112,7 +239,10 @@ class TodoTile extends StatelessWidget {
         todo.copyWith(completedAt: Timestamp.fromDate(DateTime.now()));
     await Utility.performActionAndShowInfo(
         context: context,
-        action: () => GetIt.instance<TodoService>().updateTodo(updatedTodo),
-        successMessage: 'Todo completed.');
+        action: () async {
+          await GetIt.instance<TodoService>().updateTodo(updatedTodo);
+          return null;
+        },
+        successMessage: 'TODO completed.');
   }
 }

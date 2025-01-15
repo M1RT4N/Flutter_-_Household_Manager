@@ -18,6 +18,8 @@ class Todo {
   final Timestamp? completedAt;
   @TimestampConverter()
   final Timestamp? deletedAt;
+  final String title;
+  final String householdId;
 
   Todo({
     required this.id,
@@ -26,6 +28,8 @@ class Todo {
     required this.createdAt,
     required this.deadline,
     required this.description,
+    required this.title,
+    required this.householdId,
     this.completedAt,
     this.deletedAt,
   });
@@ -43,6 +47,8 @@ class Todo {
     String? description,
     Timestamp? completedAt,
     Timestamp? deletedAt,
+    String? title,
+    String? householdId,
   }) {
     return Todo(
       id: id ?? this.id,
@@ -53,6 +59,8 @@ class Todo {
       description: description ?? this.description,
       completedAt: completedAt ?? this.completedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      title: title ?? this.title,
+      householdId: householdId ?? this.householdId,
     );
   }
 }

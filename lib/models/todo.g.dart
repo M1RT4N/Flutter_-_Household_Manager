@@ -14,6 +14,8 @@ Todo _$TodoFromJson(Map<String, dynamic> json) => Todo(
           const TimestampConverter().fromJson(json['createdAt'] as Object),
       deadline: const TimestampConverter().fromJson(json['deadline'] as Object),
       description: json['description'] as String,
+      title: json['title'] as String,
+      householdId: json['householdId'] as String,
       completedAt: _$JsonConverterFromJson<Object, Timestamp>(
           json['completedAt'], const TimestampConverter().fromJson),
       deletedAt: _$JsonConverterFromJson<Object, Timestamp>(
@@ -31,6 +33,8 @@ Map<String, dynamic> _$TodoToJson(Todo instance) => <String, dynamic>{
           instance.completedAt, const TimestampConverter().toJson),
       'deletedAt': _$JsonConverterToJson<Object, Timestamp>(
           instance.deletedAt, const TimestampConverter().toJson),
+      'title': instance.title,
+      'householdId': instance.householdId,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

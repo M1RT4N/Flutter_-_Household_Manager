@@ -121,6 +121,23 @@ class Utility {
   static DateTime parseDate(String data) {
     return DateFormat(_dateFormat).parse(data);
   }
+
+  static Color pickRandomColor(String id) {
+    final colors = [
+      Colors.red,
+      Colors.pink,
+      Colors.purple,
+      Colors.deepPurple,
+      Colors.indigo,
+      Colors.blue,
+      Colors.teal,
+      Colors.green,
+      Colors.orange,
+      Colors.deepOrange,
+    ];
+    final random = Random(id.hashCode);
+    return colors[random.nextInt(colors.length)];
+  }
 }
 
 class TimestampConverter implements JsonConverter<Timestamp, Object> {

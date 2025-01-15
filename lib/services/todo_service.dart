@@ -23,25 +23,23 @@ class TodoService {
         .map((snapShot) => snapShot.docs.map((doc) => doc.data()).toList());
   }
 
-  Stream<List<Todo>> getTodoStreamTopNBeforeDeadline(int n) {
+  Stream<List<Todo>> getTodoStreamTopNBeforeDeadline() {
     return getTodoStream.map((todos) {
       return todos
           .where((t) =>
               DateTime.now().isBefore(t.deadline.toDate()) &&
-              t.createdForId == _userService.getUser!.id &&
               t.completedAt == null &&
               t.deletedAt == null)
           .toList()
         ..sort((t1, t2) => t1.deadline
             .toDate()
             .difference(DateTime.now())
-            .compareTo(t2.deadline.toDate().difference(DateTime.now())))
-        ..take(n);
+            .compareTo(t2.deadline.toDate().difference(DateTime.now())));
     });
   }
 
-  Future<Todo> createTodo(
-      String createdForId, DateTime deadline, String description) async {
+  Future<Todo> createTodo(String createdForId, DateTime deadline,
+      String description, String title, String householdId) async {
     final todo = Todo(
       id: Utility.generateRandomCode(_todoIdLength),
       createdById: _userService.getUser!.id,
@@ -49,6 +47,8 @@ class TodoService {
       createdAt: Timestamp.now(),
       deadline: Timestamp.fromDate(deadline),
       description: description,
+      title: title,
+      householdId: householdId,
     );
 
     await _todoRepository.setOrAdd(todo.id, todo);
@@ -83,5 +83,14 @@ class TodoService {
     }
 
     return todosWithUsers;
+  }
+
+  Stream<List<Todo>> getTodoStreamAll(List<String> userIds) {
+    return getTodoStream.map((todos) {
+      return todos
+          .where((t) => userIds.contains(t.createdForId) && t.deletedAt == null)
+          .toList()
+        ..sort((t1, t2) => t1.deadline.compareTo(t2.deadline));
+    });
   }
 }

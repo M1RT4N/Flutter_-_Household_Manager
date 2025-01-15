@@ -6,6 +6,7 @@ import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/user_service.dart';
+import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notification.dart';
 import 'package:household_manager/widgets/notifications/user_notification.dart';
@@ -19,8 +20,6 @@ const _boxPadding = 16.0;
 const _searchBarPadding = 8.0;
 const _searchBarPaddingTop = 16.0;
 const _menuBarGapRight = 8.0;
-const _noNotificationsFontSize = 16.0;
-const _noNotificationsPaddingTop = 25.0;
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -75,7 +74,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               final filteredNotifications =
                   _filterNotifications(snapshot.data!);
               if (filteredNotifications.isEmpty) {
-                return _buildNoNotificationsMessage();
+                return InfoBubble(labelText: 'No notifications available.');
               }
               return ListView.builder(
                 padding: EdgeInsets.all(_cardInnerPadding),
@@ -182,32 +181,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
             child: Padding(
               padding: EdgeInsets.all(_boxPadding),
               child: notification.build(context),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNoNotificationsMessage() {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: Padding(
-        padding: const EdgeInsets.only(top: _noNotificationsPaddingTop),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(_borderRadius),
-              side: BorderSide(color: Colors.grey[600]!),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(_boxPadding),
-              child: Text(
-                'No notifications available.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: _noNotificationsFontSize),
-              ),
             ),
           ),
         ),

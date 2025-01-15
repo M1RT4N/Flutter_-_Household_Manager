@@ -12,6 +12,7 @@ import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/notifications/notification_type.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
@@ -34,8 +35,10 @@ class EditTodoPage extends StatefulWidget {
 
 class _EditTodoPageState extends State<EditTodoPage> {
   final _descriptionController = TextEditingController();
+  final _titleController = TextEditingController();
   final _dateController = TextEditingController();
   final _editableTextFocusNode = FocusNode();
+  final _editableTextFocusNodeTitle = FocusNode();
   final userService = GetIt.instance<UserService>();
   final todoService = GetIt.instance<TodoService>();
   final householdService = GetIt.instance<HouseholdService>();
@@ -49,6 +52,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
   void initState() {
     editTodo = Modular.args.data;
     if (editTodo != null) {
+      _titleController.text = editTodo!.todo.title;
       _descriptionController.text = editTodo!.todo.description;
       _dateController.text =
           Utility.formatDate(editTodo!.todo.deadline.toDate());
@@ -58,6 +62,8 @@ class _EditTodoPageState extends State<EditTodoPage> {
           editTodo!.todo.deletedAt == null;
     } else {
       editable = true;
+      _titleController.text = '';
+      // TODO: WTF? _createdForController.text = userService.getUser!.name;
       _dateController.text = Utility.formatDate(DateTime.now());
       _selectedMemberId = userService.getUser!.id;
     }
@@ -103,12 +109,14 @@ class _EditTodoPageState extends State<EditTodoPage> {
                 Text(editable.toString()),
                 _buildDescriptionRow(),
                 _rowGap,
+                _buildTitleRow(),
+                _rowGap,
                 _buildDeadlineRow(),
                 _rowGap,
                 _buildAssigneeRow(householdWithUsers.members),
                 _rowGap,
                 if (editTodo == null)
-                  _buildCreateButton()
+                  _buildCreateButton(household)
                 else
                   _buildCreatorRow(),
                 if (editable && editTodo != null) ...[
@@ -121,33 +129,34 @@ class _EditTodoPageState extends State<EditTodoPage> {
     );
   }
 
-  Widget _buildCreateButton() {
+  Widget _buildCreateButton(Household household) {
     return Center(
       child: LoadingStadiumButton(
         idleStateWidget: Text('Create'),
-        onPressed: _createTodo,
+        onPressed: () => _createTodo(household),
       ),
     );
   }
 
-  Widget _buildDescriptionRow() {
+  Widget _buildEditableRow(
+      String label, TextEditingController controller, FocusNode focusNode) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text('Description:', style: _labelTextStyle),
+            Text('$label:', style: _labelTextStyle),
             if (editable)
               IconButton(
                 icon: Icon(Icons.edit),
-                onPressed: () => _editableTextFocusNode.requestFocus(),
+                onPressed: () => focusNode.requestFocus(),
               ),
           ],
         ),
         EditableText(
           maxLines: null,
-          controller: _descriptionController,
-          focusNode: _editableTextFocusNode,
+          controller: controller,
+          focusNode: focusNode,
           style: _editableTextStyle,
           cursorColor: Colors.grey,
           backgroundCursorColor: Colors.amber,
@@ -156,6 +165,16 @@ class _EditTodoPageState extends State<EditTodoPage> {
         )
       ],
     );
+  }
+
+  Widget _buildDescriptionRow() {
+    return _buildEditableRow(
+        'Description', _descriptionController, _editableTextFocusNode);
+  }
+
+  Widget _buildTitleRow() {
+    return _buildEditableRow(
+        'Title', _titleController, _editableTextFocusNodeTitle);
   }
 
   Widget _buildDeadlineRow() {
@@ -246,6 +265,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
 
     final updatedTodo = editTodo!.todo.copyWith(
       description: _descriptionController.text,
+      title: _titleController.text,
       deadline: Timestamp.fromDate(Utility.parseDate(_dateController.text)),
     );
 
@@ -261,19 +281,27 @@ class _EditTodoPageState extends State<EditTodoPage> {
       deletedAt: Timestamp.fromDate(DateTime.now()),
     );
 
-    await Utility.handleActionWithConfirmation(
-      context: context,
-      title: 'Delete TODO',
-      message: 'Are you sure?',
-      action: () => todoService.updateTodo(updatedTodo),
-      successMessage: 'Deleted TODO',
-      errorMessage: 'Could not delete.',
+    final res = await Utility.showConfirmationDialog(
+      context,
+      'Delete',
+      'Delete todo?',
     );
 
-    Modular.to.pop();
+    if (res == true && mounted) {
+      await Utility.performActionAndShowInfo(
+        context: context,
+        action: () async {
+          await todoService.updateTodo(updatedTodo);
+          return null;
+        },
+        successMessage: 'Todo deleted.',
+      );
+    }
+
+    Modular.to.popAndPushNamed(AppRoute.myTodos.path);
   }
 
-  void _createTodo() async {
+  void _createTodo(Household household) async {
     if (_selectedMemberId == null) {
       showTopSnackBar(context, 'Please choose a member.', Colors.red);
       return;
@@ -288,6 +316,8 @@ class _EditTodoPageState extends State<EditTodoPage> {
       _selectedMemberId!,
       Utility.parseDate(_dateController.text),
       _descriptionController.text,
+      _titleController.text,
+      household.id,
     );
 
     if (userService.getUser!.id != todo.createdForId) {
@@ -325,6 +355,7 @@ class _EditTodoPageState extends State<EditTodoPage> {
   @override
   void dispose() {
     _descriptionController.dispose();
+    _titleController.dispose();
     _dateController.dispose();
     _editableTextFocusNode.dispose();
     super.dispose();

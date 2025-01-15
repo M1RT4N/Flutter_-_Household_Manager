@@ -2,14 +2,14 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
-import 'package:household_manager/enums/stat_range.dart';
-import 'package:household_manager/enums/todo_section.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/todo_service.dart';
+import 'package:household_manager/utils/tabs/stat_range.dart';
+import 'package:household_manager/utils/tabs/todo_section.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:rxdart/rxdart.dart';
 

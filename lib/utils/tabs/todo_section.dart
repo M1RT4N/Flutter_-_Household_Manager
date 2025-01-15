@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:household_manager/enums/stat_range.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart';
+import 'package:household_manager/utils/tabs/stat_range.dart';
 
 class TodoSection {
   final Color color;

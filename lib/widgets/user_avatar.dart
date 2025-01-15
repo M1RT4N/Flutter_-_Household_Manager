@@ -11,20 +11,24 @@ const _initialsRadius = 16.0;
 const _initialsFontSize = 12.0;
 
 class UserAvatar extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final userService = GetIt.instance<UserService>();
   final double initialsRadius;
   final double initialsFontSize;
+  final User? selectedUser;
 
-  UserAvatar({
-    super.key,
-    required this.onPressed,
-    this.initialsRadius = _initialsRadius,
-    this.initialsFontSize = _initialsFontSize,
-  });
+  UserAvatar(
+      {super.key,
+      this.onPressed,
+      this.initialsRadius = _initialsRadius,
+      this.initialsFontSize = _initialsFontSize,
+      this.selectedUser});
 
   @override
   Widget build(BuildContext context) {
+    if (selectedUser != null) {
+      return _buildViewAvatar();
+    }
     return LoadingStreamBuilder(
         stream: userService.getUserStream,
         builder: (context, user_) {
@@ -32,13 +36,17 @@ class UserAvatar extends StatelessWidget {
 
           return IconButton(
             icon: _buildAvatar(user),
-            onPressed: () => onPressed(),
+            onPressed: () => onPressed!(),
             iconSize: initialsRadius * _imageRadiusFactor,
             constraints: BoxConstraints(),
             splashRadius: initialsRadius,
             visualDensity: VisualDensity.compact,
           );
         });
+  }
+
+  Widget _buildViewAvatar() {
+    return _buildAvatar(selectedUser!);
   }
 
   Widget _buildAvatar(User user) {
