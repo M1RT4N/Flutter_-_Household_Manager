@@ -6,10 +6,11 @@ class TodoDto {
   final Todo todo;
   final User creator;
   final User assignee;
+  final User? solver;
 
-  TodoDto({
-    required this.todo,
-    required this.creator,
-    required this.assignee,
-  });
+  TodoDto(
+      {required this.todo,
+      required this.creator,
+      required this.assignee,
+      this.solver});
 }

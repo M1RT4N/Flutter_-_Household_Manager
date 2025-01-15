@@ -35,10 +35,13 @@ class HouseholdService {
   }
 
   Future<HouseholdDto> fetchUsers(Household household) async {
+    final userMap = await _userService.getUserMap();
+    final members = household.members.map((id) => userMap[id]!).toList();
+    final requesters = household.requested.map((id) => userMap[id]!).toList();
     return HouseholdDto(
       household: household,
-      members: await _userService.getUsersByIds(household.members),
-      requesters: await _userService.getUsersByIds(household.requested),
+      members: members,
+      requesters: requesters,
     );
   }
 

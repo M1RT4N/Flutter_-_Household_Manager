@@ -6,6 +6,7 @@ import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/notifications/notification_type.dart';
+import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 
@@ -33,6 +34,7 @@ class TodoTile extends StatelessWidget {
   final Todo todo;
   final User creator;
   final User assignee;
+  final User? solver;
   final VoidCallback onClick;
   final bool showTickMark;
 
@@ -44,6 +46,7 @@ class TodoTile extends StatelessWidget {
       required this.creator,
       required this.assignee,
       required this.onClick,
+      this.solver,
       this.showTickMark = false});
 
   @override
@@ -188,6 +191,7 @@ class TodoTile extends StatelessWidget {
       children: [
         _buildUserRow('Creator: ', creator),
         _buildUserRow('Assignee: ', assignee),
+        if (solver != null) _buildUserRow('Done by: ', solver!)
       ],
     );
   }
@@ -239,8 +243,10 @@ class TodoTile extends StatelessWidget {
   }
 
   void _completeTodo(BuildContext context, Todo todo) async {
-    final updatedTodo =
-        todo.copyWith(completedAt: Timestamp.fromDate(DateTime.now()));
+    final updatedTodo = todo.copyWith(
+      completedAt: Timestamp.fromDate(DateTime.now()),
+      doneById: GetIt.instance<UserService>().getUser!.id,
+    );
     await Utility.performActionAndShowInfo(
         context: context,
         action: () async {

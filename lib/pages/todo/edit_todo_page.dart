@@ -115,8 +115,10 @@ class _EditTodoPageState extends State<EditTodoPage> {
                   _rowGap,
                   if (editTodo == null)
                     _buildCreateButton(household)
-                  else
+                  else ...[
                     _buildCreatorRow(),
+                    if (editTodo!.solver != null) _buildDoneByRow(),
+                  ],
                   if (editable && editTodo != null) ...[
                     _rowGap,
                     _buildButtonsRow()
@@ -232,12 +234,28 @@ class _EditTodoPageState extends State<EditTodoPage> {
     return Row(
       children: [
         Text(
-          'CreatedBy:',
+          'Created By:',
           style: _labelTextStyle,
         ),
         _labelTextGap,
         Text(
           editTodo!.creator.name,
+          style: _editableTextStyle,
+        )
+      ],
+    );
+  }
+
+  Widget _buildDoneByRow() {
+    return Row(
+      children: [
+        Text(
+          'Done By:',
+          style: _labelTextStyle,
+        ),
+        _labelTextGap,
+        Text(
+          editTodo!.solver!.name,
           style: _editableTextStyle,
         )
       ],

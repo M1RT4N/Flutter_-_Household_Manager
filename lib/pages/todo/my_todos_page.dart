@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
-import 'package:household_manager/utils/tabs/stat_range.dart';
-import 'package:household_manager/utils/tabs/todo_section.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/routing/routes.dart';
+import 'package:household_manager/utils/tabs/stat_range.dart';
+import 'package:household_manager/utils/tabs/todo_section.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 
 const _buttonPadding = EdgeInsets.all(12.0);
@@ -81,6 +81,7 @@ class _MyTodosPageState extends State<MyTodosPage> {
               todo: todoWithUsers.todo,
               creator: todoWithUsers.creator,
               assignee: todoWithUsers.assignee,
+              solver: todoWithUsers.solver,
               showTickMark: _selectedSection == TodoSection.activeTodo ||
                   _selectedSection == TodoSection.created,
               onClick: () => Modular.to.pushNamed(
