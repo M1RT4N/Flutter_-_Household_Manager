@@ -305,8 +305,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _changeEmail(BuildContext context, String newEmail) {
     return Utility.performActionAndShowInfo(
       context: context,
-      action: () => GetIt.instance<UserService>().changeEmail(newEmail)
-          as Future<String?>,
+      action: () => GetIt.instance<UserService>().changeEmail(newEmail),
       successMessage: 'Email changed.',
     );
   }
