@@ -12,11 +12,14 @@ import 'package:household_manager/widgets/todo_tile.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/scheduler.dart';
 
+const _maxPhoneWidth = 500.0;
 const _calendarDaysLimit = 2048;
 const _maxEventLines = 3;
 const _eventTopPadding = 32.0;
 const _calendarSize = 500.0;
 const _calendarControlSize = 125.0;
+const _calendarSizeMobile = 425.0;
+const _calendarControlSizeMobile = 200.0;
 const _calendarControlPadding = 8.0;
 const _calendarNoTodosPadding = 5.0;
 const _calendarTodoListPadding = 25.0;
@@ -119,8 +122,12 @@ class _CalendarViewState extends State<CalendarView> {
         borderRadius: BorderRadius.circular(4),
       ),
       child: SizedBox(
-        width: _calendarSize,
-        height: _calendarSize + _calendarControlSize,
+        width: MediaQuery.of(context).size.width < _maxPhoneWidth
+            ? _calendarSizeMobile
+            : _calendarSize,
+        height: MediaQuery.of(context).size.width < _maxPhoneWidth
+            ? _calendarSizeMobile + _calendarControlSizeMobile
+            : _calendarSize + _calendarControlSize,
         child: Column(
           children: [
             _buildCalendarHeader(),
