@@ -12,8 +12,11 @@ abstract class BaseNotification {
   final String description;
   final IconData icon;
 
-  BaseNotification(
-      {required this.icon, required this.title, required this.description});
+  BaseNotification({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
 
   Widget build(BuildContext context) {
     return Row(
@@ -35,16 +38,25 @@ abstract class BaseNotification {
     );
   }
 
-  Widget buildContent() {
+  Widget buildContent({VoidCallback? onTitleClick}) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-                fontSize: _titleFontSize, fontWeight: FontWeight.bold),
-          ),
+          onTitleClick != null
+              ? GestureDetector(
+                  onTap: onTitleClick,
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                        fontSize: _titleFontSize, fontWeight: FontWeight.bold),
+                  ),
+                )
+              : Text(
+                  title,
+                  style: TextStyle(
+                      fontSize: _titleFontSize, fontWeight: FontWeight.bold),
+                ),
           SizedBox(height: _titleDescriptionGap),
           Text(
             description,
