@@ -219,25 +219,6 @@ class HouseholdService {
     return null;
   }
 
-  Future<String?> manageRequest(String request, bool accept) async {
-    final household = getHousehold!;
-    final user = await _userService.getById(request);
-
-    final requests = List<String>.from(household.requested)..remove(request);
-    final members = List<String>.from(household.members)..add(user!.id);
-
-    final newUser = user.copyWith(
-      requestedId: '',
-      householdId: accept ? household.id : null,
-    );
-    final newHousehold = household.copyWith(
-      requested: accept ? requests : null,
-      members: accept ? members : null,
-    );
-
-    return await _householdUserUpdateTransaction(newHousehold, newUser);
-  }
-
   Future<String?> removeMember(String member) async {
     final household = getHousehold!;
     final user = await _userService.getById(member);

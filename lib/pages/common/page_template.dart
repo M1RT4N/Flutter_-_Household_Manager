@@ -46,8 +46,13 @@ abstract class PageTemplate extends StatelessWidget {
           : null,
       actions: [
         if (showNotifications)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          Container(
+            padding: const EdgeInsets.only(
+              right: 2.0,
+            ),
+            margin: const EdgeInsets.only(
+              bottom: 10.0,
+            ),
             child: NotificationIcon(
               onPressed: () =>
                   Modular.to.pushNamed(AppRoute.notifications.path),

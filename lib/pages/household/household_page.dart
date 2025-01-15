@@ -83,7 +83,8 @@ class HouseholdPage extends StatelessWidget {
           _sizedBox,
           _buildMembersSection(context, householdWithUsers.members),
           _sizedBox,
-          _buildRequestsSection(context, householdWithUsers.requesters),
+          _buildRequestsSection(context, householdWithUsers.requesters,
+              householdWithUsers.household),
           _sizedBox,
           _buildLeaveButton(context),
         ],
@@ -102,7 +103,8 @@ class HouseholdPage extends StatelessWidget {
         _sizedBox,
         _buildMembersSection(context, householdWithUsers.members),
         _sizedBox,
-        _buildRequestsSection(context, householdWithUsers.requesters),
+        _buildRequestsSection(context, householdWithUsers.requesters,
+            householdWithUsers.household),
         _sizedBox,
         _buildLeaveButton(context),
       ],
@@ -224,7 +226,8 @@ class HouseholdPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRequestsSection(BuildContext context, List<User> requesters) {
+  Widget _buildRequestsSection(
+      BuildContext context, List<User> requesters, Household household) {
     return _buildSection<User>(
       context: context,
       leadingIcon: const Icon(Icons.mark_as_unread_rounded),
@@ -236,13 +239,15 @@ class HouseholdPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             LoadingStadiumButton(
-              onPressed: () => _manageRequest(context, requester.id, true),
+              onPressed: () =>
+                  _manageRequest(context, requester, true, household.id),
               idleStateWidget: const Icon(Icons.check),
               buttonWidth: _buttonWidth,
             ),
             _buttonsGap,
             LoadingStadiumButton(
-              onPressed: () => _manageRequest(context, requester.id, false),
+              onPressed: () =>
+                  _manageRequest(context, requester, false, household.id),
               idleStateWidget: const Icon(Icons.close),
               buttonWidth: _buttonWidth,
             ),
@@ -311,11 +316,17 @@ class HouseholdPage extends StatelessWidget {
   }
 
   Future<void> _manageRequest(
-      BuildContext context, String request, bool accept) {
+      BuildContext context, User requester, bool accept, String householdId) {
+    final householdService = GetIt.instance<HouseholdService>();
+
     return Utility.performActionAndShowInfo(
       context: context,
-      action: () =>
-          GetIt.instance<HouseholdService>().manageRequest(request, accept),
+      action: () async {
+        if (accept) {
+          return householdService.approveJoinRequest(householdId, requester);
+        }
+        return householdService.rejectJoinRequest(householdId, requester);
+      },
       successMessage: 'Request ${accept ? 'accepted' : 'rejected'}.',
     );
   }

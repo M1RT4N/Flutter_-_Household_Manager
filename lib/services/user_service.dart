@@ -167,17 +167,16 @@ class UserService {
 
   Future<void> hideNotification(String notificationId) async {
     final user = getUser;
-    if (user == null) return;
 
-    final updatedNotifications = user.notifications.map((notification) {
+    final updatedNotifications = user?.notifications.map((notification) {
       if (notification.id == notificationId) {
         return notification.copyWith(isHidden: true);
       }
       return notification;
     }).toList();
 
-    final updatedUser = user.copyWith(notifications: updatedNotifications);
-    await setUser(updatedUser);
+    final updatedUser = user?.copyWith(notifications: updatedNotifications);
+    await setUser(updatedUser!);
   }
 
   Future<String?> updateUserProfile(
