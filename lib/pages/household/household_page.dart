@@ -199,7 +199,9 @@ class HouseholdPage extends StatelessWidget {
     return ExpansionTile(
       leading: leadingIcon,
       title: Text(title),
-      children: items.map(buildItem).toList(),
+      children: items.isEmpty
+          ? [Center(child: Text('No data available'))]
+          : items.map(buildItem).toList(),
     );
   }
 
