@@ -68,7 +68,7 @@ class _TodosPageState extends State<TodosPage> {
               creator: todoWithUsers.creator,
               assignee: todoWithUsers.assignee,
               solver: todoWithUsers.solver,
-              showTickMark: todoWithUsers.todo.completedAt != null &&
+              showTickMark: todoWithUsers.todo.completedAt == null &&
                   todoWithUsers.todo.deletedAt == null,
               onClick: () => Modular.to.pushNamed(
                 AppRoute.editTodo.path,
