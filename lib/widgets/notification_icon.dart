@@ -4,6 +4,7 @@ import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/household.dart';
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -18,6 +19,7 @@ class NotificationIcon extends StatelessWidget {
   final VoidCallback onPressed;
   final userService = GetIt.instance<UserService>();
   final householdService = GetIt.instance<HouseholdService>();
+  final todoService = GetIt.instance<TodoService>();
 
   NotificationIcon({super.key, required this.onPressed});
 
@@ -35,22 +37,31 @@ class NotificationIcon extends StatelessWidget {
           final visibleNotifications = notifications
               .where((notification) => !notification.isHidden)
               .toList();
-          final notificationCount =
+          var notificationCount =
               (household?.requested.length ?? 0) + visibleNotifications.length;
 
-          return Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: _notificationIconPadding),
-                child: IconButton(
-                  icon: Icon(Icons.notifications),
-                  onPressed: onPressed,
-                ),
-              ),
-              if (notificationCount > 0)
-                _buildNotificationCountBubble(notificationCount),
-            ],
-          );
+          return LoadingStreamBuilder(
+              stream: todoService.getTodoStreamAll([user!.id]),
+              builder: (context, todos) {
+                final overdueTodos = todos
+                    .where((todo) =>
+                        todo.deadline.toDate().isBefore(DateTime.now()))
+                    .toList();
+                notificationCount += overdueTodos.length;
+                return Stack(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: _notificationIconPadding),
+                      child: IconButton(
+                        icon: Icon(Icons.notifications),
+                        onPressed: onPressed,
+                      ),
+                    ),
+                    if (notificationCount > 0)
+                      _buildNotificationCountBubble(notificationCount),
+                  ],
+                );
+              });
         });
   }
 

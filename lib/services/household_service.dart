@@ -95,7 +95,7 @@ class HouseholdService {
       final user = _userService.getUser!;
       final household = getHousehold!;
 
-      final newUser = user.copyWith(householdId: '');
+      final newUser = user.copyWith(householdId: '', notifications: []);
       final newHousehold = household.copyWith(
         members: household.members..remove(user.id),
       );

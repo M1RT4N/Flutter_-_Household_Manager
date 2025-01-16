@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/models/household.dart';
+import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/user.dart' as user_model;
 import 'package:household_manager/models/user.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/household_service.dart';
+import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/notifications/base_notification.dart';
+import 'package:household_manager/widgets/notifications/missed_todo_notification.dart';
 import 'package:household_manager/widgets/notifications/request_notification.dart';
 import 'package:household_manager/widgets/notifications/user_notification.dart';
 import 'package:rxdart/rxdart.dart';
@@ -35,6 +38,7 @@ class NotificationsPage extends StatefulWidget {
 class _NotificationsPageState extends State<NotificationsPage> {
   final userService = GetIt.instance<UserService>();
   final householdService = GetIt.instance<HouseholdService>();
+  final todoService = GetIt.instance<TodoService>();
   String _searchQuery = '';
   bool _showHidden = false;
 
@@ -152,7 +156,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   Future<List<BaseNotification>> _buildNotificationsList(
       Household? household, List<user_model.Notification> notifications) async {
+    List<Todo> todos =
+        await todoService.getTodoStreamAll([userService.getUser!.id]).first;
+    final overdueTodos = todos
+        .where((todo) => todo.deadline.toDate().isBefore(DateTime.now()))
+        .toList();
+
     final List<BaseNotification> allNotifications = [
+      ...overdueTodos.map((todo) => MissedTodoNotification(todo: todo)),
       ...await Future.wait(
         (household?.requested ?? []).map((userId) async {
           final user = await userService.fetchUser(userId);

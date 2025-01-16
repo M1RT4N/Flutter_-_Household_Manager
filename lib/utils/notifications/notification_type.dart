@@ -7,7 +7,8 @@ enum NotificationType {
   todoAssigned(Icons.assignment),
   todoCompleted(Icons.check_circle),
   todoDeleted(Icons.delete),
-  todoUpdated(Icons.edit);
+  todoUpdated(Icons.edit),
+  todoOverdue(Icons.warning);
 
   final IconData icon;
 
