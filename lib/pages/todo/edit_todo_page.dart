@@ -16,15 +16,14 @@ import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
+import 'package:household_manager/widgets/user_with_small_avatar.dart';
 
 const _padding = EdgeInsets.all(20);
 const _cardElevation = 4.0;
 const _borderRadius = 12.0;
-const _labelTextStyle = TextStyle(fontSize: 18, color: Colors.grey);
-const _editableTextStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 16);
-const _labelTextGap = SizedBox(width: 8);
 const _rowGap = SizedBox(height: 16);
 const _cardMargin = EdgeInsets.all(16);
+const _labelTextStyle = TextStyle(fontSize: 18, color: Colors.grey);
 
 class EditTodoPage extends StatefulWidget {
   const EditTodoPage({super.key});
@@ -96,38 +95,85 @@ class _EditTodoPageState extends State<EditTodoPage> {
       future: householdService.fetchUsers(household),
       builder: (context, householdWithUsers) => Center(
         child: Card(
-            margin: _cardMargin,
-            elevation: _cardElevation,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(_borderRadius)),
-            child: Padding(
-              padding: _padding,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildDescriptionRow(),
+          margin: _cardMargin,
+          elevation: _cardElevation,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(_borderRadius),
+          ),
+          child: Padding(
+            padding: _padding,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildEditableRow(
+                  'Title',
+                  _titleController,
+                  _editableTextFocusNodeTitle,
+                ),
+                _rowGap,
+                _buildEditableRow(
+                  'Description',
+                  _descriptionController,
+                  _editableTextFocusNode,
+                ),
+                _rowGap,
+                _buildPickingSection(householdWithUsers),
+                _rowGap,
+
+                /// **Row for Creator and Done By**
+                if (editTodo != null) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: UserWithSmallAvatar(
+                            user: editTodo!.creator, label: 'Creator:'),
+                      ),
+                      if (editTodo!.solver != null) ...[
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: UserWithSmallAvatar(
+                            user: editTodo!.solver!,
+                            label: 'Done by: ',
+                          ),
+                        ),
+                      ]
+                    ],
+                  ),
                   _rowGap,
-                  _buildTitleRow(),
-                  _rowGap,
-                  _buildDeadlineRow(),
-                  _rowGap,
-                  _buildAssigneeRow(householdWithUsers.members),
-                  _rowGap,
-                  if (editTodo == null)
-                    _buildCreateButton(household)
-                  else ...[
-                    _buildCreatorRow(),
-                    if (editTodo!.solver != null) _buildDoneByRow(),
-                  ],
-                  if (editable && editTodo != null) ...[
-                    _rowGap,
-                    _buildButtonsRow()
-                  ]
                 ],
-              ),
-            )),
+
+                if (editTodo == null)
+                  _buildCreateButton(household)
+                else if (editable) ...[
+                  _buildButtonsRow(),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  Widget _buildPickingSection(HouseholdDto householdWithUsers) {
+    return MediaQuery.of(context).size.width > 500
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(flex: 1, child: _buildDeadlineRow()),
+              SizedBox(width: 16),
+              Flexible(
+                  flex: 1,
+                  child: _buildAssigneeRow(householdWithUsers.members)),
+            ],
+          )
+        : Column(
+            children: [
+              _buildDeadlineRow(),
+              SizedBox(height: 16),
+              _buildAssigneeRow(householdWithUsers.members),
+            ],
+          );
   }
 
   Widget _buildCreateButton(Household household) {
@@ -158,7 +204,8 @@ class _EditTodoPageState extends State<EditTodoPage> {
           maxLines: null,
           controller: controller,
           focusNode: focusNode,
-          style: _editableTextStyle,
+          style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16, color: Colors.grey),
           cursorColor: Colors.grey,
           backgroundCursorColor: Colors.amber,
           readOnly: !editable,
@@ -168,56 +215,50 @@ class _EditTodoPageState extends State<EditTodoPage> {
     );
   }
 
-  Widget _buildDescriptionRow() {
-    return _buildEditableRow(
-        'Description', _descriptionController, _editableTextFocusNode);
-  }
-
-  Widget _buildTitleRow() {
-    return _buildEditableRow(
-        'Title', _titleController, _editableTextFocusNodeTitle);
-  }
-
   Widget _buildDeadlineRow() {
-    return Row(children: [
-      Flexible(
-        child: TextField(
-          decoration: const InputDecoration(
-            icon: Icon(Icons.calendar_today),
-            labelText: "Deadline:",
-            hintText: 'Choose deadline',
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          flex: 1,
+          child: TextField(
+            decoration: const InputDecoration(
+              icon: Icon(Icons.calendar_today),
+              labelText: "Deadline:",
+              hintText: 'Choose deadline',
+            ),
+            readOnly: !editable,
+            controller: _dateController,
+            onTap: () {
+              if (editable) {
+                Utility.pickDate(context, _dateController);
+              }
+            },
           ),
-          readOnly: !editable,
-          controller: _dateController,
-          onTap: () {
-            if (editable) {
-              Utility.pickDate(context, _dateController);
-            }
-          },
         ),
-      ),
-      if (editable)
-        IconButton(
-          onPressed: () => Utility.pickDate(context, _dateController),
-          icon: Icon(Icons.edit),
-        )
-    ]);
+        if (editable)
+          IconButton(
+            onPressed: () => Utility.pickDate(context, _dateController),
+            icon: Icon(Icons.edit),
+          )
+      ],
+    );
   }
 
   Widget _buildAssigneeRow(List<User> members) {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
+        icon: Icon(Icons.group),
         labelText: 'Todo for:',
         hintText: 'Choose member',
       ),
       value: _selectedMemberId ?? userService.getUser!.id,
-      items: [
-        for (final member in members)
-          DropdownMenuItem<String>(
-            value: member.id,
-            child: Text(member.name),
-          ),
-      ],
+      items: members.map((member) {
+        return DropdownMenuItem<String>(
+          value: member.id,
+          child: UserWithSmallAvatar(user: member),
+        );
+      }).toList(),
       onChanged: !editable
           ? null
           : (String? value) {
@@ -227,38 +268,6 @@ class _EditTodoPageState extends State<EditTodoPage> {
                 });
               }
             },
-    );
-  }
-
-  Widget _buildCreatorRow() {
-    return Row(
-      children: [
-        Text(
-          'Created By:',
-          style: _labelTextStyle,
-        ),
-        _labelTextGap,
-        Text(
-          editTodo!.creator.name,
-          style: _editableTextStyle,
-        )
-      ],
-    );
-  }
-
-  Widget _buildDoneByRow() {
-    return Row(
-      children: [
-        Text(
-          'Done By:',
-          style: _labelTextStyle,
-        ),
-        _labelTextGap,
-        Text(
-          editTodo!.solver!.name,
-          style: _editableTextStyle,
-        )
-      ],
     );
   }
 
