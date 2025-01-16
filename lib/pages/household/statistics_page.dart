@@ -11,7 +11,6 @@ import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/filters/stat_range.dart';
 import 'package:household_manager/utils/tabs/todo_section.dart';
-import 'package:household_manager/utils/utility.dart';
 import 'package:rxdart/rxdart.dart';
 
 const _padding = EdgeInsets.symmetric(vertical: 28, horizontal: 16);
@@ -234,7 +233,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
         for (final range in StatRange.values)
           DropdownMenuItem<StatRange>(
             value: range,
-            child: Text(Utility.getStringFromEnum(range)),
+            child: Text(range.toString()),
           ),
       ],
       onChanged: (value) {
