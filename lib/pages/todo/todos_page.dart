@@ -7,8 +7,8 @@ import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
-import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/filters/stat_range.dart';
+import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/tabs/todo_section.dart';
 import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/navigation_header.dart';
@@ -18,6 +18,7 @@ const _buttonPadding = EdgeInsets.all(12.0);
 const _buttonBorderRadius = 24.0;
 const _mediaQueryLimit = 600.0;
 const _widthFactorWeb = 0.6;
+const _headerHeight = 125.0;
 
 class TodosPage extends StatefulWidget {
   const TodosPage({super.key});
@@ -58,7 +59,7 @@ class _TodosPageState extends State<TodosPage> {
       width: MediaQuery.of(context).size.width > _mediaQueryLimit
           ? MediaQuery.of(context).size.width * _widthFactorWeb
           : MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
+      height: MediaQuery.of(context).size.height - _headerHeight,
       child: ListView(
         children: [
           for (final todoWithUsers in todosWithUsers)
