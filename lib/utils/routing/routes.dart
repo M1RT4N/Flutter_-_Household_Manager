@@ -11,7 +11,7 @@ import 'package:household_manager/pages/household_wizard/join_household_page.dar
 import 'package:household_manager/pages/household_wizard/request_household_page.dart';
 import 'package:household_manager/pages/splash_screen.dart';
 import 'package:household_manager/pages/todo/edit_todo_page.dart';
-import 'package:household_manager/pages/todo/my_todos_page.dart';
+import 'package:household_manager/pages/todo/todos_page.dart';
 import 'package:household_manager/pages/user/notification_page.dart';
 import 'package:household_manager/pages/user/profile_page.dart';
 import 'package:household_manager/utils/guards/household_guard.dart';
@@ -43,7 +43,7 @@ enum AppRoute {
       guardLevel: GuardLevel.householdFetched),
   editTodo('/edit_todo', EditTodoPage(),
       guardLevel: GuardLevel.householdFetched),
-  myTodos('/todos', MyTodosPage(), guardLevel: GuardLevel.householdFetched);
+  myTodos('/todos', TodosPage(), guardLevel: GuardLevel.householdFetched);
 
   final String path;
   final Widget pageType;

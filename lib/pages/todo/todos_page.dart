@@ -19,14 +19,14 @@ const _buttonBorderRadius = 24.0;
 const _mediaQueryLimit = 600.0;
 const _widthFactorWeb = 0.6;
 
-class MyTodosPage extends StatefulWidget {
-  const MyTodosPage({super.key});
+class TodosPage extends StatefulWidget {
+  const TodosPage({super.key});
 
   @override
-  State<MyTodosPage> createState() => _MyTodosPageState();
+  State<TodosPage> createState() => _TodosPageState();
 }
 
-class _MyTodosPageState extends State<MyTodosPage> {
+class _TodosPageState extends State<TodosPage> {
   final userService = GetIt.instance<UserService>();
 
   @override
