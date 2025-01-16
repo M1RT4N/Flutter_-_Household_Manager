@@ -95,7 +95,7 @@ class Utility {
   }
 
   static bool isPhoneView(BuildContext context) {
-    final maxPhoneScreenWidth = 500;
+    final maxPhoneScreenWidth = 600;
     return MediaQuery.of(context).size.width < maxPhoneScreenWidth;
   }
 

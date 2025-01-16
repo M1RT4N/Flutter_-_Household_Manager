@@ -143,37 +143,37 @@ class _EditTodoPageState extends State<EditTodoPage> {
               label: 'Done by: ',
             ),
           ];
-    return MediaQuery.of(context).size.width > 500
-        ? Row(
+    return Utility.isPhoneView(context)
+        ? Column(
+            children: [creatorRow, if (editTodo!.solver != null) ...solverRow],
+          )
+        : Row(
             children: [
               Expanded(
                 child: creatorRow,
               ),
               ...solverRow
             ],
-          )
-        : Column(
-            children: [creatorRow, if (editTodo!.solver != null) ...solverRow],
           );
   }
 
   Widget _buildPickingSection(HouseholdDto householdWithUsers) {
     final assigneeRow = _buildAssigneeRow(householdWithUsers.members);
     final deadlineRow = _buildDeadlineRow();
-    return MediaQuery.of(context).size.width > 500
-        ? Row(
+    return Utility.isPhoneView(context)
+        ? Column(
+            children: [
+              deadlineRow,
+              _universalGap,
+              assigneeRow,
+            ],
+          )
+        : Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Flexible(flex: 1, child: deadlineRow),
               _universalGap,
               Flexible(flex: 1, child: assigneeRow),
-            ],
-          )
-        : Column(
-            children: [
-              deadlineRow,
-              _universalGap,
-              assigneeRow,
             ],
           );
   }

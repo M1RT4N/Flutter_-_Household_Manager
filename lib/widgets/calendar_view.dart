@@ -1,5 +1,6 @@
 import 'package:cr_calendar/cr_calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
 import 'package:household_manager/common/loading_builder.dart';
@@ -10,9 +11,7 @@ import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/todo_tile.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/scheduler.dart';
 
-const _maxPhoneWidth = 500.0;
 const _calendarDaysLimit = 2048;
 const _maxEventLines = 3;
 const _eventTopPadding = 32.0;
@@ -122,10 +121,9 @@ class _CalendarViewState extends State<CalendarView> {
         borderRadius: BorderRadius.circular(4),
       ),
       child: SizedBox(
-        width: MediaQuery.of(context).size.width < _maxPhoneWidth
-            ? _calendarSizeMobile
-            : _calendarSize,
-        height: MediaQuery.of(context).size.width < _maxPhoneWidth
+        width:
+            Utility.isPhoneView(context) ? _calendarSizeMobile : _calendarSize,
+        height: Utility.isPhoneView(context)
             ? _calendarSizeMobile + _calendarControlSizeMobile
             : _calendarSize + _calendarControlSize,
         child: Column(
