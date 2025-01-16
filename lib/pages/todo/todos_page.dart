@@ -5,6 +5,7 @@ import 'package:household_manager/common/loading_builder.dart';
 import 'package:household_manager/models/todo.dart';
 import 'package:household_manager/models/todo_dto.dart';
 import 'package:household_manager/pages/common/loading_page_template.dart';
+import 'package:household_manager/services/household_service.dart';
 import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/filters/stat_range.dart';
@@ -82,9 +83,16 @@ class _TodosPageState extends State<TodosPage> {
   Widget renderSelectedContent(TodoSectionEnum section, List<Todo> todos) {
     TodoSection? selectedSection = TodoSectionEnum.getSectionInstance(section);
 
+    final memberIds = GetIt.instance<HouseholdService>().getHousehold!.members;
     return LoadingFutureBuilder(
         future: GetIt.instance<TodoService>().fetchUsers(selectedSection == null
             ? todos
+                .where((t) =>
+                    memberIds.contains(t.createdById) &&
+                    memberIds.contains(t.createdForId) &&
+                    t.deletedAt == null &&
+                    t.completedAt == null)
+                .toList()
             : selectedSection.filter(
                 todos, userService.getUser!, StatRange.AllTime)),
         builder: (context, todosWithUsers) {
