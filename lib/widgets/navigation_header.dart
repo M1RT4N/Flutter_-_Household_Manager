@@ -83,10 +83,11 @@ class _NavigationHeaderState<E extends Enum>
                       right: Radius.circular(_sectionBubbleRadius),
                     ),
                   ),
+                  side: BorderSide(color: Colors.grey),
                   padding: EdgeInsets.all(_buttonPaddingSection),
                   backgroundColor: section == _selectedSection
-                      ? Colors.blue[900]
-                      : Colors.grey[900],
+                      ? Colors.blue[800]
+                      : Theme.of(context).scaffoldBackgroundColor,
                 ),
                 onPressed: () {
                   setState(() {

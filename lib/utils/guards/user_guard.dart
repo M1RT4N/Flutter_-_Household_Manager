@@ -11,14 +11,9 @@ class UserGuard extends RouteGuard {
 
   @override
   Future<bool> canActivate(String path, ModularRoute route) async {
-    // FirebaseAuth.instance.signOut();
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return false;
-    }
-
-    if (_userService.getUser != null) {
-      return true;
     }
 
     return await _userService.fetchUser(user.uid) != null;

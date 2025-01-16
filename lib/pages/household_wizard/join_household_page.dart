@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // Added import
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:get_it/get_it.dart';
@@ -7,14 +8,11 @@ import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/widgets/info_bubble.dart';
 import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
-import 'package:flutter/foundation.dart'; // Added import
 import 'package:qr_code_dart_scan/qr_code_dart_scan.dart'; // Added import
 
 const _mainBoxSize = 600.0;
 const _mainBoxPadding = 20.0;
 const _gapBetweenColumns = 20.0;
-const _infoBoxPadding = 12.0;
-const _infoBoxRadius = 8.0;
 const _boxHeight = 250.0;
 const _boxWidth = 300.0;
 const _qrCodeIconSize = 40.0;
@@ -86,11 +84,12 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
           ),
           SizedBox(height: _gapBetweenColumns),
           LoadingStadiumButton(
-              idleStateWidget: Text(
-                'Join',
-                style: TextStyle(color: Colors.black),
-              ),
-              onPressed: () => _joinHousehold)
+            idleStateWidget: Text(
+              'Join',
+              style: TextStyle(color: Colors.black),
+            ),
+            onPressed: _joinHousehold,
+          )
         ],
       ),
     );
@@ -128,8 +127,8 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
     );
   }
 
-  void _joinHousehold(String? codeInt) async {
-    String code = codeInt ?? _codeController.text.trim();
+  void _joinHousehold() async {
+    final code = _codeController.text.trim();
     if (!_isValidCode(code)) {
       showTopSnackBar(
           context, 'Please enter a valid 8-character code.', Colors.red);
@@ -189,7 +188,8 @@ class _JoinHouseholdPageState extends State<JoinHouseholdPage> {
           BarcodeFormat.qrCode,
         ],
         onCapture: (Result result) {
-          _joinHousehold(result.text);
+          _codeController.text = result.text;
+          _joinHousehold();
         },
       ),
     );

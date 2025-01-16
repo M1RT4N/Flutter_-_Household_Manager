@@ -78,13 +78,16 @@ class _ProfilePageState extends State<ProfilePage> {
       return InfoBubble(labelText: 'No data available.');
     }
 
+    _usernameController.text = user.username;
+    _nameController.text = user.name;
+
     return NavigationHeader<ProfileSection>(
       values: ProfileSection.values,
       selectionCallback: (ProfileSection s) => renderSelectedContent(s, user),
     );
   }
 
-  Widget renderSelectedContent(ProfileSection section, user) {
+  Widget renderSelectedContent(ProfileSection section, User user) {
     var child = _buildChangePasswordCard();
     if (section == ProfileSection.UserDetail) {
       child = _buildUserDetailsCard(user);

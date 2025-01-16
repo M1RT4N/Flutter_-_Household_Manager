@@ -12,7 +12,7 @@ const _logoHeight = 128.0;
 const _logoWidth = 512.0;
 const _themeSwitcherPadding = 8.0;
 const _themeSwitcherPaddingInnerRight = 24.0;
-const _drawerHeaderHeight = 200.0;
+const _drawerHeaderHeight = 11 / 6 * _logoHeight;
 const _logoFontSize = 20.0;
 const _subLogoFontSize = 12.0;
 

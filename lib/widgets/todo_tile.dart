@@ -7,7 +7,7 @@ import 'package:household_manager/services/todo_service.dart';
 import 'package:household_manager/services/user_service.dart';
 import 'package:household_manager/utils/notifications/notification_type.dart';
 import 'package:household_manager/utils/utility.dart';
-import 'package:household_manager/widgets/user_avatar.dart';
+import 'package:household_manager/widgets/user_with_small_avatar.dart';
 
 const _sectionPaddingHor = 16.0;
 const _titleFontSize = 18.0;
@@ -23,8 +23,6 @@ const _statusUpperPadding = 8.0;
 const _dateIconSize = 14.0;
 const _dateIconPadding = 3.0;
 const _userSpacing = 16.0;
-const _smallUserAvatarRadius = 10.0;
-const _smallUserAvatarFontSize = 8.0;
 const _statusIconSize = 16.0;
 const _statusDatePadding = 3.0;
 const _statusDateFontSize = 16.0;
@@ -188,29 +186,10 @@ class TodoTile extends StatelessWidget {
     return Wrap(
       spacing: _userSpacing,
       children: [
-        _buildUserRow('Creator: ', creator),
-        _buildUserRow('Assignee: ', assignee),
-        if (solver != null) _buildUserRow('Done by: ', solver!)
-      ],
-    );
-  }
-
-  Widget _buildUserRow(String label, User user) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(label, style: TextStyle(color: Colors.grey)),
-        UserAvatar(
-          selectedUser: user,
-          initialsRadius: _smallUserAvatarRadius,
-          initialsFontSize: _smallUserAvatarFontSize,
-        ),
-        Text(
-          ' ${user.name}',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
+        UserWithSmallAvatar(user: creator, label: 'Creator:'),
+        UserWithSmallAvatar(user: assignee, label: 'Assignee:'),
+        if (solver != null)
+          UserWithSmallAvatar(user: solver!, label: 'Done by:'),
       ],
     );
   }

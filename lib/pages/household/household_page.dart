@@ -12,7 +12,6 @@ import 'package:household_manager/utils/routing/routes.dart';
 import 'package:household_manager/utils/utility.dart';
 import 'package:household_manager/widgets/editable_field.dart';
 import 'package:household_manager/widgets/info_bubble.dart';
-import 'package:household_manager/widgets/loading_stadium_button.dart';
 import 'package:household_manager/widgets/snack_bar.dart';
 import 'package:household_manager/widgets/user_avatar.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -216,12 +215,9 @@ class HouseholdPage extends StatelessWidget {
       buildItem: (member) => ListTile(
         title: _buildUserRow(member),
         trailing: GetIt.instance<UserService>().getUser!.id != member.id
-            ? LoadingStadiumButton(
-                onPressed: () => _removeMember(context, member.id),
-                idleStateWidget: const Icon(Icons.delete_forever),
-                buttonWidth: _buttonWidth,
-              )
-            : const Text('You  '),
+            ? _buildButton(context, const Icon(Icons.delete_forever),
+                () => _removeMember(context, member.id))
+            : const Text('You'),
       ),
     );
   }
@@ -238,21 +234,30 @@ class HouseholdPage extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            LoadingStadiumButton(
-              onPressed: () =>
-                  _manageRequest(context, requester, true, household.id),
-              idleStateWidget: const Icon(Icons.check),
-              buttonWidth: _buttonWidth,
+            _buildButton(
+              context,
+              const Icon(Icons.check, color: Colors.green),
+              () => _manageRequest(context, requester, true, household.id),
             ),
             _buttonsGap,
-            LoadingStadiumButton(
-              onPressed: () =>
-                  _manageRequest(context, requester, false, household.id),
-              idleStateWidget: const Icon(Icons.close),
-              buttonWidth: _buttonWidth,
-            ),
+            _buildButton(
+              context,
+              const Icon(Icons.cancel, color: Colors.red),
+              () => _manageRequest(context, requester, false, household.id),
+            )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildButton(
+      BuildContext context, Icon icon, Future<void> Function() action) {
+    return SizedBox(
+      width: _buttonWidth,
+      child: IconButton(
+        onPressed: action,
+        icon: icon,
       ),
     );
   }

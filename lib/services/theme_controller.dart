@@ -1,20 +1,21 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class ThemeController {
-  final StreamController<ThemeData> _themeContr =
+  final StreamController<ThemeData> _themeController =
       StreamController<ThemeData>.broadcast();
   ThemeData _currentTheme = ThemeData.dark();
 
-  Stream<ThemeData> get themeStream => _themeContr.stream;
+  Stream<ThemeData> get themeStream => _themeController.stream;
   ThemeData get currentTheme => _currentTheme;
 
   void toggleTheme(bool isDarkMode) {
     _currentTheme = isDarkMode ? ThemeData.dark() : ThemeData.light();
-    _themeContr.add(_currentTheme);
+    _themeController.add(_currentTheme);
   }
 
   void dispose() {
-    _themeContr.close();
+    _themeController.close();
   }
 }
