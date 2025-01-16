@@ -76,14 +76,8 @@ class _EditTodoPageState extends State<EditTodoPage> {
       showNotifications: false,
       showBackArrow: true,
       showDrawer: false,
-      bodyFunctionPhone: _buildBodyPhone,
-      bodyFunctionWeb: _buildBodyWeb,
+      bodyFunction: _buildBodyPhone,
     );
-  }
-
-  // TODO: implement or use phone design
-  Widget _buildBodyWeb(BuildContext context, Household? household) {
-    return _buildBodyPhone(context, household);
   }
 
   Widget _buildBodyPhone(BuildContext context, Household? household) {

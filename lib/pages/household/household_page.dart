@@ -40,15 +40,12 @@ class HouseholdPage extends StatelessWidget {
     return LoadingPageTemplate<Household?>(
       title: 'Your Household',
       stream: GetIt.instance<HouseholdService>().getHouseholdStream,
-      bodyFunctionPhone: (context, household) =>
-          _buildCommonBody(context, household, _buildBodyPhone),
-      bodyFunctionWeb: (context, household) =>
-          _buildCommonBody(context, household, _buildBodyWeb),
+      bodyFunction: (context, household) =>
+          _buildCommonBody(context, household),
     );
   }
 
-  Widget _buildCommonBody(BuildContext context, Household? household,
-      Function(BuildContext, Household, HouseholdDto) bodyFunction) {
+  Widget _buildCommonBody(BuildContext context, Household? household) {
     if (household == null) {
       return InfoBubble(labelText: "Household not found.");
     }
@@ -58,7 +55,9 @@ class HouseholdPage extends StatelessWidget {
       builder: (context, householdWithUsers) {
         return SingleChildScrollView(
           padding: _padding,
-          child: bodyFunction(context, household, householdWithUsers),
+          child: Utility.isPhoneView(context)
+              ? _buildBodyPhone(context, household, householdWithUsers)
+              : _buildBodyWeb(context, household, householdWithUsers),
         );
       },
     );

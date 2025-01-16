@@ -45,14 +45,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
           todoService.getTodoStream,
           householdService.getHouseholdStream,
           (todos, household) => (todos, household!)),
-      bodyFunctionPhone: _buildBodyPhone,
-      bodyFunctionWeb: _buildBodyWeb,
+      bodyFunction: _buildBodyPhone,
     );
-  }
-
-  // TODO: implement or use phone design
-  Widget _buildBodyWeb(BuildContext context, (List<Todo>, Household) res) {
-    return _buildBodyPhone(context, res);
   }
 
   Widget _buildBodyPhone(BuildContext context, (List<Todo>, Household) res) {

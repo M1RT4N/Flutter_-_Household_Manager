@@ -35,8 +35,7 @@ class _TodosPageState extends State<TodosPage> {
     return LoadingPageTemplate<List<Todo>>(
       title: 'TODOs',
       stream: GetIt.instance<TodoService>().getTodoStream,
-      bodyFunctionPhone: _buildBodyCommon,
-      bodyFunctionWeb: _buildBodyCommon,
+      bodyFunction: _buildBodyCommon,
       floatingActionButton: _buildFloatingActionButton(),
     );
   }

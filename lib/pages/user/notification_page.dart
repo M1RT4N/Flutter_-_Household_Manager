@@ -53,8 +53,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         householdService.getHouseholdStream,
         (user, household) => (user!, household!),
       ),
-      bodyFunctionWeb: _buildBodyCommon,
-      bodyFunctionPhone: _buildBodyCommon,
+      bodyFunction: _buildBodyCommon,
     );
   }
 

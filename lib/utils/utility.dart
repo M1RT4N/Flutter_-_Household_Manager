@@ -94,6 +94,11 @@ class Utility {
     }
   }
 
+  static bool isPhoneView(BuildContext context) {
+    final maxPhoneScreenWidth = 500;
+    return MediaQuery.of(context).size.width < maxPhoneScreenWidth;
+  }
+
   static Future<void> performActionAndShowInfo({
     required BuildContext context,
     required Future<String?> Function() action,
