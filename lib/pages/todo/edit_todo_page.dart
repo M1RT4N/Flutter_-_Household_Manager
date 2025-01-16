@@ -21,7 +21,7 @@ import 'package:household_manager/widgets/user_with_small_avatar.dart';
 const _padding = EdgeInsets.all(20);
 const _cardElevation = 4.0;
 const _borderRadius = 12.0;
-const _rowGap = SizedBox(height: 16);
+const _universalGap = SizedBox(height: 16, width: 16);
 const _cardMargin = EdgeInsets.all(16);
 const _labelTextStyle = TextStyle(fontSize: 18, color: Colors.grey);
 
@@ -110,38 +110,20 @@ class _EditTodoPageState extends State<EditTodoPage> {
                   _titleController,
                   _editableTextFocusNodeTitle,
                 ),
-                _rowGap,
+                _universalGap,
                 _buildEditableRow(
                   'Description',
                   _descriptionController,
                   _editableTextFocusNode,
                 ),
-                _rowGap,
+                _universalGap,
                 _buildPickingSection(householdWithUsers),
-                _rowGap,
-
-                /// **Row for Creator and Done By**
+                _universalGap,
+                _universalGap,
                 if (editTodo != null) ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: UserWithSmallAvatar(
-                            user: editTodo!.creator, label: 'Creator:'),
-                      ),
-                      if (editTodo!.solver != null) ...[
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: UserWithSmallAvatar(
-                            user: editTodo!.solver!,
-                            label: 'Done by: ',
-                          ),
-                        ),
-                      ]
-                    ],
-                  ),
-                  _rowGap,
+                  _buildUsersSection(),
+                  _universalGap,
                 ],
-
                 if (editTodo == null)
                   _buildCreateButton(household)
                 else if (editable) ...[
@@ -155,23 +137,49 @@ class _EditTodoPageState extends State<EditTodoPage> {
     );
   }
 
+  Widget _buildUsersSection() {
+    final creatorRow =
+        UserWithSmallAvatar(user: editTodo!.creator, label: 'Creator:');
+    final solverRow = editTodo!.solver == null
+        ? []
+        : [
+            _universalGap,
+            UserWithSmallAvatar(
+              user: editTodo!.solver!,
+              label: 'Done by: ',
+            ),
+          ];
+    return MediaQuery.of(context).size.width > 500
+        ? Row(
+            children: [
+              Expanded(
+                child: creatorRow,
+              ),
+              ...solverRow
+            ],
+          )
+        : Column(
+            children: [creatorRow, if (editTodo!.solver != null) ...solverRow],
+          );
+  }
+
   Widget _buildPickingSection(HouseholdDto householdWithUsers) {
+    final assigneeRow = _buildAssigneeRow(householdWithUsers.members);
+    final deadlineRow = _buildDeadlineRow();
     return MediaQuery.of(context).size.width > 500
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Flexible(flex: 1, child: _buildDeadlineRow()),
-              SizedBox(width: 16),
-              Flexible(
-                  flex: 1,
-                  child: _buildAssigneeRow(householdWithUsers.members)),
+              Flexible(flex: 1, child: deadlineRow),
+              _universalGap,
+              Flexible(flex: 1, child: assigneeRow),
             ],
           )
         : Column(
             children: [
-              _buildDeadlineRow(),
-              SizedBox(height: 16),
-              _buildAssigneeRow(householdWithUsers.members),
+              deadlineRow,
+              _universalGap,
+              assigneeRow,
             ],
           );
   }
